@@ -1,0 +1,64 @@
+{
+    "extensions.autoCheckUpdates": false,
+    "extensions.autoUpdate": false,
+    "update.enableWindowsBackgroundUpdates": false,
+    "update.mode": "none",
+    "java.home": "_WORKSPACE_\\java",
+    "java.jdt.ls.java.home": "_WORKSPACE_\\java",
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-21",
+            "path": "_WORKSPACE_\\java"
+        }
+    ],
+    "zopeneditor.JAVA_HOME": "_WORKSPACE_\\java",
+    "files.associations": {
+        "**/*.COBOL*{,/*}": "cobol",
+        "**/*.COB*{,/*}": "cobol",
+        "**/*.COBCOPY*{,/*}": "cobol",
+        "**/*.COPYBOOK*{,/*}": "cobol",
+        "**/*.COPY*{,/*}": "cobol",
+        "**/*.PL1*{,/*}": "pl1",
+        "**/*.PLI*{,/*}": "pl1",
+        "**/*.INC*{,/*}": "pl1",
+        "**/*.INCLUDE*{,/*}": "pl1",
+        "**/*.JCL*{,/*}": "jcl",
+        "**/*.CNTL*{,/*}": "jcl",
+        "**/*.PROC*{,/*}": "jcl",
+        "**/*.ASM*{,/*}": "hlasm",
+        "**/*.ASSEMBLE*{,/*}": "hlasm",
+        "**/*.HLASM*{,/*}": "hlasm",
+        "**/*.HLA*{,/*}": "hlasm",
+        "**/*.MACLIB*{,/*}": "hlasm",
+        "**/*.DBD*{,/*}": "hlasm",
+        "**/*.MFS*{,/*}": "hlasm",
+        "**/*.PCB*{,/*}": "hlasm",
+        "**/*.EXEC*{,/*}": "rexx",
+        "**/*.REXX*{,/*}": "rexx",
+        "**/*.REXXINC*{,/*}": "rexx",
+        "*.rex": "rexx",
+        "**/.hlasmplugin/proc_grps.json": "jsonc",
+        "**/.hlasmplugin/pgm_conf.json": "jsonc"
+    },
+    "zowe.cics.persistent": {
+        "persistence": true,
+        "programSearchHistory": [],
+        "transactionSearchHistory": [],
+        "localFileSearchHistory": [],
+        "loadedCICSProfile": [],
+        "librarySearchHistory": [],
+        "datasetSearchHistory": [],
+        "regionSearchHistory": [],
+        "tcpipsSearchHistory": [],
+        "urimapsSearchHistory": [],
+        "pipelineSearchHistory": [],
+        "webserviceSearchHistory": []
+    },
+    "cobol-lsp.cpy-manager.copybook-extensions": [
+        ".CPY",
+        ".COPY",
+        ".cpy",
+        ".copy",
+        ""
+    ]
+}

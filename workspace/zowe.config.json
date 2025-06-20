@@ -1,0 +1,109 @@
+{
+    "$schema": "./zowe.schema.json",
+    "profiles": {
+        "zosmf": {
+            "type": "zosmf",
+            "properties": {
+                "port": "_ZOSMF_PORT_"
+            },
+            "secure": []
+        },
+        "tso": {
+            "type": "tso",
+            "properties": {
+                "account": "",
+                "codePage": "_TSO_CODEPAGE_",
+                "logonProcedure": "IZUFPROC"
+            },
+            "secure": []
+        },
+        "ssh": {
+            "type": "ssh",
+            "properties": {
+                "port": _SSH_PORT_
+            },
+            "secure": []
+        },
+        "zftp": {
+            "type": "zftp",
+            "properties": {
+                "port": _FTP_PORT_,
+                "secureFtp": true
+            },
+            "secure": []
+        },
+        "rse": {
+            "type": "rse",
+            "properties": {
+                "port": _RSE_PORT_,
+                "basePath": "rseapi",
+                "protocol": "https",
+                "encoding": "_RSE_ENCODING_"
+            },
+            "secure": []
+        },
+        "endevor": {
+            "type": "endevor",
+            "properties": {
+                "port": 0,
+                "protocol": "https"
+            },
+            "secure": []
+        },
+        "endevor-location": {
+            "type": "endevor-location",
+            "properties": {
+                "instance": "ENDEVOR",
+                "environment": "DEV",
+                "system": "",
+                "subsystem": "",
+                "type": "",
+                "stageNumber": "",
+                "maxrc": 8
+            },
+            "secure": []
+        },
+        "zOpenDebug": {
+            "type": "zOpenDebug",
+            "properties": {
+                "dpsPort": _DEBUG_PORT_,
+                "dpsContextRoot": "api/v1",
+                "dpsSecured": true,
+                "authenticationType": "token",
+                "uuid": "a142a31e-3269-4695-af55-16c69bbb6943"
+            },
+            "secure": []
+        },
+        "cics": {
+            "type": "cics",
+            "properties": {},
+            "secure": []
+        },
+        "project_base": {
+            "type": "base",
+            "properties": {
+                "host": "_HOST_",
+                "user": "_USER_",
+                "password": "_PASSWORD_",
+                "rejectUnauthorized": false
+            },
+            "secure": [
+                "user",
+                "password"
+            ]
+        }
+    },
+    "defaults": {
+        "zosmf": "zosmf",
+        "tso": "tso",
+        "ssh": "ssh",
+        "zftp": "zftp",
+        "rse": "rse",
+        "endevor": "endevor",
+        "endevor-location": "endevor-location",
+        "zOpenDebug": "zOpenDebug",
+        "cics": "cics",
+        "base": "project_base"
+    },
+    "autoStore": true
+}
