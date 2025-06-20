@@ -4,7 +4,7 @@
 開發單位: IBM Expert Labs
 開發人員: nicholas.yahung.chien@ibm.com
 日期: 2025/06/20
-版本: 2.2.0
+版本: 2.2.1
 
 說明:
 根據先前工具對應的資料夾路徑，
@@ -26,10 +26,10 @@ import glob
 import shutil
 from pathlib import Path
 
-def cleanup_directory(target_dir):
+def cleanup_directory(target_dir, except_pattern):
     """
-    清除指定目錄中所有非 .zip 檔的項目，包括所有檔案與子目錄。
-    只保留副檔名為 .zip 的檔案。
+    清除指定目錄中所有非 .<except_pattern> 檔的項目，包括所有檔案與子目錄。
+    只保留副檔名為 .<except_pattern> 的檔案。
     """
     if not os.path.exists(target_dir):
         print(f"目錄不存在：{target_dir}")
@@ -38,9 +38,9 @@ def cleanup_directory(target_dir):
     print(f"開始清理目錄：{target_dir}")
     for entry in os.listdir(target_dir):
         full_path = os.path.join(target_dir, entry)
-        # 如果是檔案，且副檔名不是 .zip（忽略大小寫），則刪除該檔案
+        # 如果是檔案，且副檔名不是 .<except_pattern>（忽略大小寫），則刪除該檔案
         if os.path.isfile(full_path):
-            if not entry.lower().endswith(".zip"):
+            if not entry.lower().endswith(f".{except_pattern}"):
                 try:
                     os.remove(full_path)
                     print(f"已刪除檔案: {full_path}")
@@ -95,19 +95,20 @@ def main():
     
     # 定義工具對應的目錄（相對於腳本所在目錄）
     tools = {
-        "vscode": os.path.join(script_dir, "vscode"),
-        "java": os.path.join(script_dir, "java"),
-        "python": os.path.join(script_dir, "python"),
-        "node": os.path.join(script_dir, "node"),
-        "zowe": os.path.join(script_dir, "zowe-cli"),
+        "vscode": {"dir": os.path.join(script_dir, "vscode"), "except": "zip" },
+        "java": {"dir": os.path.join(script_dir, "java"), "except": "zip" },
+        "python": {"dir": os.path.join(script_dir, "python"), "except": "zip" },
+        "node": {"dir": os.path.join(script_dir, "node"), "except": "zip" },
+        "git": {"dir": os.path.join(script_dir, "git"), "except": "7z.exe" },
+        "zowe": {"dir": os.path.join(script_dir, "zowe-cli"), "except": "zip" },
     }
     
     print("=== Uninstall 開始 ===\n")
     
     # 逐一清理每個工具所在的資料夾，本動作將保留資料夾中所有 .zip 檔，其它內容皆清除
     for tool_name, tool_path in tools.items():
-        print(f"清理 [{tool_name}] 目錄：{tool_path}")
-        cleanup_directory(tool_path)
+        print(f"清理 [{tool_name}] 目錄：{tool_path["dir"]}")
+        cleanup_directory(tool_path["dir"], tool_path["except"])
     
     # 執行備份檔還原
     workspace_dir = os.path.join(script_dir, "workspace")

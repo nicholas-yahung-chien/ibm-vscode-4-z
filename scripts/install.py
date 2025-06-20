@@ -4,7 +4,7 @@
 開發單位: IBM Expert Labs
 開發人員: nicholas.yahung.chien@ibm.com
 日期: 2025/06/20
-版本: 2.2.0
+版本: 2.2.1
 
 說明:
 1. 於各指定資料夾中尋找符合條件的 Zip 檔（依修改時間排序取最新檔案）。
@@ -241,6 +241,7 @@ def main():
         "java21": {"dir": os.path.join(script_dir, "java"), "pattern": "*jdk*21*.zip"},
         "python": {"dir": os.path.join(script_dir, "python"), "pattern": "*python*.zip"},
         "nodejs": {"dir": os.path.join(script_dir, "node"), "pattern": "*node*.zip"},
+        "git": {"dir": os.path.join(script_dir, "git"), "pattern": "PortableGit*.exe"},
         "zowe-core": {"dir": os.path.join(script_dir, "zowe-cli"), "pattern": "zowe*package*.zip"},
         "zowe-plugin": {"dir": os.path.join(script_dir, "zowe-cli"), "pattern": "zowe*plugins*.zip"},
     }
@@ -284,6 +285,12 @@ def main():
     nodejs_zip_path = os.path.join(tools["nodejs"]["dir"], tool_files["nodejs"])
     extract_zip_with_spinner(nodejs_zip_path, tools["nodejs"]["dir"])
     move_contents_up(tools["nodejs"]["dir"], find_real_directory(tools["nodejs"]["dir"]))
+    print()
+    
+    # Git 解壓
+    git_selfzip_path = os.path.join(tools["git"]["dir"], tool_files["git"])
+    print(f"解壓縮：{git_selfzip_path}\n到目錄：{tools["git"]["dir"]}")
+    subprocess.run([git_selfzip_path, "-y", f"-o{tools["git"]["dir"]}"], cwd=tools["git"]["dir"])
     print()
     
     # Zowe 解壓
@@ -379,6 +386,7 @@ def main():
         + f"{';'}{find_home_path(tools["python"]["dir"], "python.exe").replace("\\", "\\\\")}"
         + f"{';'}{find_home_path(tools["python"]["dir"], "pip.exe").replace("\\", "\\\\")}"
         + f"{';'}{find_home_path(tools["nodejs"]["dir"], "node.exe").replace("\\", "\\\\")}"
+        + f"{';'}{os.path.join(tools["git"]["dir"], "cmd").replace("\\", "\\\\")}"
         + f"{';%PATH%'}{'"'}\n",
         f"set {'"'}{'JAVA_HOME='}{tools["java21"]["dir"].replace("\\", "\\\\")}{'"'}\n"
     ]
