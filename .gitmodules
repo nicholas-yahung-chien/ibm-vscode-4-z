@@ -1,0 +1,4 @@
+[submodule "workspace/zopeneditor-sample"]
+	path = workspace/zopeneditor-sample
+	url = https://github.com/IBM/zopeneditor-sample
+	branch = wazi-tutorial-complete
