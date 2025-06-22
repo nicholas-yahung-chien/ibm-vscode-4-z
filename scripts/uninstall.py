@@ -26,6 +26,24 @@ import glob
 import shutil
 from pathlib import Path
 
+def update_java_dirs(java_root_dir, tools_dic):
+    if not os.path.exists(java_root_dir):
+        # 沒有 java 目錄就直接傳原本的 tools
+        print(f"找不到 java 目錄：{java_root_dir}")
+        return tools_dic
+    # 遍歷所有子目錄
+    for folder in os.listdir(java_root_dir):
+        folder_path = os.path.join(java_root_dir, folder)
+        if os.path.isdir(folder_path):
+            # 更新 tools 字典，組成的 key 為 "java" + 資料夾名稱
+            key = f"java{folder}"
+            tools_dic[key] = {
+                "dir": folder_path,
+                "except": "zip"
+            }
+            print(f"已更新工具包路徑：新增 {key}")
+    return tools_dic
+
 def cleanup_directory(target_dir, except_pattern):
     """
     清除指定目錄中所有非 .<except_pattern> 檔的項目，包括所有檔案與子目錄。
@@ -96,12 +114,12 @@ def main():
     # 定義工具對應的目錄（相對於腳本所在目錄）
     tools = {
         "vscode": {"dir": os.path.join(script_dir, "vscode"), "except": "zip" },
-        "java": {"dir": os.path.join(script_dir, "java"), "except": "zip" },
         "python": {"dir": os.path.join(script_dir, "python"), "except": "zip" },
         "node": {"dir": os.path.join(script_dir, "node"), "except": "zip" },
         "git": {"dir": os.path.join(script_dir, "git"), "except": "7z.exe" },
         "zowe": {"dir": os.path.join(script_dir, "zowe-cli"), "except": "zip" },
     }
+    tools = update_java_dirs(os.path.join(script_dir, "java"), tools)
     
     print("=== Uninstall 開始 ===\n")
     

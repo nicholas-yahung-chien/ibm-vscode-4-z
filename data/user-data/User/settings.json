@@ -3,15 +3,12 @@
     "extensions.autoUpdate": false,
     "update.enableWindowsBackgroundUpdates": false,
     "update.mode": "none",
-    "java.home": "_WORKSPACE_\\java",
-    "java.jdt.ls.java.home": "_WORKSPACE_\\java",
     "java.configuration.runtimes": [
-        {
-            "name": "JavaSE-21",
-            "path": "_WORKSPACE_\\java"
-        }
+        _JAVARUNTIMES_
     ],
-    "zopeneditor.JAVA_HOME": "_WORKSPACE_\\java",
+    "java.home": "_JAVAHOME_",
+    "java.jdt.ls.java.home": "_JAVAHOME_",
+    "zopeneditor.JAVA_HOME": "_JAVAHOME_",
     "files.associations": {
         "**/*.COBOL*{,/*}": "cobol",
         "**/*.COB*{,/*}": "cobol",
@@ -60,5 +57,11 @@
         ".cpy",
         ".copy",
         ""
+    ],
+    "cobol-lsp.cpy-manager.paths-local": [
+        "_WORKSPACE_\\workspace\\*\\COPYBOOK",
+        "_WORKSPACE_\\workspace\\*\\COPYLIB",
+        "_WORKSPACE_\\workspace\\*\\COBCOPY",
+        "_WORKSPACE_\\workspace\\*\\COPY"
     ]
 }

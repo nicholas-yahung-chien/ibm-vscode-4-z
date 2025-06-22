@@ -25,10 +25,12 @@ import os
 import sys
 import time
 import threading
+import argparse
 import glob
 import zipfile
 import shutil
 import re
+import json
 import subprocess
 from pathlib import Path
 from urllib.parse import quote
@@ -39,9 +41,17 @@ try:
 except ImportError:
     win32com = None
 
-def press_enter(message):
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Install script with optional aito-confirmation.")
+    parser.add_argument("-y", "--yes", action="store_true", help="預設自動執行所有步驟，不須停等使用者 Enter 確認。")
+    return parser.parse_args()
+
+def press_enter(message, auto_continue=False):
     """顯示訊息並等待使用者按下 Enter"""
-    input(message)
+    if auto_continue:
+        print(f"{message}\n")
+    else:
+        input(f"{message}（請按下 Enter 鍵繼續）。\n")
 
 def get_latest_file(directory, pattern):
     """
@@ -103,6 +113,38 @@ def find_home_path(start_path, target_file):
         if has_target:
             return root
     # 若遍歷整個目錄樹後仍無符合條件的目錄，返回 None
+    return None
+
+def update_java_dirs(java_root_dir, tools_dic):
+    if not os.path.exists(java_root_dir):
+        # 沒有 java 目錄就直接傳原本的 tools
+        print(f"找不到 java 目錄：{java_root_dir}")
+        return tools_dic
+    # 遍歷所有子目錄
+    for folder in os.listdir(java_root_dir):
+        folder_path = os.path.join(java_root_dir, folder)
+        if os.path.isdir(folder_path):
+            # 更新 tools 字典，組成的 key 為 "java" + 資料夾名稱
+            key = f"java{folder}"
+            # 組成搜尋模式，例如：*jdk*21*.zip
+            pattern = f"*jdk*{folder}*.zip"
+            tools_dic[key] = {
+                "dir": folder_path,
+                "pattern": pattern
+            }
+            print(f"已更新工具包路徑：新增 {key}")
+    return tools_dic
+
+def extract_major_version(version_text):
+    """
+    從輸入文字中擷取版本號序列當中 major 數字的部份。
+    僅保留第一組數字序列（例如：'11.0.18' -> '11'）。
+    """
+    match = re.search(r'\d+(?:\.\d+)*', version_text)
+    if match:
+        full_version = match.group()
+        major = full_version.split(".")[0]
+        return major
     return None
 
 def spinner(stop_event, msg_startup, msg_running, msg_complete):
@@ -216,7 +258,7 @@ def vscode_cmd_insertion(file_path, insertions):
     with open(file_path, "w", encoding="utf-8") as f:
         f.writelines(new_lines)
 
-def main():
+def main(args):
     # 取得腳本所在目錄（== %~dp0）
     if getattr(sys, 'frozen', False):  # 檢查是不是被 PyInstaller 打包成 .exe
         # 取得 .exe 執行檔所在路徑
@@ -238,13 +280,13 @@ def main():
     # 各工具對應的資料夾及 Zip 檔案搜尋條件
     tools = {
         "vscode": {"dir": os.path.join(script_dir, "vscode"), "pattern": "VSCode*.zip"},
-        "java21": {"dir": os.path.join(script_dir, "java"), "pattern": "*jdk*21*.zip"},
         "python": {"dir": os.path.join(script_dir, "python"), "pattern": "*python*.zip"},
         "nodejs": {"dir": os.path.join(script_dir, "node"), "pattern": "*node*.zip"},
         "git": {"dir": os.path.join(script_dir, "git"), "pattern": "PortableGit*.exe"},
         "zowe-core": {"dir": os.path.join(script_dir, "zowe-cli"), "pattern": "zowe*package*.zip"},
         "zowe-plugin": {"dir": os.path.join(script_dir, "zowe-cli"), "pattern": "zowe*plugins*.zip"},
     }
+    tools = update_java_dirs(os.path.join(script_dir, "java"), tools)
     
     tool_files = {}
     for tool, info in tools.items():
@@ -256,7 +298,7 @@ def main():
             sys.exit(1)
     
     print("檢查工具包完成。\n")
-    press_enter("準備解壓工具包…按下 Enter 鍵開始。\n")
+    press_enter("準備解壓工具包…", args.yes)
     
     # === 第2階段：解壓工具包 ===
     # workspace 為腳本所在的路徑
@@ -269,11 +311,18 @@ def main():
     move_contents_up(tools["vscode"]["dir"], find_real_directory(tools["vscode"]["dir"]))
     print()
     
-    # Java 21 解壓
-    java21_zip_path = os.path.join(tools["java21"]["dir"], tool_files["java21"])
-    extract_zip_with_spinner(java21_zip_path, tools["java21"]["dir"])
-    move_contents_up(tools["java21"]["dir"], find_real_directory(tools["java21"]["dir"]))
-    print()
+    # Java 解壓
+    for key, value in tools.items():
+        if key.startswith("java"):
+            java_zip_path = os.path.join(tools[key]["dir"], tool_files[key])
+            extract_zip_with_spinner(java_zip_path, tools[key]["dir"])
+            move_contents_up(tools[key]["dir"], find_real_directory(tools[key]["dir"]))
+            print()
+    
+    # 找出所有 JDK 版本中作為 JAVA_HOME 之最新版本之安裝
+    java_versions = sorted([key for key in tools if key.startswith("java")], reverse=True)
+    java_home_path = tools[java_versions[0]]["dir"]
+    java_home_bin_path = os.path.join(tools[java_versions[0]]["dir"], "bin")
     
     # Python 解壓
     python_zip_path = os.path.join(tools["python"]["dir"], tool_files["python"])
@@ -305,7 +354,7 @@ def main():
     print()
     
     print("解壓工具包完成。\n")
-    press_enter("準備安裝Zowe-Cli工具…按下 Enter 鍵開始。\n")
+    press_enter("準備安裝Zowe-Cli工具…", args.yes)
     
     # === 第3階段：安裝Zowe指令列環境工具 ===
     # workspace 為腳本所在的路徑
@@ -319,7 +368,7 @@ def main():
         subprocess.run([os.path.join(tools["nodejs"]["dir"], "npm.cmd"), "install", "-g", "--prefer-offline", "--prefer-online", "--no-fund", "--no-audit", zowe_module], cwd=tools["nodejs"]["dir"])
     
     print("安裝Zowe-Cli完成。\n")
-    press_enter("準備進行路徑設定遷移…按下 Enter 鍵開始。\n")
+    press_enter("準備進行路徑設定遷移…", args.yes)
     
     # === 第4階段：路徑設定遷移 ===
     # workspace 為腳本所在的路徑
@@ -345,9 +394,22 @@ def main():
     replace_in_file(vscode_settings_path, pattern_vscode, qbsworkspace)
     pattern_vscode_uri = r"_WORKSPACEURI_"
     replace_in_file(vscode_settings_path, pattern_vscode_uri, workspaceuri)
+    pattern_javahome = r"_JAVAHOME_"
+    replace_in_file(vscode_settings_path, pattern_javahome, f"{java_home_path}".replace("\\", "\\\\\\\\"))
+    
+    # 使用正規表達式抓出 key 中出現的版本號序列，組成 runtime 清單
+    java_runtimes = []
+    for key in java_versions:
+        major_version = extract_major_version(key)
+        java_runtimes.append({
+            "name": f"JavaSE-{major_version}",
+            "path": tools[key]["dir"].replace("\\", "\\\\")
+        })
+    pattern_javaruntime = r"_JAVARUNTIMES_"
+    replace_in_file(vscode_settings_path, pattern_javaruntime, ",\n".join(json.dumps(entry) for entry in java_runtimes))
     
     print("\n路徑遷移完成。\n")
-    press_enter("準備安裝 VSCode IBM Z 擴充功能包…按下 Enter 鍵開始。\n")
+    press_enter("準備安裝 VSCode IBM Z 擴充功能包…", args.yes)
     
     # === 第5階段：安裝 IBM Z 開發工具擴充功能包 ===
     # 安裝 VSCode 擴充功能包
@@ -360,7 +422,7 @@ def main():
             subprocess.run([os.path.join(workspace, "vscode", "bin", "code.cmd"), "--install-extension", extension], cwd=os.path.join(workspace, "vscode", "bin"))
     
     print("\n擴充功能包安裝完成。\n")
-    press_enter("準備建立 VSCode 快捷方式…按下 Enter 鍵開始。\n")
+    press_enter("準備建立 VSCode 快捷方式…", args.yes)
     
     # === 第6階段：建立 VSCode 快捷方式 ===
     # workspace 為腳本所在的路徑
@@ -382,13 +444,13 @@ def main():
     insertions = [
         f"powershell -Command {'"'}Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser -Force{'"'}\n",
         f"set {'"'}{'PATH='}"
-        + f"{os.path.join(tools["java21"]["dir"], "bin").replace("\\", "\\\\")}"
+        + f"{java_home_bin_path.replace("\\", "\\\\")}"
         + f"{';'}{find_home_path(tools["python"]["dir"], "python.exe").replace("\\", "\\\\")}"
         + f"{';'}{find_home_path(tools["python"]["dir"], "pip.exe").replace("\\", "\\\\")}"
         + f"{';'}{find_home_path(tools["nodejs"]["dir"], "node.exe").replace("\\", "\\\\")}"
         + f"{';'}{os.path.join(tools["git"]["dir"], "cmd").replace("\\", "\\\\")}"
         + f"{';%PATH%'}{'"'}\n",
-        f"set {'"'}{'JAVA_HOME='}{tools["java21"]["dir"].replace("\\", "\\\\")}{'"'}\n"
+        f"set {'"'}{'JAVA_HOME='}{java_home_path.replace("\\", "\\\\")}{'"'}\n"
     ]
     
     vscode_cmd_insertion(vscmd, insertions)
@@ -399,6 +461,7 @@ def main():
         shell = win32com.client.Dispatch("WScript.Shell")
         shortcut = shell.CreateShortcut(shortcut_path)
         shortcut.TargetPath = vscmd
+        shortcut.Arguments = " ".join([os.path.join(workspace, "workspace"), "--locale=zh-tw"])
         shortcut.WorkingDirectory = vscmd_home
         # 設定圖示所在：vsc_home\Code.exe,0
         shortcut.IconLocation = os.path.join(vsc_home, "Code.exe") + ",0"
@@ -410,7 +473,8 @@ def main():
     print("\n快捷方式建立完成。\n")
     
     print("腳本執行結束。")
-    press_enter("按下 Enter 後結束程式。\n")
+    press_enter("按下 Enter 後結束程式", args.yes)
     
 if __name__ == "__main__":
-    main()
+    args = parse_arguments()
+    main(args)
