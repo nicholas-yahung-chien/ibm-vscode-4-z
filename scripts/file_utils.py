@@ -21,6 +21,7 @@ import time
 import sys
 import threading
 import glob
+import fnmatch
 
 def spinner(stop_event, msg_startup, msg_running, msg_complete):
     """
@@ -96,7 +97,7 @@ def move_contents_up(parent_dir, target_dir):
     os.rmdir(bogus_folder)
     print(f"已將 {bogus_folder} 中的內容搬移至 {parent_dir} 並刪除該資料夾。")
 
-def cleanup_directory(target_dir, except_pattern):
+def cleanup_directory_except(target_dir, except_pattern):
     """
     清除指定目錄中所有非 .<except_pattern> 檔的項目，包括所有檔案與子目錄。
     只保留副檔名為 .<except_pattern> 的檔案。
@@ -123,4 +124,25 @@ def cleanup_directory(target_dir, except_pattern):
                 print(f"已遞迴刪除目錄: {full_path}")
             except Exception as e:
                 print(f"刪除目錄 {full_path} 發生錯誤: {e}")
+    print(f"目錄清理完成：{target_dir}\n")
+
+def cleanup_directory_match(target_dir, pattern):
+    """
+    清除指定目錄中所有符合 .<pattern> 檔案的項目。
+    """
+    if not os.path.exists(target_dir):
+        print(f"目錄不存在：{target_dir}")
+        return
+    
+    print(f"開始清理目錄：{target_dir}")
+    for entry in os.listdir(target_dir):
+        full_path = os.path.join(target_dir, entry)
+        # 如果是檔案，且副檔名符合 <pattern>（忽略大小寫），則刪除該檔案
+        if os.path.isfile(full_path):
+            if fnmatch.fnmatch(os.path.basename(full_path), pattern):
+                try:
+                    os.remove(full_path)
+                    print(f"已刪除檔案: {full_path}")
+                except Exception as e:
+                    print(f"刪除檔案 {full_path} 發生錯誤: {e}")
     print(f"目錄清理完成：{target_dir}\n")

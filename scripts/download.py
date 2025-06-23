@@ -22,6 +22,7 @@ import re
 import requests
 import yaml
 from pathlib import Path
+from file_utils import cleanup_directory_match
 
 # -------------------------------
 #  功能函式
@@ -102,10 +103,8 @@ def download_file(url, dest_directory, filename_pattern, possible_filename):
             dest_path = os.path.join(dest_directory, filename)
             
             # 如果檔案已存在，就先刪除
-            if os.path.exists(dest_path):
-                os.remove(dest_path)
-                print(f"已刪除存在的檔案: {dest_path}")
-                
+            cleanup_directory_match(dest_directory, filename_pattern)
+            
             # 寫入檔案
             with open(dest_path, "wb") as f:
                 f.write(response.content)

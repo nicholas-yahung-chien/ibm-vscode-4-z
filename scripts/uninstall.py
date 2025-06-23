@@ -28,7 +28,7 @@ import shutil
 import yaml
 import re
 from pathlib import Path
-from file_utils import cleanup_directory
+from file_utils import cleanup_directory_except
 
 # -------------------------------
 #  功能函式
@@ -147,7 +147,7 @@ def main():
     # 逐一清理每個工具所在的資料夾，本動作將保留資料夾中所有 .zip 檔，其它內容皆清除
     for tool_name, tool_path in tools.items():
         print(f"清理 [{tool_name}] 目錄：{tool_path['dir']}")
-        cleanup_directory(tool_path["dir"], extract_extension_from_pattern(tool_path["pattern"]))
+        cleanup_directory_except(tool_path["dir"], extract_extension_from_pattern(tool_path["pattern"]))
     
     # 執行備份檔還原
     workspace_dir = os.path.join(workspace, "workspace")
