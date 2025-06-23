@@ -103,13 +103,7 @@ def zip_workspace(workspace, version):
     """
     zip_name = os.path.join(workspace, f"VSCode4z-{version}.zip")
     print(f"開始建立壓縮檔: {zip_name}")
-    with zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        for root, dirs, files in os.walk(workspace):
-            for file in files:
-                file_path = os.path.join(root, file)
-                # 為了在 zip 中保留相對路徑，計算相對於 workspace 的路徑
-                relative_path = os.path.relpath(file_path, workspace)
-                zipf.write(file_path, relative_path)
+    shutil.make_archive(zip_name, "zip", root_dir=workspace)
     print(f"壓縮檔建立完成: {zip_name}")
 
 # -------------------------------
