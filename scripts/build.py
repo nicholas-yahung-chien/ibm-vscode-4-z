@@ -108,8 +108,8 @@ def zip_workspace(workspace, version):
             for file in files:
                 file_path = os.path.join(root, file)
                 # 為了在 zip 中保留相對路徑，計算相對於 workspace 的路徑
-                relative_path = file_path.relative_to(workspace)
-                zipf.write(file_path, arcname=str(relative_path))
+                relative_path = os.path.relpath(file_path, workspace)
+                zipf.write(file_path, relative_path)
     print(f"壓縮檔建立完成: {zip_name}")
 
 # -------------------------------
