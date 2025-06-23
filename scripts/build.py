@@ -126,7 +126,7 @@ def gather_files(root_dir, exclude_dirs=None, exclude_files=None):
             if any(fnmatch.fnmatch(file, pat) for pat in exclude_files):
                 continue
             file_abs_paths.append(os.path.join(root, file))
-            prefix_rel_paths.append(os.path.relpath(root, start=root_dir))
+            prefix_rel_paths.append("" if os.path.relpath(root, start=root_dir) == "." else os.path.relpath(root, start=root_dir))
             
     return file_abs_paths, prefix_rel_paths
 
