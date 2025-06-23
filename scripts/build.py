@@ -90,11 +90,11 @@ def clean_scripts_directory(scripts_dir):
         # 若是檔案且副檔名不是 .py 與 .yml
         if os.path.isfile(os.path.join(scripts_dir, item)) and item.lower().endswith((".py", ".yml")):
             print(f"刪除檔案: {item}")
-            item.unlink()
+            os.remove(os.path.join(scripts_dir, item))
         # 若是目錄，全部刪除
-        elif item.is_dir():
-            print(f"刪除目錄: {item.name}")
-            shutil.rmtree(item)
+        elif os.path.isdir(os.path.join(scripts_dir, item)):
+            print(f"刪除目錄: {item}")
+            shutil.rmtree(os.path.join(scripts_dir, item))
 
 def zip_workspace(workspace, version):
     """
