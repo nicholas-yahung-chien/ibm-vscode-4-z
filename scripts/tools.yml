@@ -1,7 +1,7 @@
 vscode:
   dir: vscode
   pattern: "VSCode*.zip"
-  link: https://code.visualstudio.com/sha/download?build=_VERSION_&os=win32-x64-archive
+  link: https://code.visualstudio.com/sha/download?version=_VERSION_&os=win32-x64-archive
   version: 1.101.1
 python:
   dir: python
