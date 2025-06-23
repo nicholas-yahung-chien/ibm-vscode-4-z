@@ -21,6 +21,7 @@ import argparse
 import re
 import json
 import subprocess
+import yaml
 from pathlib import Path
 from urllib.parse import quote
 
@@ -65,6 +66,17 @@ def get_script_dir():
         # 取得 .py 腳本所在路徑
         return Path(__file__).parent.resolve()
 
+def load_tools_config(scripts_dir):
+    """
+    載入 tools.yml 設定檔，並回傳工具包資訊。
+    """
+    tools_yml_path = os.path.join(scripts_dir, "tools.yml")
+    if not os.path.exists(tools_yml_path):
+        sys.exit(f"找不到設定檔: {tools_yml_path}")
+    with open(tools_yml_path, "r", encoding="utf-8") as f:
+        tools = yaml.safe_load(f)
+    return tools
+
 def update_java_dirs(java_root_dir, tools_dic):
     """
     遍歷 java_root_dir 內所有子資料夾，以 "java{資料夾名稱}" 為 key 更新 tools_dic，
@@ -78,7 +90,10 @@ def update_java_dirs(java_root_dir, tools_dic):
         if os.path.isdir(folder_path):
             key = f"java{folder}"
             pattern = f"*jdk*{folder}*.zip"
-            tools_dic[key] = {"dir": folder_path, "pattern": pattern}
+            tools_dic[key] = {
+                "dir": folder_path,
+                "pattern": pattern
+            }
             print(f"已更新工具包路徑：新增 {key}")
     return tools_dic
 
@@ -135,16 +150,12 @@ def vscode_cmd_insertion(file_path, insertions):
 def phase1_check_tools(workspace, auto_continue=False):
     print("檢查工具包...\n")
     
-    tools = {
-        "vscode": {"dir": os.path.join(workspace, "vscode"), "pattern": "VSCode*.zip"},
-        "python": {"dir": os.path.join(workspace, "python"), "pattern": "*python*.zip"},
-        "nodejs": {"dir": os.path.join(workspace, "node"), "pattern": "*node*.zip"},
-        "git": {"dir": os.path.join(workspace, "git"), "pattern": "PortableGit*.exe"},
-        "zowe-core": {"dir": os.path.join(workspace, "zowe-cli"), "pattern": "zowe*package*.zip"},
-        "zowe-plugin": {"dir": os.path.join(workspace, "zowe-cli"), "pattern": "zowe*plugins*.zip"}
-    }
+    # 載入 tools.yml 設定檔
+    tools = load_tools_config(os.path.join(workspace, "scripts"))
+    # 更新 java 相關工具包路徑
     tools = update_java_dirs(os.path.join(workspace, "java"), tools)
     
+    # 取得工具包檔案
     tool_files = {}
     for tool, info in tools.items():
         zip_file = get_latest_file(info["dir"], info["pattern"])

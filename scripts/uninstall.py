@@ -25,6 +25,8 @@ import sys
 import argparse
 import glob
 import shutil
+import yaml
+import re
 from pathlib import Path
 from file_utils import cleanup_directory
 
@@ -44,23 +46,52 @@ def get_script_dir():
         # 取得 .py 腳本所在路徑
         return Path(__file__).parent.resolve()
 
+def load_tools_config(scripts_dir):
+    """
+    載入 tools.yml 設定檔，並回傳工具包資訊。
+    """
+    tools_yml_path = os.path.join(scripts_dir, "tools.yml")
+    if not os.path.exists(tools_yml_path):
+        sys.exit(f"找不到設定檔: {tools_yml_path}")
+    with open(tools_yml_path, "r", encoding="utf-8") as f:
+        tools = yaml.safe_load(f)
+    return tools
+
 def update_java_dirs(java_root_dir, tools_dic):
+    """
+    遍歷 java_root_dir 內所有子資料夾，以 "java{資料夾名稱}" 為 key 更新 tools_dic，
+    並設定相應的搜尋 pattern（例如：*jdk*{版本}*.zip）。
+    """
     if not os.path.exists(java_root_dir):
-        # 沒有 java 目錄就直接傳原本的 tools
         print(f"找不到 java 目錄：{java_root_dir}")
         return tools_dic
-    # 遍歷所有子目錄
     for folder in os.listdir(java_root_dir):
         folder_path = os.path.join(java_root_dir, folder)
         if os.path.isdir(folder_path):
-            # 更新 tools 字典，組成的 key 為 "java" + 資料夾名稱
             key = f"java{folder}"
+            pattern = f"*jdk*{folder}*.zip"
             tools_dic[key] = {
                 "dir": folder_path,
-                "except": "zip"
+                "pattern": pattern
             }
             print(f"已更新工具包路徑：新增 {key}")
     return tools_dic
+
+def extract_extension_from_pattern(pattern):
+    """
+    從傳入的 pattern 字串中提取尾端副檔名。
+    
+    例如：
+      - "VSCode*.zip" 會回傳 ".zip"
+      - "*node*.exe" 會回傳 ".exe"
+    
+    若找不到副檔名則回傳空字串。
+    """
+    match = re.search(r'(\.[\.\w]+)$', pattern)
+    if match:
+        return match.group(1)
+    else:
+        return ""
 
 def restore_backup(workspace_dir):
     """
@@ -106,14 +137,9 @@ def main():
     os.chdir(workspace)
     print("目前工作目錄設定為：", workspace)
     
-    # 定義工具對應的目錄（相對於腳本所在目錄）
-    tools = {
-        "vscode": {"dir": os.path.join(workspace, "vscode"), "except": "zip" },
-        "python": {"dir": os.path.join(workspace, "python"), "except": "zip" },
-        "node": {"dir": os.path.join(workspace, "node"), "except": "zip" },
-        "git": {"dir": os.path.join(workspace, "git"), "except": "7z.exe" },
-        "zowe": {"dir": os.path.join(workspace, "zowe-cli"), "except": "zip" },
-    }
+    # 載入 tools.yml 設定檔
+    tools = load_tools_config(os.path.join(workspace, "scripts"))
+    # 更新 java 相關工具包路徑
     tools = update_java_dirs(os.path.join(workspace, "java"), tools)
     
     print("=== Uninstall 開始 ===\n")
@@ -121,7 +147,7 @@ def main():
     # 逐一清理每個工具所在的資料夾，本動作將保留資料夾中所有 .zip 檔，其它內容皆清除
     for tool_name, tool_path in tools.items():
         print(f"清理 [{tool_name}] 目錄：{tool_path['dir']}")
-        cleanup_directory(tool_path["dir"], tool_path["except"])
+        cleanup_directory(tool_path["dir"], extract_extension_from_pattern(tool_path["pattern"]))
     
     # 執行備份檔還原
     workspace_dir = os.path.join(workspace, "workspace")

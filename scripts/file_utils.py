@@ -108,9 +108,9 @@ def cleanup_directory(target_dir, except_pattern):
     print(f"開始清理目錄：{target_dir}")
     for entry in os.listdir(target_dir):
         full_path = os.path.join(target_dir, entry)
-        # 如果是檔案，且副檔名不是 .<except_pattern>（忽略大小寫），則刪除該檔案
+        # 如果是檔案，且副檔名不是 <except_pattern>（忽略大小寫），則刪除該檔案
         if os.path.isfile(full_path):
-            if not entry.lower().endswith(f".{except_pattern}"):
+            if not entry.lower().endswith(f"{except_pattern}"):
                 try:
                     os.remove(full_path)
                     print(f"已刪除檔案: {full_path}")

@@ -1,0 +1,18 @@
+vscode:
+  dir: vscode
+  pattern: "VSCode*.zip"
+python:
+  dir: python
+  pattern: "*python*.zip"
+nodejs:
+  dir: node
+  pattern: "*node*.zip"
+git:
+  dir: git
+  pattern: "PortableGit*.7z.exe"
+zowe-core:
+  dir: zowe-cli
+  pattern: "zowe*package*.zip"
+zowe-plugin:
+  dir: zowe-cli
+  pattern: "zowe*plugins*.zip"
