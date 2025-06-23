@@ -145,7 +145,7 @@ def compress_directory(root_dir, output_zip, exclude_patterns=None):
         return
 
     try:
-        pyminizip.compress_multiple(srcfiles=file_names, prefixs=relative_paths, zipfile=output_zip, password=None, compress_level=5)
+        pyminizip.compress_multiple(file_names, relative_paths, output_zip, None, 5)
         print(f"壓縮成功，輸出檔案：{output_zip}")
     except Exception as e:
         print("壓縮失敗：", e)
