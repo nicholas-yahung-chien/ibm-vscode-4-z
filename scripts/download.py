@@ -92,7 +92,8 @@ def download_file(url, dest_directory, filename_pattern, possible_filename):
             dest_path = os.path.join(dest_directory, filename)
             
             # 如果檔案已存在，就先刪除
-            cleanup_directory_match(dest_directory, filename)
+            if os.path.exists(os.path.join(dest_directory, filename)):
+                os.remove(os.path.join(dest_directory, filename))
             
             # 寫入檔案
             with open(dest_path, "wb") as f:
