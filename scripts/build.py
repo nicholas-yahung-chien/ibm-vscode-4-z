@@ -105,11 +105,11 @@ def gather_files(root_dir, exclude_patterns=None):
     :param root_dir: 要壓縮的來源目錄（字串或 Path 皆可）
     :param exclude_patterns: 要排除的名稱模式清單，例如 [".git", "*.tmp"]
     :return: 兩個清單 (file_paths, arc_names)
-         file_paths：每個檔案的絕對路徑
-         arc_names：在 zip 中的相對存放路徑（以 root_dir 為根）
+         file_names：每個檔案的檔案名稱
+         prefix_paths：在 zip 中的相對存放路徑（以 root_dir 為根）
     """
-    file_paths = []
-    arc_names = []
+    file_names = []
+    prefix_paths = []
     
     if exclude_patterns is None:
         exclude_patterns = []
@@ -125,12 +125,12 @@ def gather_files(root_dir, exclude_patterns=None):
             abs_path = os.path.join(root, file)
             # 利用 os.path.relpath 計算相對於 source_dir 的路徑
             rel_path = os.path.relpath(abs_path, start=root_dir)
-            file_paths.append(abs_path)
-            arc_names.append(rel_path)
+            file_names.append(os.path.basename(abs_path))
+            prefix_paths.append(rel_path)
             
-    return file_paths, arc_names
+    return file_names, prefix_paths
 
-def compress_directory(root_dir, output_zip, compression_level=5, exclude_patterns=None):
+def compress_directory(root_dir, output_zip, exclude_patterns=None):
     """
     利用 pyminizip 將 root_dir 目錄下（排除指定檔案/目錄後）的檔案壓縮成 output_zip。
     
@@ -139,13 +139,13 @@ def compress_directory(root_dir, output_zip, compression_level=5, exclude_patter
     :param compression_level: 壓縮等級 (0~9)
     :param exclude_patterns: 要排除的檔案或目錄模式清單（例如 [".git", "*.tmp"]）
     """
-    file_paths, arc_names = gather_files(root_dir, exclude_patterns)
-    if not file_paths:
+    file_names, relative_paths = gather_files(root_dir, exclude_patterns)
+    if not file_names:
         print("沒有檔案需要壓縮！")
         return
 
     try:
-        pyminizip.compress_multiple(file_paths, arc_names, output_zip, None, compression_level)
+        pyminizip.compress_multiple(srcfiles=file_names, prefixs=relative_paths, zipfile=output_zip, password=None, compress_level=5)
         print(f"壓縮成功，輸出檔案：{output_zip}")
     except Exception as e:
         print("壓縮失敗：", e)
