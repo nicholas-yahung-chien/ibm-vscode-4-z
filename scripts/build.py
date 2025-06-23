@@ -125,10 +125,8 @@ def gather_files(root_dir, exclude_dirs=None, exclude_files=None):
             # 若檔案名稱符合任何排除模式，則略過
             if any(fnmatch.fnmatch(file, pat) for pat in exclude_files):
                 continue
-            # 利用 os.path.relpath 計算相對於 source_dir 的路徑
-            rel_prefix = os.path.relpath(root, start=root_dir)
             file_names.append(file)
-            prefix_paths.append(rel_prefix)
+            prefix_paths.append(root)
             
     return file_names, prefix_paths
 
@@ -141,13 +139,13 @@ def compress_directory(root_dir, output_zip, exclude_dirs=None):
     :param compression_level: 壓縮等級 (0~9)
     :param exclude_patterns: 要排除的檔案或目錄模式清單（例如 [".git", "*.tmp"]）
     """
-    file_names, relative_paths = gather_files(root_dir, exclude_dirs)
+    file_names, prefix_paths = gather_files(root_dir, exclude_dirs)
     if not file_names:
         print("沒有檔案需要壓縮！")
         return
 
     try:
-        pyminizip.compress_multiple(file_names, relative_paths, output_zip, None, 5)
+        pyminizip.compress_multiple(file_names, prefix_paths, output_zip, None, 5)
         print(f"壓縮成功，輸出檔案：{output_zip}")
     except Exception as e:
         print("壓縮失敗：", e)
