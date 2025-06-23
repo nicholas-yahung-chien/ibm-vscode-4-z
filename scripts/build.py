@@ -106,6 +106,30 @@ def zip_workspace(workspace, version):
     shutil.make_archive(zip_base_name, "zip", root_dir=workspace)
     print(f"壓縮檔建立完成: {zip_base_name}.zip")
 
+
+def zip_directory_exclude(root_dir, version, exclude_dirs=None):
+    """
+    將 workspace 目錄下的所有檔案與子目錄打包成一份 VSCode4z-<version>.zip。
+    並可排除位於 exclude_dirs 清單中的目錄名稱（例如：['.git']）。
+    壓縮檔將存放在 workspace 目錄下。
+    """
+    if exclude_dirs is None:
+        exclude_dirs = []
+    
+    zip_filename = os.path.join(root_dir, f"VSCode4z-{version}.zip")
+    with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(root_dir):
+            # 過濾排除目錄：移除列表中在 exclude_dirs 的項目
+            dirs[:] = [d for d in dirs if d not in exclude_dirs]
+            for file in files:
+                file_path = os.path.join(root, file)
+                # 以相對於 root_dir 的路徑儲存至 zip 檔中
+                arcname = os.path.relpath(file_path, root_dir)
+                zipf.write(file_path, arcname)
+                
+    print(f"壓縮完成：{os.path.basename(zip_filename)}")
+
+
 # -------------------------------
 # 主流程
 # -------------------------------
@@ -142,7 +166,7 @@ def main():
     clean_scripts_directory(scripts_dir)
     
     # 5. 將 workspace 目錄下的所有檔案與子目錄打包成壓縮檔
-    zip_workspace(workspace, version)
+    zip_directory_exclude(workspace, version, exclude_dirs=[".git"])
 
 if __name__ == "__main__":
     main()
