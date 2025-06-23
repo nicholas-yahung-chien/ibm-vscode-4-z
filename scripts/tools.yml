@@ -2,12 +2,12 @@ vscode:
   dir: vscode
   pattern: "VSCode*.zip"
   link: https://code.visualstudio.com/sha/download?version=_VERSION_&os=win32-x64-archive
-  version: 1.101.1
+  version: 1.101.0
 python:
   dir: python
   pattern: "*python*.zip"
-  link: https://sourceforge.net/projects/winpython/files/_GROUP_/_VERSION_/Winpython64-_VERSION_dot.zip/download
-  group: "WinPython_3.13"
+  link: https://github.com/winpython/winpython/releases/download/_GROUP_/Winpython64-_VERSION_dot.zip
+  group: "15.3.20250425final"
   version: 3.13.3.0
 nodejs:
   dir: node

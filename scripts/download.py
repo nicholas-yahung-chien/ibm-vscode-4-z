@@ -16,6 +16,8 @@
 import os
 import sys
 import argparse
+import fnmatch
+from urllib.parse import urlparse
 import re
 import requests
 import yaml
@@ -59,7 +61,34 @@ def load_extensions_config(scripts_dir):
         extensions = yaml.safe_load(f)
     return extensions
 
-def download_file(url, dest_directory, possible_filename):
+def determine_filename(response, pattern, default_filename):
+    """
+    根據下載的 HTTP response、pattern 與 default_filename 決定下載檔案的檔名，優先順序如下：
+      1. 如果有 Content-Disposition，則以其中的 filename 為主。
+      2. 如果下載連結（最終 response.url）的最後檔名符合 pattern，則以該檔案名稱為主。
+      3. 否則，根據 default_filename 預設檔名。
+    """
+    # 優先順序 1：檢查 Content-Disposition
+    content_disposition = response.headers.get("Content-Disposition", "")
+    if content_disposition:
+        match = re.search(r'filename="?([^";]+)"?', content_disposition)
+        if match:
+            filename = match.group(1)
+            print(f"根據 Content-Disposition 取得檔名：{filename}")
+            return filename
+    
+    # 優先順序 2：根據 response.url 取得最後部分檔名，並檢查是否符合 pattern
+    parsed = urlparse(response.url)
+    tail_filename = os.path.basename(parsed.path)
+    if tail_filename and fnmatch.fnmatch(tail_filename, pattern):
+        print(f"根據連結尾端檔名符合 pattern，取得檔名：{tail_filename}")
+        return tail_filename
+
+    # 優先順序 3：回傳根據 pattern 與 version 組合出的預設檔名
+    print(f"使用預設規則產生檔名：{default_filename}")
+    return default_filename
+
+def download_file(url, dest_directory, filename_pattern, possible_filename):
     """
     根據 URL 下載檔案，並根據 response header 中的 Content-Disposition 設定檔案名稱，
     若找不到檔名則使用 URL 的最後一段作為檔案名稱。在儲存前若檔案已存在，則先刪除。
@@ -67,18 +96,8 @@ def download_file(url, dest_directory, possible_filename):
     try:
         response = requests.get(url)
         if response.status_code == 200:
-            # 嘗試從 response headers 中取得 Content-Disposition 欄位
-            content_disposition = response.headers.get("Content-Disposition", "")
-            filename = None
-            
-            # 使用正規表達式解析 filename，例如：attachment; filename="example.vsix"
-            match = re.search(r'filename="?([^";]+)"?', content_disposition)
-            if match:
-                filename = match.group(1)
-            else:
-                # 沒有 Content-Disposition header 或格式不正確，則使用 possible_filename 作為檔名
-                filename = possible_filename
-                
+            # 決定檔案名稱
+            filename = determine_filename(response, filename_pattern, possible_filename)
             # 組合下載目的地的完整路徑
             dest_path = os.path.join(dest_directory, filename)
             
@@ -131,7 +150,7 @@ def main():
                 print(f"開始下載：{url}")
                 # 產生檔案名稱，例如 ibm.zopendebug-5.4.0.vsix
                 file_name = f"{publisher}.{ext_name}-{version}.vsix"
-                download_file(url, os.path.join(workspace, "extensions"), file_name)
+                download_file(url, os.path.join(workspace, "extensions"), "*.vsix", file_name)
     
     # 針對每個有連結設定的工具進行下載
     for tool, config in tools.items():
@@ -151,7 +170,7 @@ def main():
             default_filename = f"{name}-{config['version']}{ext}"
         else:
             default_filename = f"{name}-{config['version']}.{'.'.join(parts[1:])}{ext}"
-        download_file(link, os.path.join(workspace, config["dir"]), default_filename)
+        download_file(link, os.path.join(workspace, config["dir"]), config["pattern"], default_filename)
 
 if __name__ == "__main__":
     main()
