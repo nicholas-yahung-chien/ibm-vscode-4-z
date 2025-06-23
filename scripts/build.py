@@ -101,10 +101,10 @@ def zip_workspace(workspace, version):
     將 workspace 目錄下的所有檔案與子目錄打包成一份 VSCode4z-<version>.zip。
     壓縮檔將存放在 workspace 目錄下。
     """
-    zip_name = os.path.join(workspace, f"VSCode4z-{version}.zip")
-    print(f"開始建立壓縮檔: {zip_name}")
-    shutil.make_archive(zip_name, "zip", root_dir=workspace)
-    print(f"壓縮檔建立完成: {zip_name}")
+    zip_base_name = os.path.join(workspace, f"VSCode4z-{version}")
+    print(f"開始建立壓縮檔: {zip_base_name}.zip")
+    shutil.make_archive(zip_base_name, "zip", root_dir=workspace)
+    print(f"壓縮檔建立完成: {zip_base_name}.zip")
 
 # -------------------------------
 # 主流程
