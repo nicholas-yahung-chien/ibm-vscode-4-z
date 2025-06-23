@@ -97,13 +97,14 @@ def clean_scripts_directory(scripts_dir):
             print(f"刪除目錄: {item}")
             shutil.rmtree(os.path.join(scripts_dir, item))
 
-def gather_files(root_dir, exclude_patterns=None):
+def gather_files(root_dir, exclude_dirs=None, exclude_files=None):
     """
     遞迴遍歷 root_dir，蒐集所有要壓縮的檔案及其相對路徑，
     並根據 exclude_patterns 排除符合條件的目錄及檔案。
     
     :param root_dir: 要壓縮的來源目錄（字串或 Path 皆可）
-    :param exclude_patterns: 要排除的名稱模式清單，例如 [".git", "*.tmp"]
+    :param exclude_dirs: 要排除的目錄名稱模式清單，例如 [".git"]
+    :param exclude_files: 要排除的檔案名稱模式清單，例如 ["*.tmp"]
     :return: 兩個清單 (file_paths, arc_names)
          file_names：每個檔案的檔案名稱
          prefix_paths：在 zip 中的相對存放路徑（以 root_dir 為根）
@@ -111,26 +112,27 @@ def gather_files(root_dir, exclude_patterns=None):
     file_names = []
     prefix_paths = []
     
-    if exclude_patterns is None:
-        exclude_patterns = []
-    
+    if exclude_dirs is None:
+        exclude_dirs = []
+    if exclude_files is None:
+        exclude_files = []
+
     for root, dirs, files in os.walk(root_dir):
         # 排除那些目錄（直接在 dirs 中作過濾，以避免往下遍歷這些資料夾）
-        dirs[:] = [d for d in dirs if not any(fnmatch.fnmatch(d, pat) for pat in exclude_patterns)]
+        dirs[:] = [d for d in dirs if not any(fnmatch.fnmatch(d, pat) for pat in exclude_dirs)]
         
         for file in files:
             # 若檔案名稱符合任何排除模式，則略過
-            if any(fnmatch.fnmatch(file, pat) for pat in exclude_patterns):
+            if any(fnmatch.fnmatch(file, pat) for pat in exclude_files):
                 continue
-            abs_path = os.path.join(root, file)
             # 利用 os.path.relpath 計算相對於 source_dir 的路徑
-            rel_path = os.path.relpath(abs_path, start=root_dir)
-            file_names.append(os.path.basename(abs_path))
-            prefix_paths.append(rel_path)
+            rel_prefix = os.path.relpath(root, start=root_dir)
+            file_names.append(file)
+            prefix_paths.append(rel_prefix)
             
     return file_names, prefix_paths
 
-def compress_directory(root_dir, output_zip, exclude_patterns=None):
+def compress_directory(root_dir, output_zip, exclude_dirs=None):
     """
     利用 pyminizip 將 root_dir 目錄下（排除指定檔案/目錄後）的檔案壓縮成 output_zip。
     
@@ -139,7 +141,7 @@ def compress_directory(root_dir, output_zip, exclude_patterns=None):
     :param compression_level: 壓縮等級 (0~9)
     :param exclude_patterns: 要排除的檔案或目錄模式清單（例如 [".git", "*.tmp"]）
     """
-    file_names, relative_paths = gather_files(root_dir, exclude_patterns)
+    file_names, relative_paths = gather_files(root_dir, exclude_dirs)
     if not file_names:
         print("沒有檔案需要壓縮！")
         return
@@ -186,7 +188,7 @@ def main():
     clean_scripts_directory(scripts_dir)
     
     # 5. 將 workspace 目錄下的所有檔案與子目錄打包成壓縮檔
-    compress_directory(workspace, os.path.join(workspace, f"VSCode4z-{version}.zip"), exclude_patterns=[".git"])
+    compress_directory(workspace, os.path.join(workspace, f"VSCode4z-{version}.zip"), exclude_dirs=[".git"])
 
 if __name__ == "__main__":
     main()
