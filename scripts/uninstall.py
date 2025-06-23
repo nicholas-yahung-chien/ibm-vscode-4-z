@@ -22,10 +22,27 @@
 
 import os
 import sys
+import argparse
 import glob
 import shutil
 from pathlib import Path
 from file_utils import cleanup_directory
+
+# -------------------------------
+#  功能函式
+# -------------------------------
+def get_script_dir():
+    """
+    若被 PyInstaller 打包，則使用 sys.executable 的目錄作為腳本所在目錄；
+    否則使用 __file__ 的目錄。
+    """
+    # 取得腳本所在目錄（考慮是否為 PyInstaller 打包）
+    if getattr(sys, 'frozen', False):
+        # 取得 .exe 執行檔所在路徑
+        return Path(sys.executable).parent.resolve()
+    else:
+        # 取得 .py 腳本所在路徑
+        return Path(__file__).parent.resolve()
 
 def update_java_dirs(java_root_dir, tools_dic):
     if not os.path.exists(java_root_dir):
@@ -79,19 +96,13 @@ def restore_backup(workspace_dir):
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Install script with optional auto-confirmation.")
     parser.add_argument("-y", "--yes", action="store_true", help="自動執行所有步驟，不須等待使用者確認。")
-    parser.add_argument("--workspace", type="str", help="指定工作區目錄，預設為腳本檔所在路徑。"
+    parser.add_argument("--workspace", type="str", help="指定工作區目錄，預設為腳本檔所在路徑。")
     return parser.parse_args()
 
-def main(args):
-    # 取得腳本所在目錄（考慮是否為 PyInstaller 打包）
-    if getattr(sys, 'frozen', False):
-        # 取得 .exe 執行檔所在路徑
-        script_dir = Path(sys.executable).parent.resolve()
-    else:
-        # 取得 .py 腳本所在路徑
-        script_dir = Path(__file__).parent.resolve()
+def main():
+    args = parse_arguments()
     # 若使用者有指定 --workspace 則使用該目錄，否則預設為 script_dir
-    workspace = Path(args.workspace).resolve() if args.workspace else script_dir
+    workspace = Path(args.workspace).resolve() if args.workspace else get_script_dir()
     os.chdir(workspace)
     print("目前工作目錄設定為：", workspace)
     
@@ -109,7 +120,7 @@ def main(args):
     
     # 逐一清理每個工具所在的資料夾，本動作將保留資料夾中所有 .zip 檔，其它內容皆清除
     for tool_name, tool_path in tools.items():
-        print(f"清理 [{tool_name}] 目錄：{tool_path["dir"]}")
+        print(f"清理 [{tool_name}] 目錄：{tool_path['dir']}")
         cleanup_directory(tool_path["dir"], tool_path["except"])
     
     # 執行備份檔還原
@@ -121,5 +132,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    args = parse_arguments()
-    main(args)
+    main()

@@ -28,10 +28,27 @@
 
 import os
 import sys
+import argparse
 import shutil
 import datetime
 import getpass
 from pathlib import Path
+
+# -------------------------------
+#  功能函式
+# -------------------------------
+def get_script_dir():
+    """
+    若被 PyInstaller 打包，則使用 sys.executable 的目錄作為腳本所在目錄；
+    否則使用 __file__ 的目錄。
+    """
+    # 取得腳本所在目錄（考慮是否為 PyInstaller 打包）
+    if getattr(sys, 'frozen', False):
+        # 取得 .exe 執行檔所在路徑
+        return Path(sys.executable).parent.resolve()
+    else:
+        # 取得 .py 腳本所在路徑
+        return Path(__file__).parent.resolve()
 
 def prompt_with_default(prompt_text, default_value):
     """
@@ -46,19 +63,13 @@ def prompt_with_default(prompt_text, default_value):
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Install script with optional auto-confirmation.")
     parser.add_argument("-y", "--yes", action="store_true", help="自動執行所有步驟，不須等待使用者確認。")
-    parser.add_argument("--workspace", type="str", help="指定工作區目錄，預設為腳本檔所在路徑。"
+    parser.add_argument("--workspace", type="str", help="指定工作區目錄，預設為腳本檔所在路徑。")
     return parser.parse_args()
 
-def main(args):
-    # 取得腳本所在目錄（考慮是否為 PyInstaller 打包）
-    if getattr(sys, 'frozen', False):
-        # 取得 .exe 執行檔所在路徑
-        script_dir = Path(sys.executable).parent.resolve()
-    else:
-        # 取得 .py 腳本所在路徑
-        script_dir = Path(__file__).parent.resolve()
+def main():
+    args = parse_arguments()
     # 若使用者有指定 --workspace 則使用該目錄，否則預設為 script_dir
-    workspace = Path(args.workspace).resolve() if args.workspace else script_dir
+    workspace = Path(args.workspace).resolve() if args.workspace else get_script_dir()
     os.chdir(workspace)
     print("目前工作目錄設定為：", workspace)
     
@@ -105,35 +116,35 @@ def main(args):
         if choice == "1":
             # 設定 zosmf
             properties["zosmf"]["port"] = prompt_with_default(
-                f"請輸入 zosmf 連線 port (預設 {properties["zosmf"]["port"]}): ",
+                f"請輸入 zosmf 連線 port (預設 {properties['zosmf']['port']}): ",
                 properties["zosmf"]["port"])
         elif choice == "2":
             # 設定 tso
             properties["tso"]["codepage"] = prompt_with_default(
-                f"請輸入 tso 連線 codepage (預設 {properties["tso"]["codepage"]}): ",
+                f"請輸入 tso 連線 codepage (預設 {properties['tso']['codepage']}): ",
                 properties["tso"]["codepage"])
         elif choice == "3":
             # 設定 ssh
             properties["ssh"]["port"] = prompt_with_default(
-                f"請輸入 ssh 連線 port (預設 {properties["ssh"]["port"]}): ",
+                f"請輸入 ssh 連線 port (預設 {properties['ssh']['port']}): ",
                 properties["ssh"]["port"])
         elif choice == "4":
             # 設定 ftp
             properties["ftp"]["port"] = prompt_with_default(
-                f"請輸入 ftp 連線 port (預設 {properties["ftp"]["port"]}): ",
+                f"請輸入 ftp 連線 port (預設 {properties['ftp']['port']}): ",
                 properties["ftp"]["port"])
         elif choice == "5":
             # 設定 rse
             properties["rse"]["port"] = prompt_with_default(
-                f"請輸入 rse 連線 port (預設 {properties["rse"]["port"]}): ",
+                f"請輸入 rse 連線 port (預設 {properties['rse']['port']}): ",
                 properties["rse"]["port"])
             properties["rse"]["encoding"] = prompt_with_default(
-                f"請輸入 rse 連線 encoding (預設 {properties["rse"]["encoding"]}): ",
+                f"請輸入 rse 連線 encoding (預設 {properties['rse']['encoding']}): ",
                 properties["rse"]["encoding"])
         elif choice == "6":
             # 設定 debug
             properties["debug"]["port"] = prompt_with_default(
-                f"請輸入 zOpenDebug 連線 port (預設 {properties["debug"]["port"]}): ",
+                f"請輸入 zOpenDebug 連線 port (預設 {properties['debug']['port']}): ",
                 properties["debug"]["port"])
         elif choice == "7":
             # 離開選單，開始進行 zowe.config.json 檔案內容的修改
@@ -168,13 +179,13 @@ def main(args):
     content = content.replace("_USER_", f"{user}")
     content = content.replace("_PASSWORD_", f"{password}")
     
-    content = content.replace("_ZOSMF_PORT_", f"{properties["zosmf"]["port"]}")
-    content = content.replace("_TSO_CODEPAGE_", f"{properties["tso"]["codepage"]}")
-    content = content.replace("_SSH_PORT_", f"{properties["ssh"]["port"]}")
-    content = content.replace("_FTP_PORT_", f"{properties["ftp"]["port"]}")
-    content = content.replace("_RSE_PORT_", f"{properties["rse"]["port"]}")
-    content = content.replace("_RSE_ENCODING_", f"{properties["rse"]["encoding"]}")
-    content = content.replace("_DEBUG_PORT_", f"{properties["debug"]["port"]}")
+    content = content.replace("_ZOSMF_PORT_", f"{properties['zosmf']['port']}")
+    content = content.replace("_TSO_CODEPAGE_", f"{properties['tso']['codepage']}")
+    content = content.replace("_SSH_PORT_", f"{properties['ssh']['port']}")
+    content = content.replace("_FTP_PORT_", f"{properties['ftp']['port']}")
+    content = content.replace("_RSE_PORT_", f"{properties['rse']['port']}")
+    content = content.replace("_RSE_ENCODING_", f"{properties['rse']['encoding']}")
+    content = content.replace("_DEBUG_PORT_", f"{properties['debug']['port']}")
     
     try:
         with open(config_path, "w", encoding="utf-8") as f:
@@ -185,5 +196,4 @@ def main(args):
         sys.exit(1)
 
 if __name__ == "__main__":
-    args = parse_arguments()
-    main(args)
+    main()
