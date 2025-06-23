@@ -45,7 +45,7 @@ def find_real_directory(start_path, target_pattern):
     從起始資料夾向下遞迴搜尋，直到某資料夾中包含非 target_pattern 檔案，則視為「實體目錄」並回傳該路徑。
     找不到則回傳 None。
     """
-    for root, _, files in os.walk(start_path):
+    for root, _, files in os.walk(os.path.abspath(start_path)):
         non_target_files = [f for f in files if not f.lower().endswith(target_pattern)]
         if non_target_files:
             return root
@@ -56,7 +56,7 @@ def find_home_path(start_path, target_file):
     從起始資料夾向下遞迴搜尋，找到某一個包含 target_file 的資料夾則回傳其路徑。
     找不到則回傳 None。
     """
-    for root, _, files in os.walk(start_path):
+    for root, _, files in os.walk(os.path.abspath(start_path)):
         if any(f.lower() == target_file.lower() for f in files):
             return root
     return None

@@ -53,7 +53,7 @@ def extract_zip_with_spinner(zip_path, extract_to):
     )
     spinner_thread.start()
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-        zip_ref.extractall(path=extract_to)
+        zip_ref.extractall(path=os.path.abspath(extract_to))
     stop_event.set()
     spinner_thread.join()
 
@@ -73,7 +73,7 @@ def copy_contents_to_with_spinner(source_dir, destination_dir):
     )
     spinner_thread.start()
     try:
-        shutil.copytree(source_dir, destination_dir)
+        shutil.copytree(os.path.abspath(source_dir), os.path.abspath(destination_dir))
     except Exception as e:
         print("複製過程中發生錯誤：", e)
     stop_event.set()
@@ -93,7 +93,7 @@ def move_contents_up(parent_dir, target_dir):
     dirs.sort(key=lambda d: os.path.getmtime(d), reverse=True)
     bogus_folder = dirs[0]
     for item in os.listdir(bogus_folder):
-        shutil.move(os.path.join(bogus_folder, item), os.path.join(parent_dir, item))
+        shutil.move(os.path.join(bogus_folder, item), os.path.join(os.path.abspath(parent_dir), item))
     os.rmdir(bogus_folder)
     print(f"已將 {bogus_folder} 中的內容搬移至 {parent_dir} 並刪除該資料夾。")
 
