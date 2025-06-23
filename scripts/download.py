@@ -146,7 +146,11 @@ def main():
         base = config["pattern"].replace('*', '')
         # 取得檔名與副檔名
         name, ext = os.path.splitext(base)
-        default_filename = f"{name}-{version}{ext}"
+        parts = name.split('.')
+        if len(parts) <= 1:
+            default_filename = f"{name}-{config['version']}{ext}"
+        else:
+            default_filename = f"{name}-{config['version']}.{'.'.join(parts[1:])}{ext}"
         download_file(link, os.path.join(workspace, config["dir"]), default_filename)
 
 if __name__ == "__main__":
