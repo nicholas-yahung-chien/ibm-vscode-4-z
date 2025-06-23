@@ -80,7 +80,7 @@ def download_vsix(url, dest_directory, possible_filename):
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Install script with optional auto-confirmation.")
     parser.add_argument("-y", "--yes", action="store_true", help="自動執行所有步驟，不須等待使用者確認。")
-    parser.add_argument("--workspace", type="str", help="指定工作區目錄，預設為腳本檔所在路徑。")
+    parser.add_argument("--workspace", type=str, help="指定工作區目錄，預設為腳本檔所在路徑。")
     return parser.parse_args()
 
 def main():
