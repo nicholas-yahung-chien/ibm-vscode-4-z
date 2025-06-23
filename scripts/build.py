@@ -88,7 +88,7 @@ def clean_scripts_directory(scripts_dir):
     """
     for item in os.listdir(scripts_dir):
         # 若是檔案且副檔名不是 .py 與 .yml
-        if os.path.isfile(os.path.join(scripts_dir, item)) and item.lower().endswith((".py", ".yml")):
+        if os.path.isfile(os.path.join(scripts_dir, item)) and not item.lower().endswith((".py", ".yml")):
             print(f"刪除檔案: {item}")
             os.remove(os.path.join(scripts_dir, item))
         # 若是目錄，全部刪除
