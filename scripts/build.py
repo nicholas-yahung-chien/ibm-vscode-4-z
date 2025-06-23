@@ -143,9 +143,7 @@ def compress_directory(root_dir, output_zip, exclude_dirs=None):
     if not file_abs_paths:
         print("沒有檔案需要壓縮！")
         return
-    for file, prefix in zip(file_abs_paths, prefix_rel_paths):
-        print(prefix, file)
-
+    
     try:
         print(f"開始壓縮：{os.path.basename(output_zip)}")
         pyminizip.compress_multiple(file_abs_paths, prefix_rel_paths, output_zip, None, 5)
