@@ -84,7 +84,7 @@ def move_contents_up(parent_dir, target_dir):
     若 parent_dir 底下存在符合 target_dir 的子資料夾（通常為解壓後嵌套的資料夾），
     則將其內容搬移到 parent_dir 中並刪除此空資料夾。
     """
-    search_path = os.path.join(parent_dir, os.path.basename(target_dir))
+    search_path = os.path.join(parent_dir, "" if not target_dir else os.path.basename(target_dir))
     if parent_dir == search_path:
         return
     dirs = glob.glob(search_path)
