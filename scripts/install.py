@@ -216,7 +216,7 @@ def phase3_install_zowe(tools, workspace, auto_continue=False):
         print(f"\n開始安裝 {os.path.basename(zowe_module)} ...\n")
         subprocess.run([os.path.join(workspace, tools["nodejs"]["dir"], "npm.cmd"),
                         "install", "-g", "--prefer-offline", "--prefer-online",
-                        "--no-fund", "--no-audit", os.path.join(workspace, tools["zowe-core"]["dir"], zowe_module)],
+                        "--no-fund", "--no-audit", os.path.join(workspace, zowe_module)],
                        cwd=os.path.join(workspace, tools["nodejs"]["dir"]))
     print("安裝 Zowe-Cli 完成。\n")
 
