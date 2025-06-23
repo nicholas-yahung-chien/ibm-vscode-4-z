@@ -214,10 +214,10 @@ def phase3_install_zowe(tools, workspace, auto_continue=False):
     all_zowe_modules = get_all_files_reversed_sorted(tools["zowe-core"]["dir"], "*.tgz")
     for zowe_module in all_zowe_modules:
         print(f"\n開始安裝 {os.path.basename(zowe_module)} ...\n")
-        subprocess.run([os.path.join(tools["nodejs"]["dir"], "npm.cmd"),
+        subprocess.run([os.path.join(workspace, tools["nodejs"]["dir"], "npm.cmd"),
                         "install", "-g", "--prefer-offline", "--prefer-online",
-                        "--no-fund", "--no-audit", zowe_module],
-                       cwd=tools["nodejs"]["dir"])
+                        "--no-fund", "--no-audit", os.path.join(workspace, tools["zowe-core"]["dir"], zowe_module)],
+                       cwd=os.path.join(workspace, tools["nodejs"]["dir"]))
     print("安裝 Zowe-Cli 完成。\n")
 
 @confirm_step("【步驟 4】路徑設定遷移：請確認設定檔修改")
