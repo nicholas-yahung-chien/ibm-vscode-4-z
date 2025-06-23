@@ -23,8 +23,9 @@ import sys
 import argparse
 import subprocess
 import shutil
-import zipfile
+import py7zr
 import glob
+import fnmatch
 from pathlib import Path
 
 # -------------------------------
@@ -96,16 +97,36 @@ def clean_scripts_directory(scripts_dir):
             print(f"刪除目錄: {item}")
             shutil.rmtree(os.path.join(scripts_dir, item))
 
-def zip_workspace(workspace, version):
+def compress_directory(source_dir, archive_file_path, exclude_patterns=None):
     """
-    將 workspace 目錄下的所有檔案與子目錄打包成一份 VSCode4z-<version>.zip。
-    壓縮檔將存放在 workspace 目錄下。
-    """
-    zip_base_name = os.path.join(workspace, f"VSCode4z-{version}")
-    print(f"開始建立壓縮檔: {zip_base_name}.zip")
-    shutil.make_archive(zip_base_name, "zip", root_dir=workspace)
-    print(f"壓縮檔建立完成: {zip_base_name}.zip")
+    壓縮整個 source_dir 目錄到 archive_file_path 壓縮檔中，
+    並排除掉與 exclude_patterns 相關的檔案或目錄。
 
+    :param source_dir: 要壓縮的目錄（絕對路徑或相對路徑）
+    :param archive_file_path: 輸出壓縮檔路徑，例如 "output.7z"
+    :param exclude_patterns: 一個字串清單，代表要排除掉的檔案或目錄名稱模式（例如 [".git", "*.tmp"]）
+    """
+    if exclude_patterns is None:
+        exclude_patterns = []
+
+    # 建立一個 7z 壓縮檔
+    print(f"開始壓縮：{os.path.basename(archive_file_path)}")
+    with py7zr.SevenZipFile(archive_file_path, 'w') as archive:
+        # 使用 os.walk 來遞迴遍歷 source_dir 目錄
+        for root, dirs, files in os.walk(source_dir):
+            # 根據排除模式過濾掉不需要的子目錄
+            # 修改 dirs[:] 會影響到 os.walk 的後續遞迴
+            dirs[:] = [d for d in dirs if not any(fnmatch.fnmatch(d, pat) for pat in exclude_patterns)]
+
+            # 處理檔案：同樣若檔案名稱符合任何排除模式，則略過
+            for file in files:
+                if any(fnmatch.fnmatch(file, pat) for pat in exclude_patterns):
+                    continue
+                full_path = os.path.join(root, file)
+                # 相對於 source_dir 的路徑，這樣在壓縮檔中才不會包含絕對路徑
+                arcname = os.path.relpath(full_path, source_dir)
+                archive.write(full_path, arcname=arcname)
+    print(f"完成壓縮：{os.path.basename(archive_file_path)}")
 
 def zip_directory_exclude(root_dir, version, exclude_dirs=None):
     """
@@ -115,20 +136,11 @@ def zip_directory_exclude(root_dir, version, exclude_dirs=None):
     """
     if exclude_dirs is None:
         exclude_dirs = []
-    
-    zip_filename = os.path.join(root_dir, f"VSCode4z-{version}.zip")
-    with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        for root, dirs, files in os.walk(root_dir):
-            # 過濾排除目錄：移除列表中在 exclude_dirs 的項目
-            dirs[:] = [d for d in dirs if d not in exclude_dirs]
-            for file in files:
-                file_path = os.path.join(root, file)
-                # 以相對於 root_dir 的路徑儲存至 zip 檔中
-                arcname = os.path.relpath(file_path, root_dir)
-                zipf.write(file_path, arcname)
-                
-    print(f"壓縮完成：{os.path.basename(zip_filename)}")
-
+    zip_filepath = os.path.join(root_dir, f"VSCode4z-{version}.7z")
+    print(f"開始壓縮：{os.path.basename(zip_filepath)}")
+    with py7zr.SevenZipFile(zip_filepath, 'w') as archive:
+        archive.writeall(root_dir, arcname=os.path.basename(root_dir))
+    print(f"壓縮完成：{os.path.basename(zip_filepath)}")
 
 # -------------------------------
 # 主流程
@@ -166,7 +178,7 @@ def main():
     clean_scripts_directory(scripts_dir)
     
     # 5. 將 workspace 目錄下的所有檔案與子目錄打包成壓縮檔
-    zip_directory_exclude(workspace, version, exclude_dirs=[".git"])
+    compress_directory(workspace, os.path.join(workspace, f"VSCode4z-{version}.7z"), exclude_patterns=[".git"])
 
 if __name__ == "__main__":
     main()
