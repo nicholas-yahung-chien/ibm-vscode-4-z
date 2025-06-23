@@ -72,7 +72,7 @@ def download_file(url, dest_directory, possible_filename):
             filename = None
             
             # 使用正規表達式解析 filename，例如：attachment; filename="example.vsix"
-            match = re.search(r'filename="(.+)"', content_disposition)
+            match = re.search(r'filename="?([^";]+)"?', content_disposition)
             if match:
                 filename = match.group(1)
             else:

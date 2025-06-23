@@ -128,20 +128,6 @@ def compress_directory(source_dir, archive_file_path, exclude_patterns=None):
                 archive.write(full_path, arcname=arcname)
     print(f"完成壓縮：{os.path.basename(archive_file_path)}")
 
-def zip_directory_exclude(root_dir, version, exclude_dirs=None):
-    """
-    將 workspace 目錄下的所有檔案與子目錄打包成一份 VSCode4z-<version>.zip。
-    並可排除位於 exclude_dirs 清單中的目錄名稱（例如：['.git']）。
-    壓縮檔將存放在 workspace 目錄下。
-    """
-    if exclude_dirs is None:
-        exclude_dirs = []
-    zip_filepath = os.path.join(root_dir, f"VSCode4z-{version}.7z")
-    print(f"開始壓縮：{os.path.basename(zip_filepath)}")
-    with py7zr.SevenZipFile(zip_filepath, 'w') as archive:
-        archive.writeall(root_dir, arcname=os.path.basename(root_dir))
-    print(f"壓縮完成：{os.path.basename(zip_filepath)}")
-
 # -------------------------------
 # 主流程
 # -------------------------------
