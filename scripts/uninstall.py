@@ -25,6 +25,7 @@ import sys
 import glob
 import shutil
 from pathlib import Path
+from file_utils import cleanup_directory
 
 def update_java_dirs(java_root_dir, tools_dic):
     if not os.path.exists(java_root_dir):
@@ -43,35 +44,6 @@ def update_java_dirs(java_root_dir, tools_dic):
             }
             print(f"已更新工具包路徑：新增 {key}")
     return tools_dic
-
-def cleanup_directory(target_dir, except_pattern):
-    """
-    清除指定目錄中所有非 .<except_pattern> 檔的項目，包括所有檔案與子目錄。
-    只保留副檔名為 .<except_pattern> 的檔案。
-    """
-    if not os.path.exists(target_dir):
-        print(f"目錄不存在：{target_dir}")
-        return
-
-    print(f"開始清理目錄：{target_dir}")
-    for entry in os.listdir(target_dir):
-        full_path = os.path.join(target_dir, entry)
-        # 如果是檔案，且副檔名不是 .<except_pattern>（忽略大小寫），則刪除該檔案
-        if os.path.isfile(full_path):
-            if not entry.lower().endswith(f".{except_pattern}"):
-                try:
-                    os.remove(full_path)
-                    print(f"已刪除檔案: {full_path}")
-                except Exception as e:
-                    print(f"刪除檔案 {full_path} 發生錯誤: {e}")
-        # 如果是目錄，則直接遞迴刪除整個目錄
-        elif os.path.isdir(full_path):
-            try:
-                shutil.rmtree(full_path)
-                print(f"已遞迴刪除目錄: {full_path}")
-            except Exception as e:
-                print(f"刪除目錄 {full_path} 發生錯誤: {e}")
-    print(f"目錄清理完成：{target_dir}\n")
 
 def restore_backup(workspace_dir):
     """
@@ -101,25 +73,37 @@ def restore_backup(workspace_dir):
     except Exception as e:
         print(f"還原過程發生錯誤：{e}")
 
-def main():
-    # 取得腳本所在的工作目錄
-    if getattr(sys, 'frozen', False):  # 檢查是不是被 PyInstaller 打包成 .exe
+# -------------------------------
+# 主流程
+# -------------------------------
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Install script with optional auto-confirmation.")
+    parser.add_argument("-y", "--yes", action="store_true", help="自動執行所有步驟，不須等待使用者確認。")
+    parser.add_argument("--workspace", type="str", help="指定工作區目錄，預設為腳本檔所在路徑。"
+    return parser.parse_args()
+
+def main(args):
+    # 取得腳本所在目錄（考慮是否為 PyInstaller 打包）
+    if getattr(sys, 'frozen', False):
         # 取得 .exe 執行檔所在路徑
         script_dir = Path(sys.executable).parent.resolve()
     else:
         # 取得 .py 腳本所在路徑
         script_dir = Path(__file__).parent.resolve()
-    # script_dir = os.path.dirname(os.path.abspath(__file__))
+    # 若使用者有指定 --workspace 則使用該目錄，否則預設為 script_dir
+    workspace = Path(args.workspace).resolve() if args.workspace else script_dir
+    os.chdir(workspace)
+    print("目前工作目錄設定為：", workspace)
     
     # 定義工具對應的目錄（相對於腳本所在目錄）
     tools = {
-        "vscode": {"dir": os.path.join(script_dir, "vscode"), "except": "zip" },
-        "python": {"dir": os.path.join(script_dir, "python"), "except": "zip" },
-        "node": {"dir": os.path.join(script_dir, "node"), "except": "zip" },
-        "git": {"dir": os.path.join(script_dir, "git"), "except": "7z.exe" },
-        "zowe": {"dir": os.path.join(script_dir, "zowe-cli"), "except": "zip" },
+        "vscode": {"dir": os.path.join(workspace, "vscode"), "except": "zip" },
+        "python": {"dir": os.path.join(workspace, "python"), "except": "zip" },
+        "node": {"dir": os.path.join(workspace, "node"), "except": "zip" },
+        "git": {"dir": os.path.join(workspace, "git"), "except": "7z.exe" },
+        "zowe": {"dir": os.path.join(workspace, "zowe-cli"), "except": "zip" },
     }
-    tools = update_java_dirs(os.path.join(script_dir, "java"), tools)
+    tools = update_java_dirs(os.path.join(workspace, "java"), tools)
     
     print("=== Uninstall 開始 ===\n")
     
@@ -129,7 +113,7 @@ def main():
         cleanup_directory(tool_path["dir"], tool_path["except"])
     
     # 執行備份檔還原
-    workspace_dir = os.path.join(script_dir, "workspace")
+    workspace_dir = os.path.join(workspace, "workspace")
     restore_backup(workspace_dir)
     
     print("=== Uninstall 完成 ===")
@@ -137,4 +121,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    args = parse_arguments()
+    main(args)

@@ -57,21 +57,30 @@ def download_vsix(url, dest_directory, possible_filename):
     except Exception as e:
         print(f"下載過程中發生錯誤：{e}")
 
-def main():
-    # 取得腳本所在目錄（== %~dp0）
-    if getattr(sys, 'frozen', False):  # 檢查是不是被 PyInstaller 打包成 .exe
+# -------------------------------
+# 主流程
+# -------------------------------
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Install script with optional auto-confirmation.")
+    parser.add_argument("-y", "--yes", action="store_true", help="自動執行所有步驟，不須等待使用者確認。")
+    parser.add_argument("--workspace", type="str", help="指定工作區目錄，預設為腳本檔所在路徑。"
+    return parser.parse_args()
+
+def main(args):
+    # 取得腳本所在目錄（考慮是否為 PyInstaller 打包）
+    if getattr(sys, 'frozen', False):
         # 取得 .exe 執行檔所在路徑
         script_dir = Path(sys.executable).parent.resolve()
     else:
         # 取得 .py 腳本所在路徑
         script_dir = Path(__file__).parent.resolve()
-    #script_dir = os.path.dirname(os.path.abspath(__file__))
-    os.chdir(script_dir)
-    print("目前工作目錄切換為：", script_dir)
-    print()
+    # 若使用者有指定 --workspace 則使用該目錄，否則預設為 script_dir
+    workspace = Path(args.workspace).resolve() if args.workspace else script_dir
+    os.chdir(workspace)
+    print("目前工作目錄設定為：", workspace)
     
     # 載入 extensions.yml 設定檔
-    yml_path = os.path.join(script_dir, "extensions.yml")
+    yml_path = os.path.join(workspace, "scripts", "extensions.yml")
     if not os.path.exists(yml_path):
         print(f"找不到設定檔: {yml_path}")
         return
@@ -92,7 +101,8 @@ def main():
                 print(f"開始下載：{url}")
                 # 產生檔案名稱，例如 ibm.zopendebug-5.4.0.vsix
                 file_name = f"{publisher}.{ext_name}-{version}.vsix"
-                download_vsix(url, script_dir, file_name)
+                download_vsix(url, os.path.join(workspace, "extensions"), file_name)
 
 if __name__ == "__main__":
-    main()
+    args = parse_arguments()
+    main(args)

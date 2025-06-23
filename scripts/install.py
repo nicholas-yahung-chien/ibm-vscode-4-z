@@ -8,285 +8,130 @@
 
 說明:
 1. 於各指定資料夾中尋找符合條件的 Zip 檔（依修改時間排序取最新檔案）。
-2. 驗證工具（VSCode、Jdk21）的 Zip 檔是否存在，
-   若不存在則顯示錯誤後結束程式。
-3. 執行解壓動作，各個工具的 Zip 檔解壓到相應目錄中；對於解壓後產生「嵌套資料夾」的工具，
-   將把裡面的檔案移回上一層，並移除該空資料夾。
-4. 進行路徑設定的調整，根據目前工作區（即腳本所在路徑）生成兩組經過轉義的字串，
-   並用正規表達式 VSCode 設定檔中的「_WORKSPACE_」標。
-5. 刪除工作目錄中以 sed 開頭的檔案（清理殘留工具）。
-6. 建立 VSCode 的 Windows 快捷方式，利用 COM 介面產生 .lnk 檔案（若電腦無 win32com 模組則跳過此部份）。
-
-使用方式:
-使用前請確認 Python 執行環境中有必要的模組（若要建立快捷方式需要有 pywin32 模組）。
+2. 驗證工具（VSCode、Jdk21 等）的檔案是否存在，若不存在則顯示錯誤後結束程式。
+3. 執行解壓動作，各工具的 Zip 檔解壓到相應目錄中；若產生嵌套資料夾則將其中內容搬移上層後刪除該空目錄。
+4. 根據目前工作區（即腳本所在路徑）修改設定檔中的路徑參數（含轉義與 URI 部分）。
+5. 刪除工具安裝過程中殘留的臨時檔案。
+6. 利用 COM 介面建立 VSCode 的 Windows 快捷方式（若無 win32com 則略過）。
 """
 
 import os
 import sys
-import time
-import threading
 import argparse
-import glob
-import zipfile
-import shutil
 import re
 import json
 import subprocess
 from pathlib import Path
 from urllib.parse import quote
 
-# 若要建立 Windows 快捷方式，需要 win32com 模組（通常屬於 pywin32 套件）
+# 若要建立 Windows 快捷方式，需要 pywin32 模組
 try:
     import win32com.client
 except ImportError:
     win32com = None
 
-def parse_arguments():
-    parser = argparse.ArgumentParser(description="Install script with optional aito-confirmation.")
-    parser.add_argument("-y", "--yes", action="store_true", help="預設自動執行所有步驟，不須停等使用者 Enter 確認。")
-    return parser.parse_args()
+# 導入我們的互動工具模組
+from message_utils import (
+    pause_if_needed,
+    confirm_step
+)
+# 導入我們的路徑工具模組
+from path_utils import (
+    get_latest_file,
+    get_all_files_reversed_sorted,
+    find_real_directory,
+    find_home_path
+)
+# 導入我們的檔案工具模組
+from file_utils import (
+    extract_zip_with_spinner,
+    copy_contents_to_with_spinner,
+    move_contents_up
+)
 
-def press_enter(message, auto_continue=False):
-    """顯示訊息並等待使用者按下 Enter"""
-    if auto_continue:
-        print(f"{message}\n")
-    else:
-        input(f"{message}（請按下 Enter 鍵繼續）。\n")
-
-def get_latest_file(directory, pattern):
-    """
-    在指定目錄中，尋找與 pattern 相符的檔案，
-    以修改時間排序取得最新一個檔案。
-    若找不到，回傳空字串。
-    """
-    search_path = os.path.join(directory, pattern)
-    matched_files = glob.glob(search_path)
-    if not matched_files:
-        return ""
-    # 依時間由新到舊排序，取第一筆
-    matched_files.sort(key=lambda f: os.path.getmtime(f), reverse=True)
-    return os.path.basename(matched_files[0])
-
-def get_all_files_reversed_sorted(directory, pattern):
-    """
-    在指定目錄中，尋找與 pattern 相符的檔案，
-    以名稱倒序排序取得。
-    若找不到，回傳空字串。
-    """
-    search_path = os.path.join(directory, pattern)
-    matched_files = glob.glob(search_path)
-    if not matched_files:
-        return []
-    # 依名稱由字典順序大到小排序
-    matched_files.sort(key=lambda f: os.path.basename(f), reverse=True)
-    return matched_files
-
-def find_real_directory(start_path):
-    """
-    從指定起始目錄開始，遞迴搜尋子目錄，直到找到一個資料夾內
-    除了 .zip 檔案與其他子資料夾外，還存在其他類型的檔案。
-    
-    若找到符合條件的目錄，則返回該路徑；若未找到則返回 None。
-    """
-    for root, dirs, files in os.walk(start_path):
-        # 過濾掉所有 .zip 檔案，只檢查其他類型的檔案
-        non_zip_files = [f for f in files if not f.lower().endswith(".zip")]
-        
-        # 若該目錄內包含非 .zip 的檔案，則回傳該目錄路徑
-        if non_zip_files:
-            return root
-    # 若遍歷整個目錄樹後仍無符合條件的目錄，返回 None
-    return None
-
-def find_home_path(start_path, target_file):
-    """
-    從指定起始目錄開始，遞迴搜尋子目錄，直到找到一個資料夾內
-    存在符合 target_file 的檔案。
-    
-    若找到符合條件的目錄，則返回該路徑；若未找到則返回 None。
-    """
-    for root, dirs, files in os.walk(start_path):
-        # 只檢查 target_file 檔案
-        has_target = [f for f in files if f.lower() == target_file.lower()]
-        
-        # 若該目錄內包含 target_file 檔案，則回傳該目錄路徑
-        if has_target:
-            return root
-    # 若遍歷整個目錄樹後仍無符合條件的目錄，返回 None
-    return None
-
+# -------------------------------
+#  功能函式
+# -------------------------------
 def update_java_dirs(java_root_dir, tools_dic):
+    """
+    遍歷 java_root_dir 內所有子資料夾，以 "java{資料夾名稱}" 為 key 更新 tools_dic，
+    並設定相應的搜尋 pattern（例如：*jdk*{版本}*.zip）。
+    """
     if not os.path.exists(java_root_dir):
-        # 沒有 java 目錄就直接傳原本的 tools
         print(f"找不到 java 目錄：{java_root_dir}")
         return tools_dic
-    # 遍歷所有子目錄
     for folder in os.listdir(java_root_dir):
         folder_path = os.path.join(java_root_dir, folder)
         if os.path.isdir(folder_path):
-            # 更新 tools 字典，組成的 key 為 "java" + 資料夾名稱
             key = f"java{folder}"
-            # 組成搜尋模式，例如：*jdk*21*.zip
             pattern = f"*jdk*{folder}*.zip"
-            tools_dic[key] = {
-                "dir": folder_path,
-                "pattern": pattern
-            }
+            tools_dic[key] = {"dir": folder_path, "pattern": pattern}
             print(f"已更新工具包路徑：新增 {key}")
     return tools_dic
 
 def extract_major_version(version_text):
     """
-    從輸入文字中擷取版本號序列當中 major 數字的部份。
-    僅保留第一組數字序列（例如：'11.0.18' -> '11'）。
+    從 version_text 中擷取版本號序列，並僅回傳第一組（major 部分）。
+    例如：'javaJDK11.0.18' 會回傳 '11'。
     """
     match = re.search(r'\d+(?:\.\d+)*', version_text)
     if match:
         full_version = match.group()
-        major = full_version.split(".")[0]
-        return major
+        return full_version.split(".")[0]
     return None
 
-def spinner(stop_event, msg_startup, msg_running, msg_complete):
+def escape_backslashes(path: str, for_regex: bool = False) -> str:
     """
-    此函式在背景中持續印出旋轉圖示，以顯示「正在進行中」的狀態，
-    當 stop_event 被設定後，停止運行。
+    將 Windows 路徑中的反斜線轉為程式碼中需要的跳脫字元格式。
+    例如： C:\Java\JDK -> C:\\Java\\JDK
     """
-    spinner_chars = "|/-\\"
-    idx = 0
-    print(f"{msg_startup}", end='\n', flush=True)
-    while not stop_event.is_set():
-        print(f"{msg_running}... " + spinner_chars[idx % len(spinner_chars)], end='\r', flush=True)
-        idx += 1
-        time.sleep(0.2)
-    # 當完成時，清除同一行的訊息並顯示完成訊息
-    sys.stdout.write("\r" + f"{msg_complete}！        \n")
-    sys.stdout.flush()
-
-def extract_zip_with_spinner(zip_path, extract_to):
-    """
-    此函式使用 zipfile 模組解壓縮，並在解壓縮期間開啟 spinner 線程，
-    告訴使用者解壓縮程序仍在進行。
-    """
-    # 建立一個事件，讓 spinner 能在解壓縮結束時被通知停止
-    stop_event = threading.Event()
-    
-    # 啟動 spinner 背景執行緒
-    spinner_thread = threading.Thread(target=spinner, args=(stop_event,f"解壓縮：{zip_path}\n到目錄：{extract_to}","解壓縮中","解壓縮完成"))
-    spinner_thread.start()
-    
-    # 進行解壓縮（這是一個 blocking 的動作）
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-        zip_ref.extractall(path=extract_to)
-    
-    # 解壓縮完成，設定事件讓 spinner 停止
-    stop_event.set()
-    spinner_thread.join()
-
-def move_contents_up(parent_dir, target_dir):
-    """
-    檢查 parent_dir 底下是否有符合 target_dir 的子資料夾（通常為解壓後產生的嵌套資料夾），
-    若存在，將其內容搬移到 parent_dir，並刪除該子資料夾。
-    """
-    search_path = os.path.join(parent_dir, target_dir)
-    if parent_dir == search_path:
-        return
-    dirs = glob.glob(search_path)
-    if not dirs:
-        return
-    # 依時間由新到舊排序，取最新的一個資料夾
-    dirs.sort(key=lambda d: os.path.getmtime(d), reverse=True)
-    bogus_folder = dirs[0]
-    for item in os.listdir(bogus_folder):
-        source_path = os.path.join(bogus_folder, item)
-        dest_path = os.path.join(parent_dir, item)
-        shutil.move(source_path, dest_path)
-    os.rmdir(bogus_folder)
-    print(f"已將 {bogus_folder} 的內容\n搬移至 {parent_dir} 並刪除該資料夾。")
-
-def copy_contents_to_with_spinner(source_dir, destination_dir):
-    """
-    此函式使用 shutil 模組將 source_dir 目錄整個複製為 destination_dir 目錄，
-    並在複製期間開啟 spinner 線程，告訴使用者複製程序仍在進行。
-    """
-    # 建立一個事件，讓 spinner 能在複製結束時被通知停止
-    stop_event = threading.Event()
-    
-    # 啟動 spinner 背景執行緒
-    spinner_thread = threading.Thread(target=spinner, args=(stop_event,f"複製：{source_dir}\n到目錄：{destination_dir}","複製中","複製完成"))
-    spinner_thread.start()
-    
-    # 進行複製（這是一個 blocking 的動作）
-    try:
-        shutil.copytree(source_dir, destination_dir)
-    except Exception as e:
-        print("複製過程中發生錯誤：", e)
-    
-    # 複製完成，設定事件讓 spinner 停止
-    stop_event.set()
-    spinner_thread.join()
+    if for_regex:
+        # 若 for_regex 為 True，則將路徑中的反斜線轉為跳脫字元格式，並將單反斜線轉為雙反斜線
+        return escape_backslashes(path.replace("\\", "\\\\"))
+    else:
+        return path.replace("\\", "\\\\")
 
 def replace_in_file(file_path, pattern, replacement):
-    """
-    讀取 file_path 檔案內容，以 regex 方式替換符合 pattern 的部分，
-    替換為 replacement 字串，且直接覆蓋原檔案內容。
-    """
-    print(f"於檔案 {file_path} 中進行字串取代...")
+    """讀取 file_path，利用正規表達式替換 pattern 為 replacement，並覆蓋回原檔案。"""
+    print(f"於檔案 {file_path} 中進行字串取代 ...")
     with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
-    
     new_content = re.sub(pattern, replacement, content)
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(new_content)
     print("取代完成。")
 
 def vscode_cmd_insertion(file_path, insertions):
-    # 讀取原始內容
+    """在 VSCode 的批次檔中讀取 'setlocal' 行後插入額外環境設定語法。"""
     with open(file_path, "r", encoding="utf-8") as f:
         lines = f.readlines()
-        
     new_lines = []
     inserted = False
     for line in lines:
         new_lines.append(line)
-        # 當讀到 setlocal 那一行時，立即插入額外設定
         if not inserted and line.strip().lower() == "setlocal":
             new_lines.extend(insertions)
             inserted = True
-            
-    # 寫回修改後的內容
     with open(file_path, "w", encoding="utf-8") as f:
         f.writelines(new_lines)
 
-def main(args):
-    # 取得腳本所在目錄（== %~dp0）
-    if getattr(sys, 'frozen', False):  # 檢查是不是被 PyInstaller 打包成 .exe
-        # 取得 .exe 執行檔所在路徑
-        script_dir = Path(sys.executable).parent.resolve()
-    else:
-        # 取得 .py 腳本所在路徑
-        script_dir = Path(__file__).parent.resolve()
-    #script_dir = os.path.dirname(os.path.abspath(__file__))
-    os.chdir(script_dir)
-    print("目前工作目錄切換為：", script_dir)
-    print()
+# -------------------------------
+# 以下定義各階段流程（利用 decorator 包裝）
+# -------------------------------
 
-    # === 第1階段：檢查工具包 ===
-    # workspace 為腳本所在的路徑
-    workspace = script_dir
-    print("工作區目錄：", workspace)
+@confirm_step("【步驟 1】檢查工具包：請確認所有必要工具已經下載")
+def phase1_check_tools(workspace, auto_continue=False):
     print("檢查工具包...\n")
     
-    # 各工具對應的資料夾及 Zip 檔案搜尋條件
     tools = {
-        "vscode": {"dir": os.path.join(script_dir, "vscode"), "pattern": "VSCode*.zip"},
-        "python": {"dir": os.path.join(script_dir, "python"), "pattern": "*python*.zip"},
-        "nodejs": {"dir": os.path.join(script_dir, "node"), "pattern": "*node*.zip"},
-        "git": {"dir": os.path.join(script_dir, "git"), "pattern": "PortableGit*.exe"},
-        "zowe-core": {"dir": os.path.join(script_dir, "zowe-cli"), "pattern": "zowe*package*.zip"},
-        "zowe-plugin": {"dir": os.path.join(script_dir, "zowe-cli"), "pattern": "zowe*plugins*.zip"},
+        "vscode": {"dir": os.path.join(workspace, "vscode"), "pattern": "VSCode*.zip"},
+        "python": {"dir": os.path.join(workspace, "python"), "pattern": "*python*.zip"},
+        "nodejs": {"dir": os.path.join(workspace, "node"), "pattern": "*node*.zip"},
+        "git": {"dir": os.path.join(workspace, "git"), "pattern": "PortableGit*.exe"},
+        "zowe-core": {"dir": os.path.join(workspace, "zowe-cli"), "pattern": "zowe*package*.zip"},
+        "zowe-plugin": {"dir": os.path.join(workspace, "zowe-cli"), "pattern": "zowe*plugins*.zip"}
     }
-    tools = update_java_dirs(os.path.join(script_dir, "java"), tools)
+    tools = update_java_dirs(os.path.join(workspace, "java"), tools)
     
     tool_files = {}
     for tool, info in tools.items():
@@ -296,185 +141,184 @@ def main(args):
         if zip_file == "":
             print(f"{tool} 不存在，請確認後再執行。")
             sys.exit(1)
-    
     print("檢查工具包完成。\n")
-    press_enter("準備解壓工具包…", args.yes)
-    
-    # === 第2階段：解壓工具包 ===
-    # workspace 為腳本所在的路徑
-    workspace = script_dir
-    print("工作區目錄：", workspace)
-    
+    return tools, tool_files
+
+@confirm_step("【步驟 2】解壓工具包：請確認解壓前準備")
+def phase2_extract_packages(tools, tool_files, workspace, auto_continue=False):
     # VSCode 解壓
     vscode_zip_path = os.path.join(tools["vscode"]["dir"], tool_files["vscode"])
     extract_zip_with_spinner(vscode_zip_path, tools["vscode"]["dir"])
-    move_contents_up(tools["vscode"]["dir"], find_real_directory(tools["vscode"]["dir"]))
-    print()
+    move_contents_up(tools["vscode"]["dir"], find_real_directory(tools["vscode"]["dir"], ".zip"))
     
     # Java 解壓
-    for key, value in tools.items():
+    for key, info in tools.items():
         if key.startswith("java"):
-            java_zip_path = os.path.join(tools[key]["dir"], tool_files[key])
-            extract_zip_with_spinner(java_zip_path, tools[key]["dir"])
-            move_contents_up(tools[key]["dir"], find_real_directory(tools[key]["dir"]))
-            print()
+            java_zip_path = os.path.join(info["dir"], tool_files[key])
+            extract_zip_with_spinner(java_zip_path, info["dir"])
+            move_contents_up(info["dir"], find_real_directory(info["dir"], ".zip"))
     
-    # 找出所有 JDK 版本中作為 JAVA_HOME 之最新版本之安裝
+    # 取得 JAVA_HOME 相關路徑（取倒序排序第一個項目）
     java_versions = sorted([key for key in tools if key.startswith("java")], reverse=True)
     java_home_path = tools[java_versions[0]]["dir"]
-    java_home_bin_path = os.path.join(tools[java_versions[0]]["dir"], "bin")
     
     # Python 解壓
     python_zip_path = os.path.join(tools["python"]["dir"], tool_files["python"])
     extract_zip_with_spinner(python_zip_path, tools["python"]["dir"])
-    move_contents_up(tools["python"]["dir"], find_real_directory(tools["python"]["dir"]))
-    print()
+    move_contents_up(tools["python"]["dir"], find_real_directory(tools["python"]["dir"], ".zip"))
     
     # Node 解壓
     nodejs_zip_path = os.path.join(tools["nodejs"]["dir"], tool_files["nodejs"])
     extract_zip_with_spinner(nodejs_zip_path, tools["nodejs"]["dir"])
-    move_contents_up(tools["nodejs"]["dir"], find_real_directory(tools["nodejs"]["dir"]))
-    print()
+    move_contents_up(tools["nodejs"]["dir"], find_real_directory(tools["nodejs"]["dir"], ".zip"))
     
     # Git 解壓
     git_selfzip_path = os.path.join(tools["git"]["dir"], tool_files["git"])
-    print(f"解壓縮：{git_selfzip_path}\n到目錄：{tools["git"]["dir"]}")
-    subprocess.run([git_selfzip_path, "-y", f"-o{tools["git"]["dir"]}"], cwd=tools["git"]["dir"])
-    print()
+    print(f"解壓縮：{git_selfzip_path}\n到目錄：{tools['git']['dir']}")
+    subprocess.run([git_selfzip_path, "-y", f"-o{tools['git']['dir']}"], cwd=tools["git"]["dir"])
     
     # Zowe 解壓
-    zowe_core_zip_path = os.path.join(tools["zowe-core"]["dir"], tool_files["zowe-core"])
-    extract_zip_with_spinner(zowe_core_zip_path, tools["zowe-core"]["dir"])
-    move_contents_up(tools["zowe-core"]["dir"], find_real_directory(tools["zowe-core"]["dir"]))
-    print()
-    
-    zowe_plugins_zip_path = os.path.join(tools["zowe-plugin"]["dir"], tool_files["zowe-plugin"])
-    extract_zip_with_spinner(zowe_plugins_zip_path, tools["zowe-plugin"]["dir"])
-    move_contents_up(tools["zowe-plugin"]["dir"], find_real_directory(tools["zowe-plugin"]["dir"]))
-    print()
+    for key in ["zowe-core", "zowe-plugin"]:
+        zip_path = os.path.join(tools[key]["dir"], tool_files[key])
+        extract_zip_with_spinner(zip_path, tools[key]["dir"])
+        move_contents_up(tools[key]["dir"], find_real_directory(tools[key]["dir"], ".zip"))
     
     print("解壓工具包完成。\n")
-    press_enter("準備安裝Zowe-Cli工具…", args.yes)
-    
-    # === 第3階段：安裝Zowe指令列環境工具 ===
-    # workspace 為腳本所在的路徑
-    workspace = script_dir
-    print("工作區目錄：", workspace)
-    
-    # 安裝 Zowe-Cli
+    return java_home_path, java_versions
+
+@confirm_step("【步驟 3】安裝 Zowe-Cli：請確認安裝前設定")
+def phase3_install_zowe(tools, workspace, auto_continue=False):
     all_zowe_modules = get_all_files_reversed_sorted(tools["zowe-core"]["dir"], "*.tgz")
     for zowe_module in all_zowe_modules:
         print(f"\n開始安裝 {os.path.basename(zowe_module)} ...\n")
-        subprocess.run([os.path.join(tools["nodejs"]["dir"], "npm.cmd"), "install", "-g", "--prefer-offline", "--prefer-online", "--no-fund", "--no-audit", zowe_module], cwd=tools["nodejs"]["dir"])
-    
-    print("安裝Zowe-Cli完成。\n")
-    press_enter("準備進行路徑設定遷移…", args.yes)
-    
-    # === 第4階段：路徑設定遷移 ===
-    # workspace 為腳本所在的路徑
-    workspace = script_dir
-    print("工作區目錄：", workspace)
-    
-    # 依據原批次檔指令，對 workspace 做字元轉義處理
-    # qbsworkspace：將 "\" 轉成 "\\\\"
-    qbsworkspace = f"{workspace}".replace("\\", "\\\\\\\\")
-    # workspaceuri：將目錄路徑轉成以 "file://" 開頭的 uri 路徑
+        subprocess.run([os.path.join(tools["nodejs"]["dir"], "npm.cmd"),
+                        "install", "-g", "--prefer-offline", "--prefer-online",
+                        "--no-fund", "--no-audit", zowe_module],
+                       cwd=tools["nodejs"]["dir"])
+    print("安裝 Zowe-Cli 完成。\n")
+
+@confirm_step("【步驟 4】路徑設定遷移：請確認設定檔修改")
+def phase4_path_migration(tools, java_home_path, workspace, auto_continue=False):
+    # 產生轉義字串與 URI
+    qbsworkspace = escape_backslashes(f"{workspace}", for_regex=True)
     workspaceuri = quote(workspace.as_uri())
     
-    # 複製整個 VSCode 可攜式設定目錄結構
-    print("複製設定目錄結構。\n")
+    # 複製 VSCode 設定結構
     source_from = os.path.join(workspace, "data")
     copy_to = os.path.join(workspace, "vscode", "data")
     copy_contents_to_with_spinner(source_from, copy_to)
     
-    print("修改安裝路徑設定。\n")
-    # 針對 VSCode 的 settings.json 進行取代
+    # 修改 VSCode 設定檔內容
     vscode_settings_path = os.path.join(workspace, "vscode", "data", "user-data", "User", "settings.json")
-    pattern_vscode = r"_WORKSPACE_"
-    replace_in_file(vscode_settings_path, pattern_vscode, qbsworkspace)
-    pattern_vscode_uri = r"_WORKSPACEURI_"
-    replace_in_file(vscode_settings_path, pattern_vscode_uri, workspaceuri)
-    pattern_javahome = r"_JAVAHOME_"
-    replace_in_file(vscode_settings_path, pattern_javahome, f"{java_home_path}".replace("\\", "\\\\\\\\"))
+    replace_in_file(vscode_settings_path, r"_WORKSPACE_", qbsworkspace)
+    replace_in_file(vscode_settings_path, r"_WORKSPACEURI_", workspaceuri)
+    replace_in_file(vscode_settings_path, r"_JAVAHOME_", escape_backslashes(java_home_path, for_regex=True))
     
-    # 使用正規表達式抓出 key 中出現的版本號序列，組成 runtime 清單
+    # 組成 java runtime 清單（僅取 major 版本）
+    java_versions = sorted([key for key in tools if key.startswith("java")], reverse=True)
     java_runtimes = []
     for key in java_versions:
         major_version = extract_major_version(key)
         java_runtimes.append({
             "name": f"JavaSE-{major_version}",
-            "path": tools[key]["dir"].replace("\\", "\\\\")
+            "path": escape_backslashes(tools[key]["dir"])
         })
-    pattern_javaruntime = r"_JAVARUNTIMES_"
-    replace_in_file(vscode_settings_path, pattern_javaruntime, ",\n".join(json.dumps(entry) for entry in java_runtimes))
+    runtime_json = ",\n".join(json.dumps(entry) for entry in java_runtimes)
+    replace_in_file(vscode_settings_path, r"_JAVARUNTIMES_", runtime_json)
     
-    print("\n路徑遷移完成。\n")
-    press_enter("準備安裝 VSCode IBM Z 擴充功能包…", args.yes)
-    
-    # === 第5階段：安裝 IBM Z 開發工具擴充功能包 ===
-    # 安裝 VSCode 擴充功能包
-    print("安裝擴充功能包。\n")
+    print("路徑設定遷移完成。\n")
+    return
+
+@confirm_step("【步驟 5】安裝 VSCode 擴充功能包：請確認安裝擴充功能包")
+def phase5_install_extensions(workspace, auto_continue=False):
     extension_groups = ['ms-ceintl', 'redhat', 'ibm', 'broadcommfd', 'zowe']
     for group in extension_groups:
-        all_group_extensions = get_all_files_reversed_sorted(os.path.join(workspace, "extensions"), f"{group}*.vsix")
+        group_folder = os.path.join(workspace, "extensions")
+        all_group_extensions = get_all_files_reversed_sorted(group_folder, f"{group}*.vsix")
         for extension in all_group_extensions:
             print(f"\n開始安裝 {os.path.basename(extension)} ...\n")
-            subprocess.run([os.path.join(workspace, "vscode", "bin", "code.cmd"), "--install-extension", extension], cwd=os.path.join(workspace, "vscode", "bin"))
-    
-    print("\n擴充功能包安裝完成。\n")
-    press_enter("準備建立 VSCode 快捷方式…", args.yes)
-    
-    # === 第6階段：建立 VSCode 快捷方式 ===
-    # workspace 為腳本所在的路徑
-    workspace = script_dir
-    print("工作區目錄：", workspace)
-    
+            subprocess.run([os.path.join(workspace, "vscode", "bin", "code.cmd"),
+                            "--install-extension", extension],
+                           cwd=os.path.join(workspace, "vscode", "bin"))
+    print("擴充功能包安裝完成。\n")
+    return
+
+@confirm_step("【步驟 6】建立 VSCode 快捷方式：請確認建立捷徑")
+def phase6_create_shortcut(tools, java_home_path, workspace, auto_continue=False):
     shortcut_path = os.path.join(workspace, "VSCode.lnk")
-    # 如果已存在同名快捷方式，先刪除它
     if os.path.exists(shortcut_path):
         os.remove(shortcut_path)
-        print("既有的 VSCode.lnk 已被刪除。")
-    
-    # 設定相關路徑
+        print("已刪除既有的 VSCode.lnk 快捷方式。")
+        
     vscmd = os.path.join(workspace, "vscode", "bin", "code.cmd")
     vscmd_home = os.path.join(workspace, "vscode", "bin")
     vsc_home = os.path.join(workspace, "vscode")
     
-    # 要插入的環境變數設定語法
+    # 拼湊要插入於批次檔中的環境設定語法
+    # ※ 注意此處各路徑會依照雙反斜線轉義
+    python_home = find_home_path(tools["python"]["dir"], "python.exe")
+    node_home = find_home_path(tools["nodejs"]["dir"], "node.exe")
+    git_cmd_path = os.path.join(tools["git"]["dir"], "cmd")
     insertions = [
-        f"powershell -Command {'"'}Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser -Force{'"'}\n",
-        f"set {'"'}{'PATH='}"
-        + f"{java_home_bin_path.replace("\\", "\\\\")}"
-        + f"{';'}{find_home_path(tools["python"]["dir"], "python.exe").replace("\\", "\\\\")}"
-        + f"{';'}{find_home_path(tools["python"]["dir"], "pip.exe").replace("\\", "\\\\")}"
-        + f"{';'}{find_home_path(tools["nodejs"]["dir"], "node.exe").replace("\\", "\\\\")}"
-        + f"{';'}{os.path.join(tools["git"]["dir"], "cmd").replace("\\", "\\\\")}"
-        + f"{';%PATH%'}{'"'}\n",
-        f"set {'"'}{'JAVA_HOME='}{java_home_path.replace("\\", "\\\\")}{'"'}\n"
+        'powershell -Command "Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser -Force"\n',
+        'set "PATH={};{};{};{};%PATH%"\n'.format(
+            escape_backslashes(java_home_path),
+            escape_backslashes(python_home) if python_home else "",
+            escape_backslashes(node_home) if node_home else "",
+            escape_backslashes(git_cmd_path)
+        ),
+        'set "JAVA_HOME={}"\n'.format(escape_backslashes(java_home_path))
     ]
-    
     vscode_cmd_insertion(vscmd, insertions)
-    print("更新完成，已插入 PATH 與 JAVA_HOME 的暫時性環境變數設定。")
+    print("已插入臨時 PATH 與 JAVA_HOME 設定於 VSCode 啟動檔中。")
     
-    # 利用 COM 介面建立 Windows 快捷方式
     if win32com is not None:
         shell = win32com.client.Dispatch("WScript.Shell")
         shortcut = shell.CreateShortcut(shortcut_path)
         shortcut.TargetPath = vscmd
         shortcut.Arguments = " ".join([os.path.join(workspace, "workspace"), "--locale=zh-tw"])
         shortcut.WorkingDirectory = vscmd_home
-        # 設定圖示所在：vsc_home\Code.exe,0
         shortcut.IconLocation = os.path.join(vsc_home, "Code.exe") + ",0"
         shortcut.Save()
         print("VSCode 快捷方式建立成功。")
     else:
         print("無 win32com 模組，無法建立 Windows 快捷方式。")
+    print("快捷方式建立完成。\n")
+    return
+
+# -------------------------------
+# 主流程
+# -------------------------------
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Install script with optional auto-confirmation.")
+    parser.add_argument("-y", "--yes", action="store_true", help="自動執行所有步驟，不須等待使用者確認。")
+    parser.add_argument("--workspace", type="str", help="指定工作區目錄，預設為腳本檔所在路徑。"
+    return parser.parse_args()
+
+def main(args):
+    # 取得腳本所在目錄（考慮是否為 PyInstaller 打包）
+    if getattr(sys, 'frozen', False):
+        # 取得 .exe 執行檔所在路徑
+        script_dir = Path(sys.executable).parent.resolve()
+    else:
+        # 取得 .py 腳本所在路徑
+        script_dir = Path(__file__).parent.resolve()
+    # 若使用者有指定 --workspace 則使用該目錄，否則預設為 script_dir
+    workspace = Path(args.workspace).resolve() if args.workspace else script_dir
+    os.chdir(workspace)
+    print("目前工作目錄設定為：", workspace)
     
-    print("\n快捷方式建立完成。\n")
+    # 執行各階段流程
+    tools, tool_files = phase1_check_tools(workspace, auto_continue=args.yes)
+    java_home_path, _ = phase2_extract_packages(tools, tool_files, workspace, auto_continue=args.yes)
+    phase3_install_zowe(tools, workspace, auto_continue=args.yes)
+    phase4_path_migration(tools, java_home_path, workspace, auto_continue=args.yes)
+    phase5_install_extensions(workspace, auto_continue=args.yes)
+    phase6_create_shortcut(tools, java_home_path, workspace, auto_continue=args.yes)
     
     print("腳本執行結束。")
-    press_enter("按下 Enter 後結束程式", args.yes)
-    
+    pause_if_needed("按下 Enter 鍵後關閉程式", auto_continue=args.yes)
+
 if __name__ == "__main__":
     args = parse_arguments()
     main(args)
