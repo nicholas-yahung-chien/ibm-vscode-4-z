@@ -24,6 +24,7 @@ import subprocess
 import yaml
 from pathlib import Path
 from urllib.parse import quote
+from path_utils import compose_folder_path
 
 # 若要建立 Windows 快捷方式，需要 pywin32 模組
 try:
@@ -77,25 +78,27 @@ def load_tools_config(scripts_dir):
         tools = yaml.safe_load(f)
     return tools
 
-def update_java_dirs(java_root_dir, tools_dic):
+def load_init_config(scripts_dir):
     """
-    遍歷 java_root_dir 內所有子資料夾，以 "java{資料夾名稱}" 為 key 更新 tools_dic，
-    並設定相應的搜尋 pattern（例如：*jdk*{版本}*.zip）。
+    載入 init.yml 設定檔，並回傳初始化資訊。
     """
-    if not os.path.exists(java_root_dir):
-        print(f"找不到 java 目錄：{java_root_dir}")
-        return tools_dic
-    for folder in os.listdir(java_root_dir):
-        folder_path = os.path.join(java_root_dir, folder)
-        if os.path.isdir(folder_path):
-            key = f"java{folder}"
-            pattern = f"*jdk*{folder}*.zip"
-            tools_dic[key] = {
-                "dir": folder_path,
-                "pattern": pattern
-            }
-            print(f"已更新工具包路徑：新增 {key}")
-    return tools_dic
+    init_yml_path = os.path.join(scripts_dir, "init.yml")
+    if not os.path.exists(init_yml_path):
+        sys.exit(f"找不到設定檔: {init_yml_path}")
+    with open(init_yml_path, "r", encoding="utf-8") as f:
+        init_config = yaml.safe_load(f)
+    return init_config
+
+def load_extensions_config(scripts_dir):
+    """
+    載入 extensions.yml 設定檔，並回傳擴充功能包資訊。
+    """
+    extensions_yml_path = os.path.join(scripts_dir, "extensions.yml")
+    if not os.path.exists(extensions_yml_path):
+        sys.exit(f"找不到設定檔: {extensions_yml_path}")
+    with open(extensions_yml_path, "r", encoding="utf-8") as f:
+        extensions = yaml.safe_load(f)
+    return extensions
 
 def extract_major_version(version_text):
     """
@@ -152,16 +155,14 @@ def phase1_check_tools(workspace, auto_continue=False):
     
     # 載入 tools.yml 設定檔
     tools = load_tools_config(os.path.join(workspace, "scripts"))
-    # 更新 java 相關工具包路徑
-    tools = update_java_dirs(os.path.join(workspace, "java"), tools)
     
     # 取得工具包檔案
     tool_files = {}
     for tool, info in tools.items():
-        zip_file = get_latest_file(info["dir"], info["pattern"])
-        tool_files[tool] = zip_file
-        print(f"{tool}：{zip_file}")
-        if zip_file == "":
+        tool_file = get_latest_file(compose_folder_path(workspace, info["dir"]), f"{info["pattern"]}.{info["type"]}")
+        tool_files[tool] = tool_file
+        print(f"{tool}：{tool_file}")
+        if tool_file == "":
             print(f"{tool} 不存在，請確認後再執行。")
             sys.exit(1)
     print("檢查工具包完成。\n")
@@ -169,55 +170,46 @@ def phase1_check_tools(workspace, auto_continue=False):
 
 @confirm_step("【步驟 2】解壓工具包：請確認解壓前準備")
 def phase2_extract_packages(tools, tool_files, workspace, auto_continue=False):
-    # VSCode 解壓
-    vscode_zip_path = os.path.join(tools["vscode"]["dir"], tool_files["vscode"])
-    extract_zip_with_spinner(vscode_zip_path, tools["vscode"]["dir"])
-    move_contents_up(tools["vscode"]["dir"], find_real_directory(tools["vscode"]["dir"], ".zip"))
+    # 解壓縮 zip 類型工具包
+    for tool, info in tools.items():
+        if info["type"] == "zip":
+            dest_dir = compose_folder_path(workspace, info["dir"])
+            zip_path = os.path.join(dest_dir, tool_files[tool])
+            extract_zip_with_spinner(zip_path, dest_dir)
+            move_contents_up(dest_dir, find_real_directory(dest_dir, f".{info['type']}"))
     
-    # Java 解壓
-    for key, info in tools.items():
-        if key.startswith("java"):
-            java_zip_path = os.path.join(info["dir"], tool_files[key])
-            extract_zip_with_spinner(java_zip_path, info["dir"])
-            move_contents_up(info["dir"], find_real_directory(info["dir"], ".zip"))
+    # 解壓縮 exe 類型自解工具包
+    for tool, info in tools.items():
+        if info["type"] == "exe":
+            dest_dir = compose_folder_path(workspace, info["dir"])
+            exe_path = os.path.join(dest_dir, tool_files[tool])
+            subprocess.run([exe_path, "/S", "-y", f"-o{dest_dir}"], cwd=dest_dir)
     
     # 取得 JAVA_HOME 相關路徑（取倒序排序第一個項目）
     java_versions = sorted([key for key in tools if key.startswith("java")], reverse=True)
-    java_home_path = tools[java_versions[0]]["dir"]
-    
-    # Python 解壓
-    python_zip_path = os.path.join(tools["python"]["dir"], tool_files["python"])
-    extract_zip_with_spinner(python_zip_path, tools["python"]["dir"])
-    move_contents_up(tools["python"]["dir"], find_real_directory(tools["python"]["dir"], ".zip"))
-    
-    # Node 解壓
-    nodejs_zip_path = os.path.join(tools["nodejs"]["dir"], tool_files["nodejs"])
-    extract_zip_with_spinner(nodejs_zip_path, tools["nodejs"]["dir"])
-    move_contents_up(tools["nodejs"]["dir"], find_real_directory(tools["nodejs"]["dir"], ".zip"))
-    
-    # Git 解壓
-    git_selfzip_path = os.path.join(tools["git"]["dir"], tool_files["git"])
-    print(f"解壓縮：{git_selfzip_path}\n到目錄：{tools['git']['dir']}")
-    subprocess.run([git_selfzip_path, "-y", f"-o{tools['git']['dir']}"], cwd=tools["git"]["dir"])
-    
-    # Zowe 解壓
-    for key in ["zowe-core", "zowe-plugin"]:
-        zip_path = os.path.join(tools[key]["dir"], tool_files[key])
-        extract_zip_with_spinner(zip_path, tools[key]["dir"])
-        move_contents_up(tools[key]["dir"], find_real_directory(tools[key]["dir"], ".zip"))
+    java_home_path = compose_folder_path(workspace, tools[java_versions[0]]["dir"])
     
     print("解壓工具包完成。\n")
     return java_home_path, java_versions
 
 @confirm_step("【步驟 3】安裝 Zowe-Cli：請確認安裝前設定")
 def phase3_install_zowe(tools, workspace, auto_continue=False):
-    all_zowe_modules = get_all_files_reversed_sorted(tools["zowe-core"]["dir"], "*.tgz")
-    for zowe_module in all_zowe_modules:
+    # 安裝 Zowe-Cli Core 模組
+    zowe_core_modules = get_all_files_reversed_sorted(compose_folder_path(workspace, tools["zowe-core"]["dir"]), "*.tgz")
+    for zowe_module in zowe_core_modules:
         print(f"\n開始安裝 {os.path.basename(zowe_module)} ...\n")
-        subprocess.run([os.path.join(workspace, tools["nodejs"]["dir"], "npm.cmd"),
+        subprocess.run([os.path.join(compose_folder_path(workspace, tools["nodejs"]["dir"]), "npm.cmd"),
                         "install", "-g", "--prefer-offline", "--prefer-online",
-                        "--no-fund", "--no-audit", os.path.join(workspace, zowe_module)],
-                       cwd=os.path.join(workspace, tools["nodejs"]["dir"]))
+                        "--no-fund", "--no-audit", os.path.join(compose_folder_path(workspace, tools["zowe-core"]["dir"]), zowe_module)],
+                       cwd=compose_folder_path(workspace, tools["nodejs"]["dir"]))
+    # 安裝 Zowe-Cli Plugin 模組
+    zowe_plugin_modules = get_all_files_reversed_sorted(compose_folder_path(workspace, tools["zowe-plugin"]["dir"]), "*.tgz")
+    for zowe_module in zowe_plugin_modules:
+        print(f"\n開始安裝 {os.path.basename(zowe_module)} ...\n")
+        subprocess.run([os.path.join(compose_folder_path(workspace, tools["nodejs"]["dir"]), "npm.cmd"),
+                        "install", "-g", "--prefer-offline", "--prefer-online",
+                        "--no-fund", "--no-audit", os.path.join(compose_folder_path(workspace, tools["zowe-plugin"]["dir"]), zowe_module)],
+                       cwd=compose_folder_path(workspace, tools["nodejs"]["dir"]))
     print("安裝 Zowe-Cli 完成。\n")
 
 @confirm_step("【步驟 4】路徑設定遷移：請確認設定檔修改")
@@ -228,11 +220,11 @@ def phase4_path_migration(tools, java_home_path, workspace, auto_continue=False)
     
     # 複製 VSCode 設定結構
     source_from = os.path.join(workspace, "data")
-    copy_to = os.path.join(workspace, "vscode", "data")
+    copy_to = os.path.join(compose_folder_path(workspace, tools["vscode"]["dir"]), "data")
     copy_contents_to_with_spinner(source_from, copy_to)
     
     # 修改 VSCode 設定檔內容
-    vscode_settings_path = os.path.join(workspace, "vscode", "data", "user-data", "User", "settings.json")
+    vscode_settings_path = os.path.join(compose_folder_path(workspace, tools["vscode"]["dir"]), "data", "user-data", "User", "settings.json")
     replace_in_file(vscode_settings_path, r"_WORKSPACE_", qbsworkspace)
     replace_in_file(vscode_settings_path, r"_WORKSPACEURI_", workspaceuri)
     replace_in_file(vscode_settings_path, r"_JAVAHOME_", escape_backslashes(java_home_path, for_regex=True))
@@ -244,7 +236,7 @@ def phase4_path_migration(tools, java_home_path, workspace, auto_continue=False)
         major_version = extract_major_version(key)
         java_runtimes.append({
             "name": f"JavaSE-{major_version}",
-            "path": escape_backslashes(tools[key]["dir"])
+            "path": escape_backslashes(compose_folder_path(workspace, tools[key]["dir"]))
         })
     runtime_json = ",\n".join(json.dumps(entry) for entry in java_runtimes)
     replace_in_file(vscode_settings_path, r"_JAVARUNTIMES_", runtime_json)
@@ -253,16 +245,17 @@ def phase4_path_migration(tools, java_home_path, workspace, auto_continue=False)
     return
 
 @confirm_step("【步驟 5】安裝 VSCode 擴充功能包：請確認安裝擴充功能包")
-def phase5_install_extensions(workspace, auto_continue=False):
-    extension_groups = ['ms-ceintl', 'redhat', 'ibm', 'broadcommfd', 'zowe']
-    for group in extension_groups:
+def phase5_install_extensions(tools, workspace, auto_continue=False):
+    # 載入 extensions.yml 設定檔
+    extensions = load_extensions_config(os.path.join(workspace, "scripts"))
+    for publisher, _ in extensions.items():
         group_folder = os.path.join(workspace, "extensions")
-        all_group_extensions = get_all_files_reversed_sorted(group_folder, f"{group}*.vsix")
+        all_group_extensions = get_all_files_reversed_sorted(group_folder, f"{publisher}*.vsix")
         for extension in all_group_extensions:
             print(f"\n開始安裝 {os.path.basename(extension)} ...\n")
-            subprocess.run([os.path.join(workspace, "vscode", "bin", "code.cmd"),
+            subprocess.run([os.path.join(compose_folder_path(workspace, tools["vscode"]["dir"]), "bin", "code.cmd"),
                             "--install-extension", extension],
-                           cwd=os.path.join(workspace, "vscode", "bin"))
+                           cwd=os.path.join(compose_folder_path(workspace, tools["vscode"]["dir"]), "bin"))
     print("擴充功能包安裝完成。\n")
     return
 
@@ -273,33 +266,35 @@ def phase6_create_shortcut(tools, java_home_path, workspace, auto_continue=False
         os.remove(shortcut_path)
         print("已刪除既有的 VSCode.lnk 快捷方式。")
         
-    vscmd = os.path.join(workspace, "vscode", "bin", "code.cmd")
-    vscmd_home = os.path.join(workspace, "vscode", "bin")
-    vsc_home = os.path.join(workspace, "vscode")
+    vscmd = os.path.join(compose_folder_path(workspace, tools["vscode"]["dir"]), "bin", "code.cmd")
+    vscmd_home = os.path.join(compose_folder_path(workspace, tools["vscode"]["dir"]), "bin")
+    vsc_home = compose_folder_path(workspace, tools["vscode"]["dir"])
     
     # 拼湊要插入於批次檔中的環境設定語法
-    # ※ 注意此處各路徑會依照雙反斜線轉義
-    python_home = find_home_path(tools["python"]["dir"], "python.exe")
-    node_home = find_home_path(tools["nodejs"]["dir"], "node.exe")
-    git_cmd_path = os.path.join(tools["git"]["dir"], "cmd")
+    # 注意此處各路徑會依照雙反斜線轉義
+    tool_home_paths = []
+    for tool, info in tools.items():
+        if info["add_home_path_to_env"]:
+            home_path = find_home_path(compose_folder_path(workspace, info["dir"]), info["home_path_of"])
+            if home_path:
+                tool_home_paths.append(escape_backslashes(home_path))
     insertions = [
         'powershell -Command "Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser -Force"\n',
-        'set "PATH={};{};{};{};%PATH%"\n'.format(
-            escape_backslashes(java_home_path),
-            escape_backslashes(python_home) if python_home else "",
-            escape_backslashes(node_home) if node_home else "",
-            escape_backslashes(git_cmd_path)
+        'set "PATH={};%PATH%"\n'.format(
+            ";".join(tool_home_paths)
         ),
         'set "JAVA_HOME={}"\n'.format(escape_backslashes(java_home_path))
     ]
     vscode_cmd_insertion(vscmd, insertions)
     print("已插入臨時 PATH 與 JAVA_HOME 設定於 VSCode 啟動檔中。")
     
+    # 載入 init.yml 設定檔
+    init_config = load_init_config(os.path.join(workspace, "scripts"))
     if win32com is not None:
         shell = win32com.client.Dispatch("WScript.Shell")
         shortcut = shell.CreateShortcut(shortcut_path)
         shortcut.TargetPath = vscmd
-        shortcut.Arguments = " ".join([os.path.join(workspace, "workspace"), "--locale=zh-tw"])
+        shortcut.Arguments = " ".join([os.path.join(workspace, "workspace", init_config["default"]["workspace"]), f"--locale={init_config['default']['locale']}"])
         shortcut.WorkingDirectory = vscmd_home
         shortcut.IconLocation = os.path.join(vsc_home, "Code.exe") + ",0"
         shortcut.Save()
@@ -330,7 +325,7 @@ def main():
     java_home_path, _ = phase2_extract_packages(tools, tool_files, workspace, auto_continue=args.yes)
     phase3_install_zowe(tools, workspace, auto_continue=args.yes)
     phase4_path_migration(tools, java_home_path, workspace, auto_continue=args.yes)
-    phase5_install_extensions(workspace, auto_continue=args.yes)
+    phase5_install_extensions(tools, workspace, auto_continue=args.yes)
     phase6_create_shortcut(tools, java_home_path, workspace, auto_continue=args.yes)
     
     print("腳本執行結束。")

@@ -23,6 +23,7 @@ import requests
 import yaml
 from pathlib import Path
 from file_utils import cleanup_directory_match
+from path_utils import compose_folder_path
 
 # -------------------------------
 #  功能函式
@@ -89,7 +90,7 @@ def determine_filename(response, pattern, default_filename):
     print(f"使用預設規則產生檔名：{default_filename}")
     return default_filename
 
-def download_file(url, dest_directory, filename_pattern, possible_filename):
+def download_file(url, dest_directory, filename_pattern, default_filename=""):
     """
     根據 URL 下載檔案，並根據 response header 中的 Content-Disposition 設定檔案名稱，
     若找不到檔名則使用 URL 的最後一段作為檔案名稱。在儲存前若檔案已存在，則先刪除。
@@ -98,7 +99,7 @@ def download_file(url, dest_directory, filename_pattern, possible_filename):
         response = requests.get(url)
         if response.status_code == 200:
             # 決定檔案名稱
-            filename = determine_filename(response, filename_pattern, possible_filename)
+            filename = determine_filename(response, filename_pattern, default_filename)
             # 組合下載目的地的完整路徑
             dest_path = os.path.join(dest_directory, filename)
             
@@ -138,6 +139,7 @@ def main():
     extensions = load_extensions_config(os.path.join(workspace, "scripts"))
         
     # 根據設定檔逐一下載 vsix 檔案
+    cleanup_directory_match(os.path.join(workspace, "extensions"), "*.vsix")
     for publisher, ext_list in extensions.items():
         for ext_dict in ext_list:
             # 這裡假設每個元素都是只有一筆 {extension: version} 的字典
@@ -155,22 +157,15 @@ def main():
     # 針對每個有連結設定的工具進行下載
     for tool, config in tools.items():
         print(f"\n下載工具：{tool}")
-        link = config["link"]
-        if "group" in config:
-            link = link.replace("_GROUP_", config.get("group", ""))
-        link = link.replace("_VERSION_", config["version"])
+        link = config["source"]
         print(f"開始下載：{link}")
         # 設定預設檔名 (若無法從下載連結決定)，例如 "python_3.13.3.0.zip"
-        # 將 pattern 中的所有星號移除
-        base = config["pattern"].replace('*', '')
-        # 取得檔名與副檔名
-        name, ext = os.path.splitext(base)
-        parts = name.split('.')
-        if len(parts) <= 1:
-            default_filename = f"{name}-{config['version']}{ext}"
-        else:
-            default_filename = f"{name}-{config['version']}.{'.'.join(parts[1:])}{ext}"
-        download_file(link, os.path.join(workspace, config["dir"]), config["pattern"], default_filename)
+        filename_pattern = f"{config['pattern']}.{config['type']}"
+        default_filename = filename_pattern.replace('*', '')
+        # 將 dir 拆解後用 os.path.join 組合
+        dest_directory = compose_folder_path(workspace, config["dir"])
+        cleanup_directory_match(dest_directory, f"*.{config['type']}")
+        download_file(link, dest_directory, filename_pattern, default_filename)
 
 if __name__ == "__main__":
     main()

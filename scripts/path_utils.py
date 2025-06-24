@@ -16,6 +16,12 @@
 import os
 import glob
 
+def compose_folder_path(workspace, sub_folder_path):
+    """
+    組合 workspace 與 path_parts 成為完整路徑。
+    """
+    return os.path.join(workspace, *(sub_folder_path.replace("\\", "/").split("/")))
+
 def get_latest_file(directory, pattern):
     """
     在指定目錄中尋找與 pattern 相符的檔案，並根據修改時間由新至舊排序，回傳最新檔案名稱。

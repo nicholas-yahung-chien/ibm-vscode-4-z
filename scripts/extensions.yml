@@ -1,12 +1,15 @@
 ibm:
   - zopendebug: 5.4.0
-  - zopeneditor: 5.4.1
+  - zopeneditor: 5.5.0
   - zcommoncomponent: 16.1.25061109
   - zfilemanager: 16.1.25061109
   - zfaultanalyzer: 16.1.25061109
   - db2forzosdeveloperextension: 2.2.2
   - ibm-developer: 1.0.1
   - wca-core: 1.6.2
+
+galasa:
+  - galasa-plugin: 0.13.0
 
 broadcommfd:
   - explorer-for-endevor: 1.11.1

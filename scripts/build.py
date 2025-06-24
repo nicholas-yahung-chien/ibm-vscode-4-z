@@ -27,6 +27,7 @@ import pyminizip
 import glob
 import fnmatch
 from pathlib import Path
+import yaml
 
 # -------------------------------
 #  功能函式
@@ -43,6 +44,17 @@ def get_script_dir():
     else:
         # 取得 .py 腳本所在路徑
         return Path(__file__).parent.resolve()
+
+def load_build_config(scripts_dir):
+    """
+    載入 build.yml 設定檔，並回傳設定資訊。
+    """
+    build_yml_path = os.path.join(scripts_dir, "build.yml")
+    if not os.path.exists(build_yml_path):
+        sys.exit(f"找不到設定檔: {build_yml_path}")
+    with open(build_yml_path, "r", encoding="utf-8") as f:
+        build_config = yaml.safe_load(f)
+    return build_config
 
 def run_download_py(workspace, scripts_dir):
     """
@@ -130,7 +142,7 @@ def gather_files(root_dir, exclude_dirs=None, exclude_files=None):
             
     return file_abs_paths, prefix_rel_paths
 
-def compress_directory(root_dir, output_zip, exclude_dirs=None):
+def compress_directory(root_dir, output_zip, exclude_dirs=None, exclude_files=None):
     """
     利用 pyminizip 將 root_dir 目錄下（排除指定檔案/目錄後）的檔案壓縮成 output_zip。
     
@@ -139,7 +151,7 @@ def compress_directory(root_dir, output_zip, exclude_dirs=None):
     :param compression_level: 壓縮等級 (0~9)
     :param exclude_patterns: 要排除的檔案或目錄模式清單（例如 [".git", "*.tmp"]）
     """
-    file_abs_paths, prefix_rel_paths = gather_files(root_dir, exclude_dirs)
+    file_abs_paths, prefix_rel_paths = gather_files(root_dir, exclude_dirs, exclude_files)
     if not file_abs_paths:
         print("沒有檔案需要壓縮！")
         return
@@ -158,7 +170,7 @@ def compress_directory(root_dir, output_zip, exclude_dirs=None):
 # -------------------------------
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Build script for VSCode4z package.")
-    parser.add_argument("--version", required=True, help="指定版本編號，例如 1.2.3")
+    parser.add_argument("--version", help="指定版本編號，例如 1.2.3，若未指定則使用 build.yml 中的版本")
     parser.add_argument("--workspace", type=str, help="指定工作區目錄，預設為腳本所在目錄")
     return parser.parse_args()
 
@@ -176,6 +188,9 @@ def main():
     if not os.path.exists(scripts_dir):
         sys.exit(f"找不到 scripts 目錄：{scripts_dir}")
 
+    # 載入 build.yml 設定檔
+    build_config = load_build_config(scripts_dir)
+
     # 1. 執行 download.py 並傳入 --workspace
     run_download_py(workspace, scripts_dir)
     
@@ -189,7 +204,7 @@ def main():
     clean_scripts_directory(scripts_dir)
     
     # 5. 將 workspace 目錄下的所有檔案與子目錄打包成壓縮檔
-    compress_directory(workspace, os.path.join(workspace, f"VSCode4z-{version}.zip"), exclude_dirs=[".git"])
+    compress_directory(workspace, os.path.join(workspace, f"{build_config['release']['name']}-{build_config['release']['version']}.zip"), exclude_dirs=build_config['release']['exclude_dirs'], exclude_files=build_config['release']['exclude_files'])
 
 if __name__ == "__main__":
     main()

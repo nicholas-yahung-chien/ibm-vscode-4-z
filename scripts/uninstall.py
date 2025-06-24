@@ -29,6 +29,7 @@ import yaml
 import re
 from pathlib import Path
 from file_utils import cleanup_directory_except
+from path_utils import compose_folder_path
 
 # -------------------------------
 #  功能函式
@@ -56,42 +57,6 @@ def load_tools_config(scripts_dir):
     with open(tools_yml_path, "r", encoding="utf-8") as f:
         tools = yaml.safe_load(f)
     return tools
-
-def update_java_dirs(java_root_dir, tools_dic):
-    """
-    遍歷 java_root_dir 內所有子資料夾，以 "java{資料夾名稱}" 為 key 更新 tools_dic，
-    並設定相應的搜尋 pattern（例如：*jdk*{版本}*.zip）。
-    """
-    if not os.path.exists(java_root_dir):
-        print(f"找不到 java 目錄：{java_root_dir}")
-        return tools_dic
-    for folder in os.listdir(java_root_dir):
-        folder_path = os.path.join(java_root_dir, folder)
-        if os.path.isdir(folder_path):
-            key = f"java{folder}"
-            pattern = f"*jdk*{folder}*.zip"
-            tools_dic[key] = {
-                "dir": folder_path,
-                "pattern": pattern
-            }
-            print(f"已更新工具包路徑：新增 {key}")
-    return tools_dic
-
-def extract_extension_from_pattern(pattern):
-    """
-    從傳入的 pattern 字串中提取尾端副檔名。
-    
-    例如：
-      - "VSCode*.zip" 會回傳 ".zip"
-      - "*node*.exe" 會回傳 ".exe"
-    
-    若找不到副檔名則回傳空字串。
-    """
-    match = re.search(r'(\.[\.\w]+)$', pattern)
-    if match:
-        return match.group(1)
-    else:
-        return ""
 
 def restore_backup(workspace_dir):
     """
@@ -139,15 +104,13 @@ def main():
     
     # 載入 tools.yml 設定檔
     tools = load_tools_config(os.path.join(workspace, "scripts"))
-    # 更新 java 相關工具包路徑
-    tools = update_java_dirs(os.path.join(workspace, "java"), tools)
     
     print("=== Uninstall 開始 ===\n")
     
     # 逐一清理每個工具所在的資料夾，本動作將保留資料夾中所有 .zip 檔，其它內容皆清除
-    for tool_name, tool_path in tools.items():
-        print(f"清理 [{tool_name}] 目錄：{tool_path['dir']}")
-        cleanup_directory_except(tool_path["dir"], extract_extension_from_pattern(tool_path["pattern"]))
+    for tool_name, config in tools.items():
+        print(f"清理 [{tool_name}] 目錄：{config['dir']}")
+        cleanup_directory_except(compose_folder_path(workspace, config["dir"]), f".{config['type']}")
     
     # 執行備份檔還原
     workspace_dir = os.path.join(workspace, "workspace")

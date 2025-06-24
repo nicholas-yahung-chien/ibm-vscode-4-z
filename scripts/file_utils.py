@@ -97,6 +97,19 @@ def move_contents_up(parent_dir, target_dir):
     os.rmdir(bogus_folder)
     print(f"已將 {bogus_folder} 中的內容搬移至 {parent_dir} 並刪除該資料夾。")
 
+def safe_rmtree(path, retries=3, delay=1):
+    """
+    遞迴刪除目錄，若刪除失敗則重試。
+    """
+    for _ in range(retries):
+        try:
+            shutil.rmtree(path)
+            return
+        except Exception as e:
+            print(f"刪除目錄 {path} 發生錯誤: {e}")
+            time.sleep(delay)
+    print(f"刪除目錄 {path} 失敗，已重試 {retries} 次。")
+
 def cleanup_directory_except(target_dir, except_pattern):
     """
     清除指定目錄中所有非 .<except_pattern> 檔的項目，包括所有檔案與子目錄。
@@ -120,7 +133,7 @@ def cleanup_directory_except(target_dir, except_pattern):
         # 如果是目錄，則直接遞迴刪除整個目錄
         elif os.path.isdir(full_path):
             try:
-                shutil.rmtree(full_path)
+                safe_rmtree(full_path)
                 print(f"已遞迴刪除目錄: {full_path}")
             except Exception as e:
                 print(f"刪除目錄 {full_path} 發生錯誤: {e}")

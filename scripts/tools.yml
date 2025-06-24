@@ -1,31 +1,53 @@
 vscode:
   dir: vscode
-  pattern: "VSCode*.zip"
-  link: https://code.visualstudio.com/sha/download?version=_VERSION_&os=win32-x64-archive
-  version: 1.101.0
+  type: "zip"
+  pattern: "VSCode*"
+  source: https://code.visualstudio.com/sha/download?version=1.101.0&os=win32-x64-archive
+  add_home_path_to_env: false
 python:
   dir: python
-  pattern: "*python*.zip"
-  link: https://github.com/winpython/winpython/releases/download/_GROUP_/Winpython64-_VERSION_dot.zip
-  group: "15.3.20250425final"
-  version: 3.13.3.0
+  type: "zip"
+  pattern: "*python*"
+  source: https://github.com/winpython/winpython/releases/download/15.3.20250425final/Winpython64-3.13.3.0dot.zip
+  add_home_path_to_env: true
+  home_path_of: "python.exe"
 nodejs:
   dir: node
-  pattern: "*node*.zip"
-  link: https://nodejs.org/dist/v_VERSION_/node-v_VERSION_-win-x64.zip
-  version: 22.16.0
+  type: "zip"
+  pattern: "*node*"
+  source: https://nodejs.org/dist/v22.16.0/node-v22.16.0-win-x64.zip
+  add_home_path_to_env: true
+  home_path_of: "node.exe"
 git:
   dir: git
-  pattern: "PortableGit*.7z.exe"
-  link: https://github.com/git-for-windows/git/releases/download/v_VERSION_.windows.1/PortableGit-_VERSION_-64-bit.7z.exe
-  version: 2.50.0
+  type: "7z.exe"
+  pattern: "PortableGit*"
+  source: https://github.com/git-for-windows/git/releases/download/v2.50.0.windows.1/PortableGit-2.50.0-64-bit.7z.exe
+  add_home_path_to_env: true
+  home_path_of: "git.exe"
+maven:
+  dir: mvn
+  type: "zip"
+  pattern: "*maven*"
+  source: https://dlcdn.apache.org/maven/maven-3/3.9.10/binaries/apache-maven-3.9.10-bin.zip
+  add_home_path_to_env: true
+  home_path_of: "mvn.cmd"
 zowe-core:
-  dir: zowe-cli
-  pattern: "zowe*package*.zip"
-  link: https://zowe.jfrog.io/zowe/list/libs-release-local/org/zowe/_VERSION_/zowe-cli-package-_VERSION_.zip
-  version: 3.2.0
+  dir: zowe-cli/core
+  type: "zip"
+  pattern: "zowe*package*"
+  source: https://zowe.jfrog.io/zowe/list/libs-release-local/org/zowe/3.2.0/zowe-cli-package-3.2.0.zip
+  add_home_path_to_env: false
 zowe-plugin:
-  dir: zowe-cli
-  pattern: "zowe*plugins*.zip"
-  link: https://zowe.jfrog.io/zowe/list/libs-release-local/org/zowe/_VERSION_/zowe-cli-plugins-_VERSION_.zip
-  version: 3.2.0
+  dir: zowe-cli/plugins
+  type: "zip"
+  pattern: "zowe*plugins*"
+  source: https://zowe.jfrog.io/zowe/list/libs-release-local/org/zowe/3.2.0/zowe-cli-plugins-3.2.0.zip
+  add_home_path_to_env: false
+java21:
+  dir: java/21
+  type: "zip"
+  pattern: "*jdk*21*"
+  source: https://github.com/ibmruntimes/semeru21-binaries/releases/download/jdk-21.0.7%2B6_openj9-0.51.0/ibm-semeru-open-jdk_x64_windows_21.0.7_6_openj9-0.51.0.zip
+  add_home_path_to_env: true
+  home_path_of: "java.exe"
