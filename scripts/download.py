@@ -40,6 +40,17 @@ def get_script_dir():
         # 取得 .py 腳本所在路徑
         return Path(__file__).parent.resolve()
 
+def load_tools_config(scripts_dir):
+    """
+    載入 tools.yml 設定檔，並回傳工具包資訊。
+    """
+    tools_yml_path = os.path.join(scripts_dir, "tools.yml")
+    if not os.path.exists(tools_yml_path):
+        sys.exit(f"找不到設定檔: {tools_yml_path}")
+    with open(tools_yml_path, "r", encoding="utf-8") as f:
+        tools = yaml.safe_load(f)
+    return tools
+
 def load_extensions_config(scripts_dir):
     """
     載入 extensions.yml 設定檔，並回傳擴充功能包資訊。
@@ -119,6 +130,9 @@ def main():
     workspace = Path(args.workspace).resolve() if args.workspace else get_script_dir()
     os.chdir(workspace)
     print("目前工作目錄設定為：", workspace)
+
+    # 載入 tools.yml 設定檔
+    tools = load_tools_config(os.path.join(workspace, "scripts"))
     
     # 載入 extensions.yml 設定檔
     extensions = load_extensions_config(os.path.join(workspace, "scripts"))
@@ -137,6 +151,26 @@ def main():
                 # 產生檔案名稱，例如 ibm.zopendebug-5.4.0.vsix
                 file_name = f"{publisher}.{ext_name}-{version}.vsix"
                 download_file(url, os.path.join(workspace, "extensions"), "*.vsix", file_name)
+    
+    # 針對每個有連結設定的工具進行下載
+    for tool, config in tools.items():
+        print(f"\n下載工具：{tool}")
+        link = config["link"]
+        if "group" in config:
+            link = link.replace("_GROUP_", config.get("group", ""))
+        link = link.replace("_VERSION_", config["version"])
+        print(f"開始下載：{link}")
+        # 設定預設檔名 (若無法從下載連結決定)，例如 "python_3.13.3.0.zip"
+        # 將 pattern 中的所有星號移除
+        base = config["pattern"].replace('*', '')
+        # 取得檔名與副檔名
+        name, ext = os.path.splitext(base)
+        parts = name.split('.')
+        if len(parts) <= 1:
+            default_filename = f"{name}-{config['version']}{ext}"
+        else:
+            default_filename = f"{name}-{config['version']}.{'.'.join(parts[1:])}{ext}"
+        download_file(link, os.path.join(workspace, config["dir"]), config["pattern"], default_filename)
 
 if __name__ == "__main__":
     main()
