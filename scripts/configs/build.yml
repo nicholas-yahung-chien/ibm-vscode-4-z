@@ -1,0 +1,27 @@
+release:
+  name: "VSCode4z"
+  version: "2.6.0"
+  description: "VSCode4z is a comprehensive development environment for IBM Z, providing Visual Studio Code with IBM Z extensions, Zowe CLI tools, and Python/Java development environments"
+  author: "IBM Taiwan Technology Expert Labs"
+  license: "MIT"
+  homepage: "https://github.com/nicholas-yahung-chien/ibm-vscode-4-z"
+  repository: "https://github.com/nicholas-yahung-chien/ibm-vscode-4-z"
+  keywords: [
+    "vscode", 
+    "zowe", 
+    "zopeneditor", 
+    "wca4z", 
+    "watsonx",
+    "ibm-z",
+    "mainframe",
+    "cobol",
+    "pli",
+    "assembler",
+    "rexx",
+    "development-environment",
+    "visual-studio-code",
+    "ibm",
+    "enterprise"
+  ]
+  exclude_dirs: [".git", "__pycache__", "node_modules", ".vscode"]
+  exclude_files: ["*.tmp", "*.log", "*.bak", "*.swp", "Thumbs.db"]

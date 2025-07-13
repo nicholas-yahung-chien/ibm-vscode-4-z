@@ -4,7 +4,7 @@
     "update.enableWindowsBackgroundUpdates": false,
     "update.mode": "none",
     "java.configuration.runtimes": [
-        _JAVARUNTIMES_
+        "_JAVA_RUNTIMES_"
     ],
     "java.home": "_JAVAHOME_",
     "java.jdt.ls.java.home": "_JAVAHOME_",
@@ -63,5 +63,32 @@
         "_WORKSPACE_\\workspace\\*\\COPYLIB",
         "_WORKSPACE_\\workspace\\*\\COBCOPY",
         "_WORKSPACE_\\workspace\\*\\COPY"
-    ]
+    ],
+    "redhat.telemetry.enabled": false,
+    "python.venvPath": "_PYTHON_VENV_HOME_",
+    "python.defaultInterpreterPath": "_PYTHON_VENV_EXEC_",
+    "ansible.python.interpreterPath": "_PYTHON_VENV_EXEC_",
+    "ansible.validation.lint.enabled": false,
+    "yaml.schemas": {
+        "_ZAPP_SCHEMA_URI_": [
+            "zapp.yaml"
+        ],
+        "_ZCODE_FORMAT_SCHEMA_URI_": [
+            "zcodeformat.yaml"
+        ]
+    },
+    "json.schemas": [
+        {
+            "fileMatch": [
+                "/zapp.json"
+            ],
+            "url": "_ZAPP_SCHEMA_URI_"
+        },
+        {
+            "fileMatch": [
+                "/zcodeformat.json"
+            ],
+            "url": "_ZCODE_FORMAT_SCHEMA_URI_"
+        }
+    ],
 }

@@ -1,68 +1,47 @@
 #!/usr/bin/env python3
 """
-程式名稱: download.py
-開發單位: IBM Expert Labs
-開發人員: nicholas.yahung.chien@ibm.com
-日期: 2025/06/20
-版本: 2.2.1
+IBM VSCode for Z Development Environment Setup Script
+開發單位: IBM Taiwan Technology Expert Labs
+版本: 2.6.0
+日期: 2025/01/13
 
 說明:
 1. 根據 extensions.yml 清單下載 VSCode 擴充功能包
+2. 根據 pip.yml 清單下載 pip 套件
+3. 根據 tools.yml 清單下載工具包
 
 使用方式:
 使用前請確認 Python 執行環境中有必要的模組。
+
+更新記錄:
+- v2.6.0: 優化下載流程，改善配置載入和檔案管理
+- v2.5.0: 優化檔案下載邏輯，改善檔案名稱決定機制
+- v2.4.11: 重構下載流程，提升檔案管理效能
+- v2.3.0: 新增檔案清理功能，改善下載流程
+- v2.2.1: 初始版本，提供基本的檔案下載功能
 """
 
 import os
-import sys
 import argparse
 import fnmatch
 from urllib.parse import urlparse
 import re
 import requests
-import yaml
 from pathlib import Path
-from file_utils import cleanup_directory_match
-from path_utils import compose_folder_path
+from utils.file_utils import cleanup_directory_match
+from utils.path_utils import compose_folder_path, get_script_dir
+import subprocess
+
+# 導入我們的設定檔工具模組
+from configs import (
+    load_tools_config,
+    load_pip_config,
+    load_extensions_config
+)
 
 # -------------------------------
 #  功能函式
 # -------------------------------
-def get_script_dir():
-    """
-    若被 PyInstaller 打包，則使用 sys.executable 的目錄作為腳本所在目錄；
-    否則使用 __file__ 的目錄。
-    """
-    # 取得腳本所在目錄（考慮是否為 PyInstaller 打包）
-    if getattr(sys, 'frozen', False):
-        # 取得 .exe 執行檔所在路徑
-        return Path(sys.executable).parent.resolve()
-    else:
-        # 取得 .py 腳本所在路徑
-        return Path(__file__).parent.resolve()
-
-def load_tools_config(scripts_dir):
-    """
-    載入 tools.yml 設定檔，並回傳工具包資訊。
-    """
-    tools_yml_path = os.path.join(scripts_dir, "tools.yml")
-    if not os.path.exists(tools_yml_path):
-        sys.exit(f"找不到設定檔: {tools_yml_path}")
-    with open(tools_yml_path, "r", encoding="utf-8") as f:
-        tools = yaml.safe_load(f)
-    return tools
-
-def load_extensions_config(scripts_dir):
-    """
-    載入 extensions.yml 設定檔，並回傳擴充功能包資訊。
-    """
-    extensions_yml_path = os.path.join(scripts_dir, "extensions.yml")
-    if not os.path.exists(extensions_yml_path):
-        sys.exit(f"找不到設定檔: {extensions_yml_path}")
-    with open(extensions_yml_path, "r", encoding="utf-8") as f:
-        extensions = yaml.safe_load(f)
-    return extensions
-
 def determine_filename(response, pattern, default_filename):
     """
     根據下載的 HTTP response、pattern 與 default_filename 決定下載檔案的檔名，優先順序如下：
@@ -133,10 +112,13 @@ def main():
     print("目前工作目錄設定為：", workspace)
 
     # 載入 tools.yml 設定檔
-    tools = load_tools_config(os.path.join(workspace, "scripts"))
+    tools = load_tools_config()
     
     # 載入 extensions.yml 設定檔
-    extensions = load_extensions_config(os.path.join(workspace, "scripts"))
+    extensions = load_extensions_config()
+
+    # 載入 pip.yml 設定檔
+    pip = load_pip_config()
         
     # 根據設定檔逐一下載 vsix 檔案
     cleanup_directory_match(os.path.join(workspace, "extensions"), "*.vsix")
@@ -154,6 +136,10 @@ def main():
                 file_name = f"{publisher}.{ext_name}-{version}.vsix"
                 download_file(url, os.path.join(workspace, "extensions"), "*.vsix", file_name)
     
+    # 下載 pip 套件
+    cleanup_directory_match(os.path.join(workspace, "pywhls"), "*.whl")
+    subprocess.run(["pip", "download", *(pip["whls"]), "--dest", os.path.join(workspace, "pywhls")])
+
     # 針對每個有連結設定的工具進行下載
     for tool, config in tools.items():
         print(f"\n下載工具：{tool}")

@@ -20,14 +20,14 @@
         "ssh": {
             "type": "ssh",
             "properties": {
-                "port": _SSH_PORT_
+                "port": "_SSH_PORT_"
             },
             "secure": []
         },
         "zftp": {
             "type": "zftp",
             "properties": {
-                "port": _FTP_PORT_,
+                "port": "_FTP_PORT_",
                 "secureFtp": true
             },
             "secure": []
@@ -35,7 +35,7 @@
         "rse": {
             "type": "rse",
             "properties": {
-                "port": _RSE_PORT_,
+                "port": "_RSE_PORT_",
                 "basePath": "rseapi",
                 "protocol": "https",
                 "encoding": "_RSE_ENCODING_"
@@ -66,7 +66,7 @@
         "zOpenDebug": {
             "type": "zOpenDebug",
             "properties": {
-                "dpsPort": _DEBUG_PORT_,
+                "dpsPort": "_DEBUG_PORT_",
                 "dpsContextRoot": "api/v1",
                 "dpsSecured": true,
                 "authenticationType": "token",

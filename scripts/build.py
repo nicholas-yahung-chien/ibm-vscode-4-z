@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 """
-build.py
-========
+IBM VSCode for Z Development Environment Setup Script
+開發單位: IBM Taiwan Technology Expert Labs
+版本: 2.6.0
+日期: 2025/01/13
+
+說明:
+VSCode4z 專案建置腳本，用於自動化打包和發布流程。
 
 使用方式:
   指定版本編號必填，例如:
@@ -16,6 +21,13 @@ build.py
   5. 將 scripts/dist 中的 .exe 複製到 workspace 目錄下。
   6. 刪除 scripts 目錄中除 .py 與 .yml 以外的所有檔案及目錄。
   7. 最後將 workspace 目錄下的所有內容打包為 VSCode4z-<version>.zip。
+
+更新記錄:
+- v2.6.0: 優化建置流程，改善配置載入和檔案管理
+- v2.5.0: 優化檔案壓縮邏輯，改善檔案收集和排除模式處理
+- v2.4.11: 重構壓縮功能，使用 pyminizip 提升效能
+- v2.3.0: 新增檔案排除功能，改善打包流程
+- v2.2.1: 初始版本，提供基本的建置和打包功能
 """
 
 import os
@@ -27,35 +39,12 @@ import pyminizip
 import glob
 import fnmatch
 from pathlib import Path
-import yaml
+from configs import load_build_config
+from utils.path_utils import get_script_dir
 
 # -------------------------------
 #  功能函式
 # -------------------------------
-def get_script_dir():
-    """
-    若被 PyInstaller 打包，則使用 sys.executable 的目錄作為腳本所在目錄；
-    否則使用 __file__ 的目錄。
-    """
-    # 取得腳本所在目錄（考慮是否為 PyInstaller 打包）
-    if getattr(sys, 'frozen', False):
-        # 取得 .exe 執行檔所在路徑
-        return Path(sys.executable).parent.resolve()
-    else:
-        # 取得 .py 腳本所在路徑
-        return Path(__file__).parent.resolve()
-
-def load_build_config(scripts_dir):
-    """
-    載入 build.yml 設定檔，並回傳設定資訊。
-    """
-    build_yml_path = os.path.join(scripts_dir, "build.yml")
-    if not os.path.exists(build_yml_path):
-        sys.exit(f"找不到設定檔: {build_yml_path}")
-    with open(build_yml_path, "r", encoding="utf-8") as f:
-        build_config = yaml.safe_load(f)
-    return build_config
-
 def run_download_py(workspace, scripts_dir):
     """
     執行 scripts 目錄下的 download.py，並傳入 --workspace 參數。
@@ -97,17 +86,20 @@ def copy_exes_to_workspace(scripts_dir, workspace):
 
 def clean_scripts_directory(scripts_dir):
     """
-    刪除 scripts 目錄下，除 .py 和 .yml 以外的所有檔案與目錄。
+    刪除 scripts 目錄下，除 .py 和 configs、utils 目錄以外的所有檔案與目錄。
     """
     for item in os.listdir(scripts_dir):
-        # 若是檔案且副檔名不是 .py 與 .yml
-        if os.path.isfile(os.path.join(scripts_dir, item)) and not item.lower().endswith((".py", ".yml")):
+        # 若是檔案且副檔名不是 .py
+        if os.path.isfile(os.path.join(scripts_dir, item)) and not item.lower().endswith(".py"):
             print(f"刪除檔案: {item}")
             os.remove(os.path.join(scripts_dir, item))
-        # 若是目錄，全部刪除
+        # 若是目錄，保留 configs 和 utils 目錄，刪除其他目錄
         elif os.path.isdir(os.path.join(scripts_dir, item)):
-            print(f"刪除目錄: {item}")
-            shutil.rmtree(os.path.join(scripts_dir, item))
+            if item in ["configs", "utils"]:
+                print(f"保留目錄: {item}")
+            else:
+                print(f"刪除目錄: {item}")
+                shutil.rmtree(os.path.join(scripts_dir, item))
 
 def gather_files(root_dir, exclude_dirs=None, exclude_files=None):
     """
@@ -189,7 +181,7 @@ def main():
         sys.exit(f"找不到 scripts 目錄：{scripts_dir}")
 
     # 載入 build.yml 設定檔
-    build_config = load_build_config(scripts_dir)
+    build_config = load_build_config()
 
     # 1. 執行 download.py 並傳入 --workspace
     run_download_py(workspace, scripts_dir)

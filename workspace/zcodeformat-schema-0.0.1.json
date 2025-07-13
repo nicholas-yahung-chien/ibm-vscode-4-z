@@ -1,0 +1,1784 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "IBM zCodeFormatSettings",
+  "description": "JSON schema for zcodeformat.yaml or zcodeformat.json code formatter preferences files. Version 0.0.1 -- Licensed Materials - Property of IBM - (c) Copyright IBM Corporation 2022. All Rights Reserved.",
+  "type": "object",
+  "properties": {
+    "additionalProperties": false,
+    "cobol": {
+      "$ref": "#/definitions/cobol"
+    },
+    "copybook": {
+      "$ref": "#/definitions/copybook"
+    }
+  },
+  "definitions": {
+    "trueBooleanIfCheck": { "const": true, "type": "boolean", "default": true },
+    "capitalizationOptions": { "enum": ["none", "upper", "lower", "mixed"] },
+    "cobol": {
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Formatting preferences for cobol files\n\nNOTE: cobol indentation values will be used for copybook files",
+      "properties": {
+        "dataDivision": {
+          "additionalProperties": false,
+          "type": "object",
+          "description": "Formatting preferences for the DATA DIVISION",
+          "properties": {
+            "enableIndentation": {
+              "type": "boolean",
+              "description": "Enable indentation of record descriptions\nIf false, startOfAreaA and indentLength are not allowed",
+              "default": true
+            },
+            "indentation": {
+              "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]"
+            },
+            "alignPictureClauses": {
+              "type": "boolean",
+              "description": "Align PICTURE Clauses",
+              "default": true
+            },
+            "alignValueClauses": {
+              "type": "boolean",
+              "description": "Align VALUE Clauses",
+              "default": true
+            }
+          },
+          "if": { "properties": { "enableIndentation": { "$ref": "#/definitions/trueBooleanIfCheck" } } },
+          "then": {
+            "properties": {
+              "indentation": {
+                "$ref": "#/definitions/dataDivIndent"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "indentation": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]"
+              }
+            }
+          }
+        },
+        "procedureDivision": {
+          "additionalProperties": false,
+          "type": "object",
+          "description": "Formatting preferences for the PROCEDURE DIVISION",
+          "properties": {
+            "enableIndentation": {
+              "type": "boolean",
+              "description": "Enable indentation of procedure divisions",
+              "default": true
+            },
+            "indentation": {
+              "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]"
+            }
+          },
+          "if": { "properties": { "enableIndentation": { "$ref": "#/definitions/trueBooleanIfCheck" } } },
+          "then": {
+            "properties": {
+              "indentation": {
+                "$ref": "#/definitions/procDivIndent"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "indentation": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]"
+              }
+            }
+          }
+        },
+        "reservedWordCase": {
+          "type": "string",
+          "description": "Case of reserved words",
+          "default": "upper",
+          "$ref": "#/definitions/capitalizationOptions"
+        },
+        "userDefinedWordCase": {
+          "type": "string",
+          "description": "Case of user-defined words",
+          "default": "upper",
+          "$ref": "#/definitions/capitalizationOptions"
+        },
+        "commentCase": {
+          "type": "string",
+          "description": "Case of comments",
+          "default": "none",
+          "$ref": "#/definitions/capitalizationOptions"
+        },
+        "functionCase": {
+          "type": "string",
+          "description": "Case of functions",
+          "default": "upper",
+          "$ref": "#/definitions/capitalizationOptions"
+        },
+        "dateFormatCase": {
+          "type": "string",
+          "description": "Case of date formats",
+          "default": "upper",
+          "$ref": "#/definitions/capitalizationOptions"
+        },
+        "compilerDirectiveCase": {
+          "type": "string",
+          "description": "Case of compiler directives",
+          "default": "upper",
+          "$ref": "#/definitions/capitalizationOptions"
+        },
+        "endOfAreaB": {
+          "type": "integer",
+          "description": "End of Area B\n\nIf -1, will use Margin R as the end of Area B",
+          "default": -1,
+          "oneOf": [
+            { "minimum": -1, "maximum": -1 },
+            { "minimum": 50, "maximum": 100 }
+          ]
+        },
+        "lineWrappingStyle": {
+          "type": "string",
+          "description": "If indentation moves code beyond Area B",
+          "default": "wrapToNextLine",
+          "enum": ["wrapToNextLine", "noIndent", "indentToAreaB", "indentPastAreaB"]
+        }
+      },
+      "$ref": "#/definitions/validationForAlignToColumn"
+    },
+    "copybook": {
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Formatting preferences for copybook files\n\nNOTE: cobol indentation values will be used for copybook files",
+      "properties": {
+        "codeCase": {
+          "type": "string",
+          "description": "Format copybook code in uppercase",
+          "default": "upper",
+          "$ref": "#/definitions/capitalizationOptions"
+        },
+        "commentCase": {
+          "type": "string",
+          "description": "Format copybook comments in uppercase",
+          "default": "upper",
+          "$ref": "#/definitions/capitalizationOptions"
+        }
+      }
+    },
+    "dataDivIndent": {
+      "type": "object",
+      "description": "Indentation objects based on enableIndentation\n\n[populates children items]",
+      "additionalProperties": false,
+      "properties": {
+        "startOfAreaA": {
+          "type": "integer",
+          "description": "Start of Area A\nCannot be used if enableIndentation is false",
+          "default": 8,
+          "minimum": 8,
+          "maximum": 11
+        },
+        "indentLength": {
+          "type": "integer",
+          "description": "Indent Length\nCannot be used if enableIndentation is false",
+          "default": 3,
+          "minimum": 0,
+          "maximum": 10
+        }
+      }
+    },
+    "procDivIndent": {
+      "type": "object",
+      "description": "Indentation objects based on enableIndentation\n\n[populates children items]",
+      "additionalProperties": false,
+      "properties": {
+        "startOfAreaA": {
+          "type": "integer",
+          "description": "Start of Area A\nCannot be used if enableIndentation is false",
+          "default": 8,
+          "minimum": 8,
+          "maximum": 11
+        },
+        "startOfAreaB": {
+          "type": "integer",
+          "description": "Start of Area B\nCannot be used if enableIndentation is false",
+          "default": 12,
+          "minimum": 12,
+          "maximum": 16
+        },
+        "indentMultipleLineStatements": {
+          "type": "integer",
+          "description": "Multiple line statement indent length\nCannot be used if enableIndentation is false\nuse -1 to disable",
+          "default": 3,
+          "minimum": 0,
+          "maximum": 10
+        },
+        "alignLists": {
+          "type": "boolean",
+          "description": "Align lists\nCannot be used if enableIndentation is false",
+          "default": true
+        },
+        "alignToClauses": {
+          "type": "boolean",
+          "description": "Align TO Clauses\nCannot be used if enableIndentation is false",
+          "default": false
+        },
+        "alignToOptions": {
+          "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]"
+        },
+        "indentForAllBlocks": {
+          "type": "integer",
+          "description": "Fixed indent length to use for all blocks\nCannot be used if enableIndentation is false\nCannot be used with other individual block indent values",
+          "default": 3,
+          "minimum": 0,
+          "maximum": 10
+        },
+        "blocks": {
+          "description": "Additional Options for indenting blocks based on type\nCannot be used if indentForAllBlocks is used\n\n[does not populate children items]"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "allOf": [
+              {
+                "properties": {
+                  "indentForAllBlocks": { "type": "number", "default": 3 }
+                }
+              },
+              { "not": { "properties": { "indentForAllBlocks": { "const": false } } } }
+            ]
+          },
+          "then": {
+            "properties": {
+              "blocks": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Additional Options for indenting blocks based on type\nCannot be used if indentForAllBlocks is used\n\n[does not populate children items]"
+              }
+            }
+          },
+          "else": { "properties": { "blocks": { "$ref": "#/definitions/blockIndent" } } }
+        },
+        {
+          "if": {
+            "properties": { "alignToClauses": { "$ref": "#/definitions/trueBooleanIfCheck", "default": false } }
+          },
+          "then": {
+            "properties": {
+              "alignToOptions": {
+                "$ref": "#/definitions/alignToOptions"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "alignToOptions": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]"
+              }
+            }
+          }
+        }
+      ],
+      "dependencies": {
+        "startOfAreaB": {
+          "allOf": [
+            {
+              "if": { "type": "object", "properties": { "startOfAreaB": { "const": 12 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "alignToOptions": {
+                    "type": "object",
+                    "properties": { "alignToClausesIntoColumn": { "type": "integer", "minimum": 13 } }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "startOfAreaB": { "const": 13 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "alignToOptions": {
+                    "type": "object",
+                    "properties": { "alignToClausesIntoColumn": { "type": "integer", "minimum": 14 } }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "startOfAreaB": { "const": 14 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "alignToOptions": {
+                    "type": "object",
+                    "properties": { "alignToClausesIntoColumn": { "type": "integer", "minimum": 15 } }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "startOfAreaB": { "const": 15 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "alignToOptions": {
+                    "type": "object",
+                    "properties": { "alignToClausesIntoColumn": { "type": "integer", "minimum": 16 } }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "startOfAreaB": { "const": 16 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "alignToOptions": {
+                    "type": "object",
+                    "properties": { "alignToClausesIntoColumn": { "type": "integer", "minimum": 17 } }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "if": { "type": "object", "properties": { "startOfAreaB": { "not": { "type": "integer" } } } },
+      "then": {
+        "type": "object",
+        "properties": {
+          "alignToOptions": {
+            "type": "object",
+            "properties": { "alignToClausesIntoColumn": { "type": "integer", "minimum": 13 } }
+          }
+        }
+      }
+    },
+    "alignToOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[populates children items]",
+      "properties": {
+        "alignIntoClauses": {
+          "type": "boolean",
+          "description": "Align INTO Clauses\nCannot be used if alignToClauses is false",
+          "default": false
+        },
+        "alignToClausesIntoColumn": {
+          "type": "integer",
+          "description": "Align TO and INTO clauses into column\nCannot be used if alignToClauses is false",
+          "default": 45
+        }
+      }
+    },
+    "blockIndent": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Additional Options for indenting blocks based on type\nCannot be used if indentForAllBlocks is used\n\n[populates children items]",
+      "properties": {
+        "indentAtEndBlock": {
+          "type": "integer",
+          "description": "Indent length of AT END block\nCannot be used if enableIndentation is false\nCannot be used if indentForAllBlocks is used",
+          "default": 3,
+          "minimum": 0,
+          "maximum": 10
+        },
+        "indentAtEndOfPageBlock": {
+          "type": "integer",
+          "description": "Indent length of AT END OF PAGE block\nCannot be used if enableIndentation is false\nCannot be used if indentForAllBlocks is used",
+          "default": 3,
+          "minimum": 0,
+          "maximum": 10
+        },
+        "indentExecBlock": {
+          "type": "integer",
+          "description": "Indent length of EXEC block\nCannot be used if enableIndentation is false\nCannot be used if indentForAllBlocks is used",
+          "default": 5,
+          "minimum": 0,
+          "maximum": 10
+        },
+        "indentEndExecPhrase": {
+          "type": "boolean",
+          "description": "Indent END-EXEC phrase\nCannot be used if enableIndentation is false\nEND-EXEC phrase will be indented with Exec Block",
+          "default": true
+        },
+        "indentIfBlock": {
+          "type": "integer",
+          "description": "Indent length of IF block\nCannot be used if enableIndentation is false\nCannot be used if indentForAllBlocks is used",
+          "default": 3,
+          "minimum": 0,
+          "maximum": 10
+        },
+        "indentInvalidKeyBlock": {
+          "type": "integer",
+          "description": "Indent length of INVALID KEY block\nCannot be used if enableIndentation is false\nCannot be used if indentForAllBlocks is used",
+          "default": 8,
+          "minimum": 0,
+          "maximum": 10
+        },
+        "indentNotAtEndBlock": {
+          "type": "integer",
+          "description": "Indent length of NOT AT END block\nCannot be used if enableIndentation is false\nCannot be used if indentForAllBlocks is used",
+          "default": 4,
+          "minimum": 0,
+          "maximum": 10
+        },
+        "indentNotAtEndOfPageBlock": {
+          "type": "integer",
+          "description": "Indent length of NOT AT END OF PAGE block\nCannot be used if enableIndentation is false\nCannot be used if indentForAllBlocks is used",
+          "default": 4,
+          "minimum": 0,
+          "maximum": 10
+        },
+        "indentNotInvalidKeyBlock": {
+          "type": "integer",
+          "description": "Indent length of INVALID KEY\nCannot be used if enableIndentation is false\nCannot be used if indentForAllBlocks is used",
+          "default": 4,
+          "minimum": 0,
+          "maximum": 10
+        },
+        "indentNotOnExceptionBlock": {
+          "type": "integer",
+          "description": "Indent length of NOT ON EXCEPTION block\nCannot be used if enableIndentation is false\nCannot be used if indentForAllBlocks is used",
+          "default": 4,
+          "minimum": 0,
+          "maximum": 10
+        },
+        "indentNotOnOverflowBlock": {
+          "type": "integer",
+          "description": "Indent length of NOT ON OVERFLOW block\nCannot be used if enableIndentation is false\nCannot be used if indentForAllBlocks is used",
+          "default": 4,
+          "minimum": 0,
+          "maximum": 10
+        },
+        "indentNotOnSizeErrorBlock": {
+          "type": "integer",
+          "description": "Indent length of NOT ON SIZE ERROR block\nCannot be used if enableIndentation is false\nCannot be used if indentForAllBlocks is used",
+          "default": 4,
+          "minimum": 0,
+          "maximum": 10
+        },
+        "indentOnExceptionBlock": {
+          "type": "integer",
+          "description": "Indent length of ON EXCEPTION block\nCannot be used if enableIndentation is false\nCannot be used if indentForAllBlocks is used",
+          "default": 3,
+          "minimum": 0,
+          "maximum": 10
+        },
+        "indentOnOverflowBlock": {
+          "type": "integer",
+          "description": "Indent length of ON OVERFLOW block\nCannot be used if enableIndentation is false\nCannot be used if indentForAllBlocks is used",
+          "default": 3,
+          "minimum": 0,
+          "maximum": 10
+        },
+        "indentOnSizeErrorBlock": {
+          "type": "integer",
+          "description": "Indent length of ON SIZE ERROR block\nCannot be used if enableIndentation is false\nCannot be used if indentForAllBlocks is used",
+          "default": 3,
+          "minimum": 0,
+          "maximum": 10
+        },
+        "indentPerformBlock": {
+          "type": "integer",
+          "description": "Indent length of PERFORM block\nCannot be used if enableIndentation is false\nCannot be used if indentForAllBlocks is used",
+          "default": 8,
+          "minimum": 0,
+          "maximum": 10
+        },
+        "indentWhenBlock": {
+          "type": "integer",
+          "description": "Indent length of WHEN block\nCannot be used if enableIndentation is false\nCannot be used if indentForAllBlocks is used",
+          "default": 5,
+          "minimum": 0,
+          "maximum": 10
+        }
+      }
+    },
+    "validationForAlignToColumn": {
+      "type": "object",
+      "dependencies": {
+        "endOfAreaB": {
+          "allOf": [
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": -1 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 72 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 50 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 49 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 51 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 50 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 52 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 51 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 53 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 52 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 54 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 53 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 55 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 56 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 56 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 55 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 57 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 56 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 58 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 57 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 59 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 58 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 60 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 59 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 61 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 60 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 62 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 61 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 63 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 62 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 64 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 63 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 65 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 66 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 66 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 65 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 67 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 66 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 68 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 67 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 69 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 68 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 70 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 69 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 71 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 70 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 72 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 71 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 73 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 72 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 74 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 73 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 75 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 74 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 76 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 75 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 77 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 76 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 78 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 79 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 79 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 78 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 80 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 79 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 81 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 80 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 82 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 81 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 83 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 82 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 84 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 83 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 85 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 84 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 86 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 85 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 87 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 86 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 88 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 87 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 89 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 88 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 90 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 89 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 91 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 90 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 92 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 91 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 93 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 92 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 94 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 93 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 95 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 94 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 96 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 95 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 97 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 96 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 98 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 97 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 99 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 98 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": { "type": "object", "properties": { "endOfAreaB": { "const": 100 } } },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "procedureDivision": {
+                    "type": "object",
+                    "properties": {
+                      "indentation": {
+                        "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                        "type": "object",
+                        "properties": {
+                          "alignToOptions": {
+                            "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                            "type": "object",
+                            "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 99 } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "if": { "type": "object", "properties": { "endOfAreaB": { "not": { "type": "integer" } } } },
+      "then": {
+        "type": "object",
+        "properties": {
+          "procedureDivision": {
+            "type": "object",
+            "properties": {
+              "indentation": {
+                "description": "Indentation objects based on enableIndentation\n\n[does not populate children items]",
+                "type": "object",
+                "properties": {
+                  "alignToOptions": {
+                    "description": "Additional Options for aligning TO and INTO clauses\nCannot be used if alignToClauses is false\n\n[does not populate children items]",
+                    "type": "object",
+                    "properties": { "alignToClausesIntoColumn": { "type": "integer", "maximum": 72 } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

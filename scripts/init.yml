@@ -1,3 +1,0 @@
-default:
-  workspace: "zopeneditor-sample"
-  locale: "zh-tw"

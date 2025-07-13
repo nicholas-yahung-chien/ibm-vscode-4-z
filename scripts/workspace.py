@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
-程式名稱: workspace.py
-開發單位: IBM Expert Labs
-開發人員: nicholas.yahung.chien@ibm.com
-日期: 2025/06/20
-版本: 2.2.0
+IBM VSCode for Z Development Environment Setup Script
+開發單位: IBM Taiwan Technology Expert Labs
+版本: 2.6.0
+日期: 2025/01/13
 
 說明:
 透過指令列依序要求使用者輸入環境參數，內容包括：
@@ -24,6 +23,20 @@
   - 用 host 取代檔案內所有 _HOST_ 字樣
   - 用 user 取代 _USER_
   - 用 password 取代 _PASSWORD_
+  - 用 zosmf_port 取代 _ZOSMF_PORT_
+  - 用 tso_codepage 取代 _TSO_CODEPAGE_
+  - 用 ssh_port 取代 _SSH_PORT_
+  - 用 ftp_port 取代 _FTP_PORT_
+  - 用 rse_port 取代 _RSE_PORT_
+  - 用 rse_encoding 取代 _RSE_ENCODING_
+  - 用 debug_port 取代 _DEBUG_PORT_
+
+更新記錄:
+- v2.6.0: 優化使用者介面，改善參數驗證和錯誤處理
+- v2.5.0: 優化使用者介面，改善參數驗證和錯誤處理
+- v2.4.11: 重構設定流程，提升使用者體驗
+- v2.3.0: 新增備份功能，改善設定檔管理
+- v2.2.0: 初始版本，提供基本的 workspace 設定功能
 """
 
 import os
@@ -33,23 +46,12 @@ import shutil
 import datetime
 import getpass
 from pathlib import Path
+from utils.path_utils import get_script_dir
+from utils.file_utils import replace_in_file
 
 # -------------------------------
 #  功能函式
 # -------------------------------
-def get_script_dir():
-    """
-    若被 PyInstaller 打包，則使用 sys.executable 的目錄作為腳本所在目錄；
-    否則使用 __file__ 的目錄。
-    """
-    # 取得腳本所在目錄（考慮是否為 PyInstaller 打包）
-    if getattr(sys, 'frozen', False):
-        # 取得 .exe 執行檔所在路徑
-        return Path(sys.executable).parent.resolve()
-    else:
-        # 取得 .py 腳本所在路徑
-        return Path(__file__).parent.resolve()
-
 def prompt_with_default(prompt_text, default_value):
     """
     顯示提示文字，若使用者沒有輸入，則回傳預設值
@@ -167,33 +169,20 @@ def main():
     
     print(f"備份完成：{backup_path}")
     
-    try:
-        with open(config_path, "r", encoding="utf-8") as f:
-            content = f.read()
-    except Exception as e:
-        print("讀取 zowe.config.json 發生錯誤：", e)
-        sys.exit(1)
-    
     # 根據使用者輸入值與預設值進行替換
-    content = content.replace("_HOST_", f"{host}")
-    content = content.replace("_USER_", f"{user}")
-    content = content.replace("_PASSWORD_", f"{password}")
+    replace_in_file(config_path, r"_HOST_", f"{host}")
+    replace_in_file(config_path, r"_USER_", f"{user}")
+    replace_in_file(config_path, r"_PASSWORD_", f"{password}")
     
-    content = content.replace("_ZOSMF_PORT_", f"{properties['zosmf']['port']}")
-    content = content.replace("_TSO_CODEPAGE_", f"{properties['tso']['codepage']}")
-    content = content.replace("_SSH_PORT_", f"{properties['ssh']['port']}")
-    content = content.replace("_FTP_PORT_", f"{properties['ftp']['port']}")
-    content = content.replace("_RSE_PORT_", f"{properties['rse']['port']}")
-    content = content.replace("_RSE_ENCODING_", f"{properties['rse']['encoding']}")
-    content = content.replace("_DEBUG_PORT_", f"{properties['debug']['port']}")
+    replace_in_file(config_path, r"\"_ZOSMF_PORT_\"", f"{properties['zosmf']['port']}")
+    replace_in_file(config_path, r"_TSO_CODEPAGE_", f"{properties['tso']['codepage']}")
+    replace_in_file(config_path, r"\"_SSH_PORT_\"", f"{properties['ssh']['port']}")
+    replace_in_file(config_path, r"\"_FTP_PORT_\"", f"{properties['ftp']['port']}")
+    replace_in_file(config_path, r"\"_RSE_PORT_\"", f"{properties['rse']['port']}")
+    replace_in_file(config_path, r"_RSE_ENCODING_", f"{properties['rse']['encoding']}")
+    replace_in_file(config_path, r"\"_DEBUG_PORT_\"", f"{properties['debug']['port']}")
     
-    try:
-        with open(config_path, "w", encoding="utf-8") as f:
-            f.write(content)
-        print("\nzowe.config.json 已成功更新！")
-    except Exception as e:
-        print("寫入 zowe.config.json 發生錯誤：", e)
-        sys.exit(1)
+    print("\nzowe.config.json 已成功更新！")
 
 if __name__ == "__main__":
     main()

@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
-程式名稱: uninstall.py
-開發單位: IBM Expert Labs
-開發人員: nicholas.yahung.chien@ibm.com
-日期: 2025/06/20
-版本: 2.2.1
+IBM VSCode for Z Development Environment Setup Script
+開發單位: IBM Taiwan Technology Expert Labs
+版本: 2.6.0
+日期: 2025/01/13
 
 說明:
 根據先前工具對應的資料夾路徑，
@@ -15,49 +14,38 @@
     - vscode: <腳本所在目錄>/vscode
     - jdk21: <腳本所在目錄>/java
     - workspace: <腳本所在目錄>/workspace
+    - python: <腳本所在目錄>/python
+    - extensions: <腳本所在目錄>/extensions
 
 使用方式:
 只有副檔名為 ".zip" 的檔案會被保留，其它所有檔案與子目錄都會被清除。
+
+更新記錄:
+- v2.6.0: 優化檔案鎖定檢測和進程終止功能，改善刪除流程
+- v2.5.0: 新增檔案鎖定檢測和進程終止功能，改善刪除流程
+- v2.4.11: 優化檔案清理邏輯，提升刪除效能
+- v2.3.0: 重構檔案處理功能，改善錯誤處理
+- v2.2.1: 初始版本，提供基本的卸載功能
 """
 
 import os
-import sys
 import argparse
 import glob
 import shutil
-import yaml
-import re
+import subprocess
+import time
 from pathlib import Path
-from file_utils import cleanup_directory_except
-from path_utils import compose_folder_path
+from utils.file_utils import cleanup_directory_except
+from utils.path_utils import compose_folder_path, get_script_dir
+
+# 導入我們的設定檔工具模組
+from configs import (
+    load_tools_config
+)
 
 # -------------------------------
 #  功能函式
 # -------------------------------
-def get_script_dir():
-    """
-    若被 PyInstaller 打包，則使用 sys.executable 的目錄作為腳本所在目錄；
-    否則使用 __file__ 的目錄。
-    """
-    # 取得腳本所在目錄（考慮是否為 PyInstaller 打包）
-    if getattr(sys, 'frozen', False):
-        # 取得 .exe 執行檔所在路徑
-        return Path(sys.executable).parent.resolve()
-    else:
-        # 取得 .py 腳本所在路徑
-        return Path(__file__).parent.resolve()
-
-def load_tools_config(scripts_dir):
-    """
-    載入 tools.yml 設定檔，並回傳工具包資訊。
-    """
-    tools_yml_path = os.path.join(scripts_dir, "tools.yml")
-    if not os.path.exists(tools_yml_path):
-        sys.exit(f"找不到設定檔: {tools_yml_path}")
-    with open(tools_yml_path, "r", encoding="utf-8") as f:
-        tools = yaml.safe_load(f)
-    return tools
-
 def restore_backup(workspace_dir):
     """
     檢查 workspace 目錄內是否有 zowe.config.backup_*.json 備份檔，
@@ -103,7 +91,7 @@ def main():
     print("目前工作目錄設定為：", workspace)
     
     # 載入 tools.yml 設定檔
-    tools = load_tools_config(os.path.join(workspace, "scripts"))
+    tools = load_tools_config()
     
     print("=== Uninstall 開始 ===\n")
     
