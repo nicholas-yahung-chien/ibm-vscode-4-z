@@ -170,13 +170,13 @@ def main():
     args = parse_arguments()
     version = args.version
     
-    # 若使用者有指定 --workspace 則使用該目錄，否則預設為 script_dir
-    workspace = Path(args.workspace).resolve() if args.workspace else get_script_dir()
+    # 若使用者有指定 --workspace 則使用該目錄，否則預設為 script_dir 的上層
+    workspace = Path(args.workspace).resolve() if args.workspace else Path(get_script_dir()).parent.resolve()
     os.chdir(workspace)
     print("目前工作目錄設定為：", workspace)
     
     # 取得 scripts 目錄，預期其在 build.py 所在目錄下的 scripts 子目錄
-    scripts_dir = os.path.join(workspace, "scripts")
+    scripts_dir = get_script_dir()
     if not os.path.exists(scripts_dir):
         sys.exit(f"找不到 scripts 目錄：{scripts_dir}")
 

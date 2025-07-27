@@ -1,6 +1,6 @@
 release:
   name: "VSCode4z"
-  version: "2.6.0"
+  version: "2.6.1"
   description: "VSCode4z is a comprehensive development environment for IBM Z, providing Visual Studio Code with IBM Z extensions, Zowe CLI tools, and Python/Java development environments"
   author: "IBM Taiwan Technology Expert Labs"
   license: "MIT"

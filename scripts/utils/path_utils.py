@@ -48,7 +48,7 @@ def get_script_dir():
     # 取得腳本所在目錄（考慮是否為 PyInstaller 打包）
     if getattr(sys, 'frozen', False):
         # 取得 .exe 執行檔所在路徑的上層
-        return Path(sys.executable).parent.parent.resolve()
+        return os.join(Path(sys.executable).parent.resolve(), "scripts")
     else:
         # 取得 .py 腳本所在路徑的上層
         return Path(__file__).parent.parent.resolve()
