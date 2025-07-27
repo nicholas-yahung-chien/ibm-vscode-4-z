@@ -85,8 +85,8 @@ def parse_arguments():
 
 def main():
     args = parse_arguments()
-    # 若使用者有指定 --workspace 則使用該目錄，否則預設為 script_dir
-    workspace = Path(args.workspace).resolve() if args.workspace else get_script_dir()
+    # 若使用者有指定 --workspace 則使用該目錄，否則預設為 script_dir 的上層
+    workspace = Path(args.workspace).resolve() if args.workspace else Path(get_script_dir()).parent.resolve()
     os.chdir(workspace)
     print("目前工作目錄設定為：", workspace)
     
