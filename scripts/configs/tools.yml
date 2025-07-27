@@ -40,7 +40,7 @@ maven:
   dir: mvn
   type: "zip"
   pattern: "*maven*"
-  source: https://dlcdn.apache.org/maven/maven-3/3.9.10/binaries/apache-maven-3.9.10-bin.zip
+  source: https://dlcdn.apache.org/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.zip
   add_home_path_to_env: true
   home_path_of:
     - "mvn.cmd"
