@@ -1,0 +1,7 @@
+extension: broadcommfd.explorer-for-endevor@1.11.1
+license: Broadcom
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: 843313b3f3d4ca53c3566bd463259a1f777a2dff344ece8a1948910dd704312e
+high_or_equal_cvss_8_0: 0

@@ -1,6 +1,6 @@
 ibm:
   - zopendebug: 5.4.0
-  - zopeneditor: 5.5.0
+  - zopeneditor: 5.6.0
   - zcommoncomponent: 16.1.25061109
   - zfilemanager: 16.1.25061109
   - zfaultanalyzer: 16.1.25061109
@@ -23,12 +23,15 @@ broadcommfd:
   - hlasm-language-support: 1.17.0
   - cobol-language-support: 2.4.0
   - jcl-language-support: 3.0.0
-  - lsp-for-rexx: 0.0.18
+  - lsp-for-rexx: 0.0.22
 
 zowe:
   - cics-extension-for-zowe: 3.8.0
   - zowe-explorer-ftp-extension: 3.2.1
   - vscode-extension-for-zowe: 3.2.1
+
+continue:
+  - continue: 1.1.71
 
 redhat:
   - vscode-yaml: 1.18.0

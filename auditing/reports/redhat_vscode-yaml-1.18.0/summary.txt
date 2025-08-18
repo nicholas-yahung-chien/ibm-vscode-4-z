@@ -1,0 +1,7 @@
+extension: redhat.vscode-yaml@1.18.0
+license: MIT
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: 52dc43a65391516aa6896e88f27e1984aec70107520c6e1dc3b33f71b8e49996
+high_or_equal_cvss_8_0: 0

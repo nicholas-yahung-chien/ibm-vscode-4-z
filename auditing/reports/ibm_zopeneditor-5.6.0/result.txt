@@ -1,0 +1,1 @@
+Vulnerability denied: 1 findings >= CVSS 8.0

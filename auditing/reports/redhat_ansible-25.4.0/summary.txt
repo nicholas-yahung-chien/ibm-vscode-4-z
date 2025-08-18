@@ -1,0 +1,7 @@
+extension: redhat.ansible@25.4.0
+license: MIT
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: 13f06880db5ac78764bfa86561c6918a74f1af88e757257d85509d90892e97db
+high_or_equal_cvss_8_0: 0

@@ -1,0 +1,77 @@
+name: VS Code Extensions Audit (Windows - Python)
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "17 3 * * *"
+
+jobs:
+  audit:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node (for ovsx fallback)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install ovsx (fallback downloader)
+        run: npm i -g ovsx
+        shell: pwsh
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python deps
+        run: pip install pyyaml requests
+
+      - name: Install Syft (Windows)
+        shell: pwsh
+        run: |
+          $ver = "1.17.0"
+          $zip = "syft_${ver}_windows_amd64.zip"
+          $url = "https://github.com/anchore/syft/releases/download/v$ver/$zip"
+          Invoke-WebRequest -Uri $url -OutFile $zip
+          Expand-Archive -Path $zip -DestinationPath "$env:RUNNER_TEMP\syft" -Force
+          Copy-Item "$env:RUNNER_TEMP\syft\syft.exe" -Destination "C:\Windows\System32\syft.exe" -Force
+          syft version
+
+      - name: Install Grype (Windows)
+        shell: pwsh
+        run: |
+          $ver = "0.79.0"
+          $zip = "grype_${ver}_windows_amd64.zip"
+          $url = "https://github.com/anchore/grype/releases/download/v$ver/$zip"
+          Invoke-WebRequest -Uri $url -OutFile $zip
+          Expand-Archive -Path $zip -DestinationPath "$env:RUNNER_TEMP\grype" -Force
+          Copy-Item "$env:RUNNER_TEMP\grype\grype.exe" -Destination "C:\Windows\System32\grype.exe" -Force
+          grype version
+
+      - name: Install OSV-Scanner (Windows)
+        shell: pwsh
+        run: |
+          $ver = "1.7.4"
+          $zip = "osv-scanner_${ver}_windows_amd64.zip"
+          $url = "https://github.com/google/osv-scanner/releases/download/v$ver/$zip"
+          Invoke-WebRequest -Uri $url -OutFile $zip
+          Expand-Archive -Path $zip -DestinationPath "$env:RUNNER_TEMP\osv" -Force
+          Copy-Item "$env:RUNNER_TEMP\osv\osv-scanner.exe" -Destination "C:\Windows\System32\osv-scanner.exe" -Force
+          osv-scanner --version
+
+      - name: Run audit (Python)
+        env:
+          OVSX_REGISTRY: https://open-vsx.org   # 若有私有 Open VSX，改為你的 URL
+        run: python scripts/scan.py
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-reports-windows
+          path: |
+            reports/
+            dist/

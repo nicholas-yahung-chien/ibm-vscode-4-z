@@ -1,0 +1,7 @@
+extension: ms-vscode-remote.remote-wsl@0.99.0
+license: Microsoft
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: cf0338823d75b0cd341e368e505119efb566d3b8820f0c0f984aa227dee45cbf
+high_or_equal_cvss_8_0: 0

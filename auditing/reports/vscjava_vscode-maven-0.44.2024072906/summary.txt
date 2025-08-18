@@ -1,0 +1,7 @@
+extension: vscjava.vscode-maven@0.44.2024072906
+license: MIT
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: f52f19cde7e0f62de76623d902d5b9693d3b769667855d30f433f9bdd9c4b457
+high_or_equal_cvss_8_0: 0

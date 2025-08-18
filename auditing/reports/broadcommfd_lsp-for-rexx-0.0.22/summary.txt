@@ -1,0 +1,7 @@
+extension: broadcommfd.lsp-for-rexx@0.0.22
+license: Broadcom
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: 10fb65628b5ff801351b7c527c02b807a2c1a76f5d27a4160bdd56dabce3e87e
+high_or_equal_cvss_8_0: 0

@@ -1,0 +1,7 @@
+extension: ms-vscode.remote-server@1.5.2
+license: Microsoft
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: 1aa6f7fdf4904b7ad885ea054bc92ca2275a66b3a57717983e81529734a09952
+high_or_equal_cvss_8_0: 0

@@ -1,0 +1,7 @@
+extension: broadcommfd.abend-analyzer@1.3.0
+license: Broadcom
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: fb49b98a3d87684332f193df40230d2ff07d742c4cde225e62dc646ca8211953
+high_or_equal_cvss_8_0: 0

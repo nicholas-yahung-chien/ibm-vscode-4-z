@@ -75,7 +75,10 @@
         ],
         "_ZCODE_FORMAT_SCHEMA_URI_": [
             "zcodeformat.yaml"
-        ]
+        ],
+        "_CONTINUE_CONFIG_SCHEMA_URI_": [
+            ".continue/**/*.yaml"
+        ],
     },
     "json.schemas": [
         {
@@ -91,4 +94,51 @@
             "url": "_ZCODE_FORMAT_SCHEMA_URI_"
         }
     ],
+    "files.autoGuessEncoding": false,
+    "zopeneditor.encodings.filePatterns": {
+        "**/*.COBOL*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.COB*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.COBCOPY*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.COPYBOOK*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.COPY*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.PL1*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.PLI*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.INC*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.INCLUDE*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.JCL*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.CNTL*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.PROC*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.ASM*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.ASSEMBLE*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.HLASM*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.HLA*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.MACLIB*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.DBD*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.MFS*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.PCB*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.EXEC*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.REXX*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.REXXINC*{,/*}": "_DEFAULT_ENCODING_",
+        "*.rex": "_DEFAULT_ENCODING_",
+        "**/.hlasmplugin/proc_grps.json": "_DEFAULT_ENCODING_",
+        "**/.hlasmplugin/pgm_conf.json": "_DEFAULT_ENCODING_"
+    },
+    "[cobol]": {
+        "files.encoding": "_DEFAULT_ENCODING_"
+    },
+    "[pl1]": {
+        "files.encoding": "_DEFAULT_ENCODING_"
+    },
+    "[hlasm]": {
+        "files.encoding": "_DEFAULT_ENCODING_"
+    },
+    "[jcl]": {
+        "files.encoding": "_DEFAULT_ENCODING_"
+    },
+    "[rexx]": {
+        "files.encoding": "_DEFAULT_ENCODING_"
+    },
+    "[jsonc]": {
+        "files.encoding": "_DEFAULT_ENCODING_"
+    }
 }

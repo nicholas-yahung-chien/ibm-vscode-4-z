@@ -4,7 +4,8 @@
         "zosmf": {
             "type": "zosmf",
             "properties": {
-                "port": "_ZOSMF_PORT_"
+                "port": "_ZOSMF_PORT_",
+                "encoding": "_ZOSMF_ENCODING_"
             },
             "secure": []
         },

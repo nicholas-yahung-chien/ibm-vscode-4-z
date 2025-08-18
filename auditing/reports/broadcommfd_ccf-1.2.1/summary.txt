@@ -1,0 +1,7 @@
+extension: broadcommfd.ccf@1.2.1
+license: Broadcom
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: 11523100625a69b4ab3b40ca50f5e9bab89a1cb06fcb1f2a7187ea408ace0953
+high_or_equal_cvss_8_0: 0

@@ -2,7 +2,7 @@
 """
 IBM VSCode for Z Development Environment Setup Script
 開發單位: IBM Taiwan Technology Expert Labs
-版本: 2.6.0
+版本: 2.7.0
 日期: 2025/01/13
 
 說明:
@@ -32,6 +32,7 @@ IBM VSCode for Z Development Environment Setup Script
   - 用 debug_port 取代 _DEBUG_PORT_
 
 更新記錄:
+- v2.7.0: 新增從 scripts/configs/workspace.yml 檔案讀取預設參數功能
 - v2.6.0: 優化使用者介面，改善參數驗證和錯誤處理
 - v2.5.0: 優化使用者介面，改善參數驗證和錯誤處理
 - v2.4.11: 重構設定流程，提升使用者體驗
@@ -45,6 +46,7 @@ import argparse
 import shutil
 import datetime
 import getpass
+import yaml
 from pathlib import Path
 from utils.path_utils import get_script_dir
 from utils.file_utils import replace_in_file
@@ -58,6 +60,25 @@ def prompt_with_default(prompt_text, default_value):
     """
     inp = input(prompt_text).strip()
     return inp if inp else default_value
+
+def load_config_from_yaml(config_path):
+    """
+    從 YAML 檔案載入設定參數
+    """
+    try:
+        with open(config_path, 'r', encoding='utf-8') as file:
+            config = yaml.safe_load(file)
+        print(f"已載入設定檔案：{config_path}")
+        return config
+    except FileNotFoundError:
+        print(f"找不到設定檔案：{config_path}")
+        return None
+    except yaml.YAMLError as e:
+        print(f"YAML 檔案格式錯誤：{e}")
+        return None
+    except Exception as e:
+        print(f"載入設定檔案時發生錯誤：{e}")
+        return None
 
 # -------------------------------
 # 主流程
@@ -75,26 +96,13 @@ def main():
     os.chdir(workspace)
     print("目前工作目錄設定為：", workspace)
     
-    # 1. 請求使用者輸入基本參數：伺服器位置、帳號名稱、密碼
-    host = input("請輸入伺服器位置: ").strip()
-    # 檢查是否有任何輸入為空
-    if not host:
-        print("\n錯誤：所有基本參數皆必須輸入，請重新執行並提供完整資訊。")
-        sys.exit(1)
-    user = input("請輸入帳號名稱: ").strip()
-    # 檢查是否有任何輸入為空
-    if not user:
-        print("\n錯誤：所有基本參數皆必須輸入，請重新執行並提供完整資訊。")
-        sys.exit(1)
-    password = getpass.getpass("請輸入密碼: ").strip()
-    # 檢查是否有任何輸入為空
-    if not password:
-        print("\n錯誤：所有基本參數皆必須輸入，請重新執行並提供完整資訊。")
-        sys.exit(1)
+    # 檢查是否存在 workspace.yml 設定檔案
+    config_path = os.path.join(get_script_dir(), "configs", "workspace.yml")
+    config_data = load_config_from_yaml(config_path)
     
-    # 設定連線參數變數（初始值為 None，後續根據選單更新）
+    # 設定連線參數變數（初始值為預設值，後續根據選單或設定檔案更新）
     properties = {
-        "zosmf": {"port": 443},
+        "zosmf": {"port": 443, "encoding": "IBM-937"},
         "tso": {"codepage": 1047},
         "ssh": {"port": 22},
         "ftp": {"port": 21},
@@ -102,57 +110,120 @@ def main():
         "debug": {"port": 8143}
     }
     
-    # 4. 顯示選單，依使用者選擇設定連線參數
-    while True:
-        print("\n請選擇設定項目：")
-        print("  1. 設定 zosmf")
-        print("  2. 設定 tso")
-        print("  3. 設定 ssh")
-        print("  4. 設定 ftp")
-        print("  5. 設定 rse")
-        print("  6. 設定 debug")
-        print("  7. 結束 workspace 設定")
+    # 如果找到設定檔案，則載入參數並跳過選單
+    if config_data:
+        print("使用設定檔案中的參數...")
         
-        choice = input("請輸入選項 (1-7): ").strip()
+        # 載入基本參數
+        host = config_data.get('host', '')
+        user = config_data.get('user', '')
+        password = config_data.get('password', '')
         
-        if choice == "1":
-            # 設定 zosmf
-            properties["zosmf"]["port"] = prompt_with_default(
-                f"請輸入 zosmf 連線 port (預設 {properties['zosmf']['port']}): ",
-                properties["zosmf"]["port"])
-        elif choice == "2":
-            # 設定 tso
-            properties["tso"]["codepage"] = prompt_with_default(
-                f"請輸入 tso 連線 codepage (預設 {properties['tso']['codepage']}): ",
-                properties["tso"]["codepage"])
-        elif choice == "3":
-            # 設定 ssh
-            properties["ssh"]["port"] = prompt_with_default(
-                f"請輸入 ssh 連線 port (預設 {properties['ssh']['port']}): ",
-                properties["ssh"]["port"])
-        elif choice == "4":
-            # 設定 ftp
-            properties["ftp"]["port"] = prompt_with_default(
-                f"請輸入 ftp 連線 port (預設 {properties['ftp']['port']}): ",
-                properties["ftp"]["port"])
-        elif choice == "5":
-            # 設定 rse
-            properties["rse"]["port"] = prompt_with_default(
-                f"請輸入 rse 連線 port (預設 {properties['rse']['port']}): ",
-                properties["rse"]["port"])
-            properties["rse"]["encoding"] = prompt_with_default(
-                f"請輸入 rse 連線 encoding (預設 {properties['rse']['encoding']}): ",
-                properties["rse"]["encoding"])
-        elif choice == "6":
-            # 設定 debug
-            properties["debug"]["port"] = prompt_with_default(
-                f"請輸入 zOpenDebug 連線 port (預設 {properties['debug']['port']}): ",
-                properties["debug"]["port"])
-        elif choice == "7":
-            # 離開選單，開始進行 zowe.config.json 檔案內容的修改
-            break
-        else:
-            print("無效選項，請重新選擇。")
+        # 載入連線參數
+        if 'zosmf' in config_data:
+            properties['zosmf']['port'] = config_data['zosmf'].get('port', properties['zosmf']['port'])
+            properties['zosmf']['encoding'] = config_data['zosmf'].get('encoding', properties['zosmf']['encoding'])
+        
+        if 'tso' in config_data:
+            properties['tso']['codepage'] = config_data['tso'].get('codepage', properties['tso']['codepage'])
+        
+        if 'ssh' in config_data:
+            properties['ssh']['port'] = config_data['ssh'].get('port', properties['ssh']['port'])
+        
+        if 'ftp' in config_data:
+            properties['ftp']['port'] = config_data['ftp'].get('port', properties['ftp']['port'])
+        
+        if 'rse' in config_data:
+            properties['rse']['port'] = config_data['rse'].get('port', properties['rse']['port'])
+            properties['rse']['encoding'] = config_data['rse'].get('encoding', properties['rse']['encoding'])
+        
+        if 'debug' in config_data:
+            properties['debug']['port'] = config_data['debug'].get('port', properties['debug']['port'])
+        
+        # 檢查必要參數是否完整
+        if not host or not user or not password:
+            print("錯誤：設定檔案中缺少必要的基本參數 (host, user, password)")
+            sys.exit(1)
+        
+        print(f"已載入設定：伺服器={host}, 使用者={user}")
+        skip_menu = True
+    else:
+        # 如果沒有設定檔案，則要求使用者輸入基本參數
+        print("未找到設定檔案，請手動輸入參數...")
+        host = input("請輸入伺服器位置: ").strip()
+        # 檢查是否有任何輸入為空
+        if not host:
+            print("\n錯誤：所有基本參數皆必須輸入，請重新執行並提供完整資訊。")
+            sys.exit(1)
+        user = input("請輸入帳號名稱: ").strip()
+        # 檢查是否有任何輸入為空
+        if not user:
+            print("\n錯誤：所有基本參數皆必須輸入，請重新執行並提供完整資訊。")
+            sys.exit(1)
+        password = getpass.getpass("請輸入密碼: ").strip()
+        # 檢查是否有任何輸入為空
+        if not password:
+            print("\n錯誤：所有基本參數皆必須輸入，請重新執行並提供完整資訊。")
+            sys.exit(1)
+        skip_menu = False
+    
+    # 4. 顯示選單，依使用者選擇設定連線參數（僅在沒有設定檔案時顯示）
+    if not skip_menu:
+        while True:
+            print("\n請選擇設定項目：")
+            print("  1. 設定 zosmf")
+            print("  2. 設定 tso")
+            print("  3. 設定 ssh")
+            print("  4. 設定 ftp")
+            print("  5. 設定 rse")
+            print("  6. 設定 debug")
+            print("  7. 結束 workspace 設定")
+            
+            choice = input("請輸入選項 (1-7): ").strip()
+            
+            if choice == "1":
+                # 設定 zosmf
+                properties["zosmf"]["port"] = prompt_with_default(
+                    f"請輸入 zosmf 連線 port (預設 {properties['zosmf']['port']}): ",
+                    properties["zosmf"]["port"])
+                properties["zosmf"]["encoding"] = prompt_with_default(
+                    f"請輸入 zosmf 連線 encoding (預設 {properties['zosmf']['encoding']}): ",
+                    properties["zosmf"]["encoding"])
+            elif choice == "2":
+                # 設定 tso
+                properties["tso"]["codepage"] = prompt_with_default(
+                    f"請輸入 tso 連線 codepage (預設 {properties['tso']['codepage']}): ",
+                    properties["tso"]["codepage"])
+            elif choice == "3":
+                # 設定 ssh
+                properties["ssh"]["port"] = prompt_with_default(
+                    f"請輸入 ssh 連線 port (預設 {properties['ssh']['port']}): ",
+                    properties["ssh"]["port"])
+            elif choice == "4":
+                # 設定 ftp
+                properties["ftp"]["port"] = prompt_with_default(
+                    f"請輸入 ftp 連線 port (預設 {properties['ftp']['port']}): ",
+                    properties["ftp"]["port"])
+            elif choice == "5":
+                # 設定 rse
+                properties["rse"]["port"] = prompt_with_default(
+                    f"請輸入 rse 連線 port (預設 {properties['rse']['port']}): ",
+                    properties["rse"]["port"])
+                properties["rse"]["encoding"] = prompt_with_default(
+                    f"請輸入 rse 連線 encoding (預設 {properties['rse']['encoding']}): ",
+                    properties["rse"]["encoding"])
+            elif choice == "6":
+                # 設定 debug
+                properties["debug"]["port"] = prompt_with_default(
+                    f"請輸入 zOpenDebug 連線 port (預設 {properties['debug']['port']}): ",
+                    properties["debug"]["port"])
+            elif choice == "7":
+                # 離開選單，開始進行 zowe.config.json 檔案內容的修改
+                break
+            else:
+                print("無效選項，請重新選擇。")
+    else:
+        print("使用設定檔案中的參數，跳過選單設定...")
     
     # 最後更新檔案：workspace/zowe.config.json
     config_path = os.path.join(workspace, "workspace", "zowe.config.json")

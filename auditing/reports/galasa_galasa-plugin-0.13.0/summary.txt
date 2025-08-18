@@ -1,0 +1,7 @@
+extension: galasa.galasa-plugin@0.13.0
+license: EPL-2.0
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: c4b6771653d4670c082cb21f78f854971da2af47446f03c028a26021e5055de3
+high_or_equal_cvss_8_0: 4

@@ -39,6 +39,8 @@ from configs import (
     load_extensions_config
 )
 
+DEFAULT_OVSX_REGISTRY = "https://open-vsx.org"
+
 # -------------------------------
 #  功能函式
 # -------------------------------
@@ -75,7 +77,7 @@ def download_file(url, dest_directory, filename_pattern, default_filename=""):
     若找不到檔名則使用 URL 的最後一段作為檔案名稱。在儲存前若檔案已存在，則先刪除。
     """
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=60)
         if response.status_code == 200:
             # 決定檔案名稱
             filename = determine_filename(response, filename_pattern, default_filename)
@@ -90,10 +92,48 @@ def download_file(url, dest_directory, filename_pattern, default_filename=""):
             with open(dest_path, "wb") as f:
                 f.write(response.content)
             print(f"下載成功，檔案已儲存為: {dest_path}")
+            return True
         else:
             print(f"下載失敗：{url} (HTTP 狀態：{response.status_code})")
+            return False
     except Exception as e:
         print(f"下載過程中發生錯誤：{e}")
+        return False
+
+
+def vsix_url_openvsx(base, publisher, ext_name, version):
+    base = base.rstrip('/')
+    return f"{base}/api/{publisher}/{ext_name}/{version}/file/{publisher}.{ext_name}-{version}.vsix"
+
+
+def download_vsix_with_sources(publisher, ext_name, version, dest_directory, registry_base):
+    """依序嘗試：本地 OpenVSX -> 遠端 OpenVSX -> VS Code Marketplace。"""
+    desired_filename = f"{publisher}.{ext_name}-{version}.vsix"
+    pattern = "*.vsix"
+
+    # 1) 若使用者指定了自訂 registry，先嘗試該 registry
+    used_local = registry_base and registry_base.rstrip('/') != DEFAULT_OVSX_REGISTRY
+    if used_local:
+        url_local = vsix_url_openvsx(registry_base, publisher, ext_name, version)
+        print(f"嘗試從本地 OpenVSX 下載：{url_local}")
+        if download_file(url_local, dest_directory, pattern, desired_filename):
+            return True
+        print("本地 OpenVSX 下載失敗，改用遠端 OpenVSX。")
+
+    # 2) 遠端 OpenVSX
+    url_remote = vsix_url_openvsx(DEFAULT_OVSX_REGISTRY, publisher, ext_name, version)
+    print(f"嘗試從遠端 OpenVSX 下載：{url_remote}")
+    if download_file(url_remote, dest_directory, pattern, desired_filename):
+        return True
+    print("遠端 OpenVSX 下載失敗，改用 VS Code Marketplace。")
+
+    # 3) VS Code Marketplace（原本邏輯）
+    url_marketplace = (
+        f"https://marketplace.visualstudio.com/_apis/public/gallery/publishers/"
+        f"{publisher}/vsextensions/{ext_name}/{version}/vspackage"
+    )
+    print(f"嘗試從 Marketplace 下載：{url_marketplace}")
+    return download_file(url_marketplace, dest_directory, pattern, desired_filename)
 
 # -------------------------------
 # 主流程
@@ -102,6 +142,12 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description="Install script with optional auto-confirmation.")
     parser.add_argument("-y", "--yes", action="store_true", help="自動執行所有步驟，不須等待使用者確認。")
     parser.add_argument("--workspace", type=str, help="指定工作區目錄，預設為腳本檔所在路徑。")
+    parser.add_argument(
+        "--ovsx-registry",
+        type=str,
+        default=DEFAULT_OVSX_REGISTRY,
+        help="OpenVSX Registry base URL。若提供自訂（例如本地端），將優先嘗試該來源；未提供則預設使用遠端。"
+    )
     return parser.parse_args()
 
 def main():
@@ -126,15 +172,12 @@ def main():
         for ext_dict in ext_list:
             # 這裡假設每個元素都是只有一筆 {extension: version} 的字典
             for ext_name, version in ext_dict.items():
-                # 組成下載 URL
-                url = (
-                    f"https://marketplace.visualstudio.com/_apis/public/gallery/publishers/"
-                    f"{publisher}/vsextensions/{ext_name}/{version}/vspackage"
-                )
-                print(f"開始下載：{url}")
-                # 產生檔案名稱，例如 ibm.zopendebug-5.4.0.vsix
-                file_name = f"{publisher}.{ext_name}-{version}.vsix"
-                download_file(url, os.path.join(workspace, "extensions"), "*.vsix", file_name)
+                print(f"開始下載 {publisher}.{ext_name}@{version}")
+                ok = download_vsix_with_sources(publisher, ext_name, version, os.path.join(workspace, "extensions"), args.ovsx_registry)
+                if not ok:
+                    print(f"❌ 下載失敗：{publisher}.{ext_name}@{version}")
+                else:
+                    print(f"✅ 下載完成：{publisher}.{ext_name}@{version}")
     
     # 下載 pip 套件
     cleanup_directory_match(os.path.join(workspace, "pywhls"), "*.whl")

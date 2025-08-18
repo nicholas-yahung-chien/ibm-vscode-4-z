@@ -1,0 +1,7 @@
+extension: broadcommfd.jcl-language-support@3.0.0
+license: Broadcom
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: f2ae4f1a1a73edc6158f72ff963e06b6b74d6930e16725aaedda76a056acdb4a
+high_or_equal_cvss_8_0: 0

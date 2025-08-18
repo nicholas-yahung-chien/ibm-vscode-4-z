@@ -1,0 +1,7 @@
+extension: continue.continue@1.1.71
+license: Apache-2.0
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: dffe14f14bdcccec8ca79aa02a65d398112861b8d1834daef931e19c6aa1854f
+high_or_equal_cvss_8_0: 0

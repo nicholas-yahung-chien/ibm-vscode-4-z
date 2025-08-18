@@ -1,0 +1,7 @@
+extension: ms-ceintl.vscode-language-pack-zh-hant@1.101.2025061109
+license: SEE MIT LICENSE IN LICENSE.md
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: e005e98897c57783e9311f3d2105939f3794fa7dd13b098cd70688fa1d2876ba
+high_or_equal_cvss_8_0: 0

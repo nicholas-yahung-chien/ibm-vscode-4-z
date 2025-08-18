@@ -1,0 +1,7 @@
+extension: ms-vscode-remote.remote-containers@0.422.0
+license: Microsoft
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: 50c5c265ef27bf038092b1f134aabe2fe01832832fab6a230e7e4dacc75338d9
+high_or_equal_cvss_8_0: 0

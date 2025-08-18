@@ -1,0 +1,7 @@
+extension: ibm.ibm-developer@1.0.1
+license: Apache 2.0 (see LICENSE.txt)
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: ddd7093ba265eec5c739dc95069121b6644a68e3d04957d18a198aacca3a8e06
+high_or_equal_cvss_8_0: 0

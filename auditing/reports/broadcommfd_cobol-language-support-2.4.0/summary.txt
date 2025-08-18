@@ -1,0 +1,7 @@
+extension: broadcommfd.cobol-language-support@2.4.0
+license: EPL-2.0
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: 09892c9db94e3948219e487c52a47c9cbb87709ee84b38e09c72b77623c467ab
+high_or_equal_cvss_8_0: 0

@@ -1,0 +1,7 @@
+extension: zowe.vscode-extension-for-zowe@3.2.1
+license: EPL-2.0
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: 3329ad679f2429ed159e81a60a484555afdbe33407f3afdad672f7faba8baaa4
+high_or_equal_cvss_8_0: 0

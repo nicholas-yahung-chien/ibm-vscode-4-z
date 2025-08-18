@@ -1,0 +1,22 @@
+license:
+  allow:
+    - MIT
+    - Apache-2.0
+    - BSD-2-Clause
+    - BSD-3-Clause
+    - MPL-2.0
+    - ISC
+    - EPL-2.0
+    - EPL-1.0
+    - IBM
+    - Microsoft
+    - Broadcom
+  deny:
+    - AGPL-3.0
+    - SSPL-1.0
+    - GPL-3.0
+    - UNKNOWN
+    - Proprietary
+    - Commercial
+vulnerability:
+  max_cvss: 8.0

@@ -2,7 +2,7 @@
 """
 IBM VSCode for Z Development Environment Setup Script
 開發單位: IBM Taiwan Technology Expert Labs
-版本: 2.6.0
+版本: 2.7.0
 日期: 2025/01/13
 
 說明:
@@ -18,6 +18,7 @@ IBM VSCode for Z Development Environment Setup Script
 10. 建立 VSCode 的 Windows 快捷方式（若無 win32com 則略過）。
 
 更新記錄:
+- v2.7.0: 新增系統編碼設定功能，允許使用者自訂檔案編碼
 - v2.6.0: 優化檔案鎖定檢測和進程終止功能，改善安裝和卸載流程
 - v2.5.0: 新增 VSCode 擴充功能安裝後的進程清理機制，避免檔案被鎖定
 - v2.4.11: 優化 Zowe-Cli 安裝流程，改善 npm 命令執行
@@ -287,7 +288,17 @@ def phase5_path_migration(tools, java_home_path, workspace, auto_continue=False)
     else:
         print("找不到 zcodeformat-schema-*.json，請確認後再執行。")
         sys.exit(1)
-    
+
+    # 修改 Continue 設定檔路徑
+    continue_config_schema_path = find_target_file_path_by_pattern(
+        compose_folder_path(workspace, "workspace"), "config-yaml-schema*.json")
+    if continue_config_schema_path:
+        continue_config_schema_uri = quote(Path(continue_config_schema_path).resolve().as_uri())
+        replace_in_file(vscode_settings_path, r"_CONTINUE_CONFIG_SCHEMA_URI_", continue_config_schema_uri)
+    else:
+        print("找不到 config-yaml-schema-*.json，請確認後再執行。")
+        sys.exit(1)
+
     # 組成 java runtime 清單（僅取 major 版本）
     java_versions = sorted([key for key in tools if key.startswith("java")], reverse=True)
     java_runtimes = []
@@ -299,6 +310,21 @@ def phase5_path_migration(tools, java_home_path, workspace, auto_continue=False)
         })
     runtime_json = ",\n".join(json.dumps(entry) for entry in java_runtimes)
     replace_in_file(vscode_settings_path, r"\"_JAVA_RUNTIMES_\"", runtime_json)
+    
+    # 設定系統編碼
+    print("設定系統編碼...")
+    default_encoding = "IBM-937"
+    if auto_continue:
+        system_encoding = default_encoding
+        print(f"使用預設編碼：{system_encoding}")
+    else:
+        system_encoding = input(f"請輸入系統編碼 (預設 {default_encoding}): ").strip()
+        if not system_encoding:
+            system_encoding = default_encoding
+            print(f"使用預設編碼：{system_encoding}")
+    
+    # 替換設定檔中的編碼變數
+    replace_in_file(vscode_settings_path, r"_DEFAULT_ENCODING_", system_encoding)
     
     print("路徑設定遷移完成。\n")
     return
