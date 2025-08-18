@@ -2,7 +2,7 @@
 """
 IBM VSCode for Z Development Environment Setup Script
 開發單位: IBM Taiwan Technology Expert Labs
-版本: 2.6.0
+版本: 2.7.0
 日期: 2025/01/13
 
 說明:
@@ -14,6 +14,7 @@ IBM VSCode for Z Development Environment Setup Script
 使用前請確認 Python 執行環境中有必要的模組。
 
 更新記錄:
+- v2.7.0: 改善 OpenVSX 下載邏輯，檢測 HTML 網頁回應並自動切換至 VS Code Marketplace
 - v2.6.0: 優化下載流程，改善配置載入和檔案管理
 - v2.5.0: 優化檔案下載邏輯，改善檔案名稱決定機制
 - v2.4.11: 重構下載流程，提升檔案管理效能
@@ -79,6 +80,18 @@ def download_file(url, dest_directory, filename_pattern, default_filename=""):
     try:
         response = requests.get(url, timeout=60)
         if response.status_code == 200:
+            # 檢查下載內容是否為 HTML 網頁而非實際檔案
+            content_type = response.headers.get('Content-Type', '').lower()
+            content_start = response.content[:1000].decode('utf-8', errors='ignore').lower()
+            
+            # 如果內容類型是 HTML 或內容包含 HTML 標籤，則認為是網頁而非檔案
+            if ('text/html' in content_type or 
+                '<!doctype html>' in content_start or 
+                '<html' in content_start or
+                '<title>' in content_start):
+                print(f"下載內容為 HTML 網頁，非實際檔案：{url}")
+                return False
+            
             # 決定檔案名稱
             filename = determine_filename(response, filename_pattern, default_filename)
             # 組合下載目的地的完整路徑
@@ -96,6 +109,9 @@ def download_file(url, dest_directory, filename_pattern, default_filename=""):
         else:
             print(f"下載失敗：{url} (HTTP 狀態：{response.status_code})")
             return False
+    except requests.exceptions.Timeout:
+        print(f"下載逾時：{url}")
+        return False
     except Exception as e:
         print(f"下載過程中發生錯誤：{e}")
         return False
@@ -118,21 +134,21 @@ def download_vsix_with_sources(publisher, ext_name, version, dest_directory, reg
         print(f"嘗試從本地 OpenVSX 下載：{url_local}")
         if download_file(url_local, dest_directory, pattern, desired_filename):
             return True
-        print("本地 OpenVSX 下載失敗，改用遠端 OpenVSX。")
+        print("本地 OpenVSX 下載失敗（逾時或返回網頁），改用遠端 OpenVSX。")
 
     # 2) 遠端 OpenVSX
     url_remote = vsix_url_openvsx(DEFAULT_OVSX_REGISTRY, publisher, ext_name, version)
     print(f"嘗試從遠端 OpenVSX 下載：{url_remote}")
     if download_file(url_remote, dest_directory, pattern, desired_filename):
         return True
-    print("遠端 OpenVSX 下載失敗，改用 VS Code Marketplace。")
+    print("遠端 OpenVSX 下載失敗（逾時或返回網頁），改用 VS Code Marketplace。")
 
-    # 3) VS Code Marketplace（原本邏輯）
+    # 3) VS Code Marketplace（最後嘗試）
     url_marketplace = (
         f"https://marketplace.visualstudio.com/_apis/public/gallery/publishers/"
         f"{publisher}/vsextensions/{ext_name}/{version}/vspackage"
     )
-    print(f"嘗試從 Marketplace 下載：{url_marketplace}")
+    print(f"嘗試從 VS Code Marketplace 下載：{url_marketplace}")
     return download_file(url_marketplace, dest_directory, pattern, desired_filename)
 
 # -------------------------------

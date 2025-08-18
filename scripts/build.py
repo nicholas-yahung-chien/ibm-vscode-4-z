@@ -2,7 +2,7 @@
 """
 IBM VSCode for Z Development Environment Setup Script
 開發單位: IBM Taiwan Technology Expert Labs
-版本: 2.6.0
+版本: 2.7.0
 日期: 2025/01/13
 
 說明:
@@ -17,12 +17,13 @@ VSCode4z 專案建置腳本，用於自動化打包和發布流程。
   1. 取得 build.py 腳本所在目錄（考量是否打包為 .exe）。
   2. 根據參數設定工作區（workspace）。
   3. 執行 scripts/download.py，並傳入 --workspace 參數。
-  4. 使用 pyinstaller --onefile 打包 scripts 下的 install.py、workspace.py 與 uninstall.py。
+  4. 使用 pyinstaller --onefile 打包 scripts 下的 install.py、workspace.py、uninstall.py 與 assistant.py。
   5. 將 scripts/dist 中的 .exe 複製到 workspace 目錄下。
   6. 刪除 scripts 目錄中除 .py 與 .yml 以外的所有檔案及目錄。
   7. 最後將 workspace 目錄下的所有內容打包為 VSCode4z-<version>.zip。
 
 更新記錄:
+- v2.7.0: 新增 assistant.py 打包功能，支援 Watsonx Assistant 設定工具
 - v2.6.0: 優化建置流程，改善配置載入和檔案管理
 - v2.5.0: 優化檔案壓縮邏輯，改善檔案收集和排除模式處理
 - v2.4.11: 重構壓縮功能，使用 pyminizip 提升效能
@@ -61,9 +62,9 @@ def run_download_py(workspace, scripts_dir):
 
 def build_executables(scripts_dir):
     """
-    分別對 scripts 目錄下的 install.py、workspace.py 與 uninstall.py 執行 pyinstaller --onefile 打包。
+    分別對 scripts 目錄下的 install.py、workspace.py、uninstall.py 與 assistant.py 執行 pyinstaller --onefile 打包。
     """
-    for script in ["install.py", "workspace.py", "uninstall.py"]:
+    for script in ["install.py", "workspace.py", "uninstall.py", "assistant.py"]:
         print(f"開始打包 {script}...")
         result = subprocess.run(
             ["pyinstaller", "--onefile", script],
@@ -186,7 +187,7 @@ def main():
     # 1. 執行 download.py 並傳入 --workspace
     run_download_py(workspace, scripts_dir)
     
-    # 2. 利用 pyinstaller 分別打包 install.py、workspace.py 與 uninstall.py 為單一執行檔
+    # 2. 利用 pyinstaller 分別打包 install.py、workspace.py、uninstall.py 與 assistant.py 為單一執行檔
     build_executables(scripts_dir)
     
     # 3. 將 scripts/dist 底下的 .exe 複製到 workspace 目錄

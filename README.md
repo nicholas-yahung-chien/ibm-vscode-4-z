@@ -29,6 +29,7 @@ VSCode4z 是一個專為 IBM Z 開發環境設計的整合式工具包，提供�
   * **VSCode 擴充功能** 自動安裝（包含檔案鎖定處理機制）
   * 開發環境啟動期間的環境路徑及設定檔調整（包含 `PATH` 與 `JAVA_HOME` 等）
   * 建立 VSCode 的啟動捷徑（請務必透過此捷徑啟動）
+  * 系統編碼設定：安裝過程將提示輸入系統編碼（預設 `IBM-937`），可依需求調整
 
 在過程中，系統會多次提示按下 `Enter` 鍵以確認繼續，請依指示操作。
 
@@ -37,6 +38,31 @@ VSCode4z 是一個專為 IBM Z 開發環境設計的整合式工具包，提供�
 ### 步驟 2：設定工作區（workspace）參數
 
 * 完成安裝後，執行 `workspace.exe`。
+
+#### 使用 YAML 設定檔自動載入（選擇性）
+
+* 若存在 `scripts/configs/workspace.yml`，執行 `workspace.exe` 時會自動載入參數，直接產生 `workspace/zowe.config.json` 並略過選單互動。
+* 範例內容（未提供者將使用預設值）：
+
+```yaml
+host: your.zos.host
+user: YOURUSER
+password: YOURPASS
+zosmf:
+  port: 443
+  encoding: IBM-937
+tso:
+  codepage: 1047
+ssh:
+  port: 22
+ftp:
+  port: 21
+rse:
+  port: 6800
+  encoding: IBM-937
+debug:
+  port: 8143
+```
 
 #### 基本參數設定
 
@@ -80,6 +106,13 @@ VSCode4z 是一個專為 IBM Z 開發環境設計的整合式工具包，提供�
 * 若有備份的設定檔案，將自動回復至最後備份狀態。
 
 ## 版本更新記錄
+
+### v2.7.0 (2025/08/18)
+* 新增系統編碼設定：安裝過程可輸入編碼，預設 `IBM-937`
+* 增強 VSIX 下載邏輯：支援自訂 OpenVSX registry，並依序嘗試「本地 → 遠端 OpenVSX → VS Code Marketplace」
+* 改善下載流程錯誤處理，提升穩定性
+* 移除過時擴充功能，精簡套件清單
+* `workspace.exe` 支援從 `scripts/configs/workspace.yml` 自動載入參數，免選單操作
 
 ### v2.6.0 (2025/01/13)
 * 優化檔案鎖定檢測和進程終止功能，改善安裝和卸載流程
@@ -129,5 +162,5 @@ VSCode4z 是一個專為 IBM Z 開發環境設計的整合式工具包，提供�
 ---
 
 **IBM Taiwan Technology Expert Labs**
-**版本:** 2.6.0
-**日期:** 2025/07/13
+**版本:** 2.7.0
+**日期:** 2025/08/18
