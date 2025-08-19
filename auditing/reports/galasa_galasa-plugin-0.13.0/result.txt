@@ -1,1 +1,2 @@
-Vulnerability denied: 4 findings >= CVSS 8.0
+VULN_DENY
+漏洞被拒絕: 4 個發現 >= CVSS 8.0

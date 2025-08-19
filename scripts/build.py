@@ -20,9 +20,11 @@ VSCode4z 專案建置腳本，用於自動化打包和發布流程。
   4. 使用 pyinstaller --onefile 打包 scripts 下的 install.py、workspace.py、uninstall.py 與 assistant.py。
   5. 將 scripts/dist 中的 .exe 複製到 workspace 目錄下。
   6. 刪除 scripts 目錄中除 .py 與 .yml 以外的所有檔案及目錄。
-  7. 最後將 workspace 目錄下的所有內容打包為 VSCode4z-<version>.zip。
+  7. 將 workspace 目錄下的所有內容打包為 VSCode4z-<version>.zip（完整版）。
+  8. 將 workspace 目錄下的內容打包為 VSCode4z-<version>-Lite.zip（精簡版，額外排除 lite 排除清單）。
 
 更新記錄:
+- v2.7.0: 新增 Lite 版本打包功能，提供體積最小化的精簡版壓縮檔
 - v2.7.0: 新增 assistant.py 打包功能，支援 Watsonx Assistant 設定工具
 - v2.6.0: 優化建置流程，改善配置載入和檔案管理
 - v2.5.0: 優化檔案壓縮邏輯，改善檔案收集和排除模式處理
@@ -196,8 +198,13 @@ def main():
     # 4. 刪除 scripts 目錄下除了 *.py 與 *.yml 以外的其他檔案與目錄
     clean_scripts_directory(scripts_dir)
     
-    # 5. 將 workspace 目錄下的所有檔案與子目錄打包成壓縮檔
+    # 5. 將 workspace 目錄下的所有檔案與子目錄打包成完整版壓縮檔
     compress_directory(workspace, os.path.join(workspace, f"{build_config['release']['name']}-{build_config['release']['version']}.zip"), exclude_dirs=build_config['release']['exclude_dirs'], exclude_files=build_config['release']['exclude_files'])
+    
+    # 6. 將 workspace 目錄下的內容打包成 Lite 版本壓縮檔（額外排除 lite 排除清單）
+    lite_exclude_dirs = build_config['release']['exclude_dirs'] + build_config['release']['exclude_dirs_lite']
+    lite_exclude_files = build_config['release']['exclude_files'] + build_config['release']['exclude_files_lite']
+    compress_directory(workspace, os.path.join(workspace, f"{build_config['release']['name']}-{build_config['release']['version']}-Lite.zip"), exclude_dirs=lite_exclude_dirs, exclude_files=lite_exclude_files)
 
 if __name__ == "__main__":
     main()

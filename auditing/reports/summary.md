@@ -1,6 +1,6 @@
-# VS Code Extensions Audit Report
+# VS Code 擴充功能安全稽核報告
 
-| Extension | License | Result | High(CVSS>=8.0) | SHA256 |
+| 擴充功能 | 授權條款 | 結果 | 高嚴重性(CVSS>=8.0) | SHA256 |
 |---|---|---:|---:|---|
 | `ibm.zopendebug@5.4.0` | `IBM` | **PASS** | 0 | `9ce86963df2fc03f9c5556a8157d9c17c078db6de931978846c8f429bae4316a` |
 | `ibm.zopeneditor@5.6.0` | `IBM` | **VULN_DENY** | 1 | `4718a82c8b66ae531d48d7d1baf42be7d6f3865bd01094d394a90df66762a1e8` |
@@ -33,14 +33,14 @@
 | `ms-vscode.remote-server@1.5.2` | `Microsoft` | **PASS** | 0 | `1aa6f7fdf4904b7ad885ea054bc92ca2275a66b3a57717983e81529734a09952` |
 | `ms-ceintl.vscode-language-pack-zh-hant@1.101.2025061109` | `SEE MIT LICENSE IN LICENSE.md` | **PASS** | 0 | `e005e98897c57783e9311f3d2105939f3794fa7dd13b098cd70688fa1d2876ba` |
 
-## Summary of Issues
+## 問題摘要
 
-### Vulnerability Issues
+### 漏洞問題
 
-The following extensions have vulnerability issues:
+以下擴充功能有漏洞問題：
 
-- ibm.zopeneditor@5.6.0: 1 vulnerabilities >= CVSS 8.0
-- galasa.galasa-plugin@0.13.0: 4 vulnerabilities >= CVSS 8.0
+- ibm.zopeneditor@5.6.0: 1 個漏洞 >= CVSS 8.0
+- galasa.galasa-plugin@0.13.0: 4 個漏洞 >= CVSS 8.0
 
-⚠️  Total issues found: 0 license issues, 2 vulnerability issues, 0 processing errors
+⚠️  總共發現問題：0 個授權條款問題，2 個漏洞問題，0 個處理錯誤
 

@@ -23,5 +23,7 @@ release:
     "ibm",
     "enterprise"
   ]
-  exclude_dirs: [".git", "__pycache__", "node_modules", ".vscode"]
-  exclude_files: ["*.tmp", "*.log", "*.bak", "*.swp", "Thumbs.db"]
+  exclude_dirs: [".git", "__pycache__", "node_modules", ".vscode", "reports"]
+  exclude_files: ["*.tmp", "*.log", "*.bak", "*.swp", "Thumbs.db", ".gitignore", ".gitattributes", ".gitmodules"]
+  exclude_dirs_lite: []
+  exclude_files_lite: ["*.vsix", "*.whl", "*.zip", "*.7z.exe"]

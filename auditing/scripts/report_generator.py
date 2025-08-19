@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+報告生成模組
+包含摘要報告和詳細報告的生成功能
+"""
+
+import os
+import textwrap
+from utils import log
+
+
+def write_summary_row(summary_md: str, pubext: str, version: str, license_str: str, result: str, high: int, sha: str):
+    """寫入摘要報告的一行。"""
+    row = f"| `{pubext}@{version}` | `{license_str}` | **{result}** | {high if high is not None else '-'} | `{sha or '-'}` |\n"
+    with open(summary_md, "a", encoding="utf-8") as f:
+        f.write(row)
+
+
+def write_summary_header(summary_md: str, max_cvss: float):
+    """寫入摘要報告的標題。"""
+    with open(summary_md, "w", encoding="utf-8") as f:
+        f.write("# VS Code 擴充功能安全稽核報告\n\n")
+        f.write(f"| 擴充功能 | 授權條款 | 結果 | 高嚴重性(CVSS>={max_cvss}) | SHA256 |\n")
+        f.write("|---|---|---:|---:|---|\n")
+
+
+def write_summary_footer(summary_md: str, license_issues: list, vuln_issues: list, error_issues: list):
+    """寫入摘要報告的頁尾。"""
+    with open(summary_md, "a", encoding="utf-8") as f:
+        f.write("\n## 問題摘要\n\n")
+        
+        if license_issues:
+            f.write("### 授權條款問題\n\n")
+            f.write("以下擴充功能有授權條款問題：\n\n")
+            for issue in license_issues:
+                f.write(f"- {issue}\n")
+            f.write("\n")
+        
+        if vuln_issues:
+            f.write("### 漏洞問題\n\n")
+            f.write("以下擴充功能有漏洞問題：\n\n")
+            for issue in vuln_issues:
+                f.write(f"- {issue}\n")
+            f.write("\n")
+        
+        if error_issues:
+            f.write("### 處理錯誤\n\n")
+            f.write("以下擴充功能遇到處理錯誤：\n\n")
+            for issue in error_issues:
+                f.write(f"- {issue}\n")
+            f.write("\n")
+        
+        if not license_issues and not vuln_issues and not error_issues:
+            f.write("✅ 未發現問題。所有擴充功能都通過了稽核。\n\n")
+        else:
+            f.write(f"⚠️  總共發現問題：{len(license_issues)} 個授權條款問題，{len(vuln_issues)} 個漏洞問題，{len(error_issues)} 個處理錯誤\n\n")
+
+
+def write_extension_summary(ext_report_dir: str, name: str, license_str: str, sbom: str, grype: str, osv: str, sha: str, high: int, max_cvss: float):
+    """寫入擴充功能的摘要檔案。"""
+    summary_txt = textwrap.dedent(f"""\
+    extension: {name}
+    license: {license_str}
+    sbom: {os.path.basename(sbom)}
+    grype: {os.path.basename(grype)}
+    osv: {os.path.basename(osv)}
+    sha256: {sha}
+    high_or_equal_cvss_{str(max_cvss).replace('.', '_')}: {high}
+    """)
+    with open(os.path.join(ext_report_dir, "summary.txt"), "w", encoding="utf-8") as f:
+        f.write(summary_txt)
+
+
+def write_result_file(ext_report_dir: str, result: str, details: str = ""):
+    """寫入結果檔案。"""
+    content = f"{result}\n"
+    if details:
+        content += f"{details}\n"
+    with open(os.path.join(ext_report_dir, "result.txt"), "w", encoding="utf-8") as f:
+        f.write(content)
+
+
+def write_license_file(ext_report_dir: str, license_str: str):
+    """寫入授權條款檔案。"""
+    with open(os.path.join(ext_report_dir, "license.txt"), "w", encoding="utf-8") as f:
+        f.write(str(license_str) + "\n")
+
+
+def write_sha256_file(ext_report_dir: str, sha: str):
+    """寫入 SHA256 檔案。"""
+    with open(os.path.join(ext_report_dir, "sha256.txt"), "w", encoding="utf-8") as f:
+        f.write(sha + "\n")
