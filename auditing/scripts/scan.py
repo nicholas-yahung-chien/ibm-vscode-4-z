@@ -155,15 +155,15 @@ def main():
                         break
 
         if rc == EXIT_OK:
-            result = "PASS"
+            result = "通過"
         elif rc == EXIT_LICENSE_DENY:
-            result = "LICENSE_DENY"
+            result = "授權條款不符"
             license_issues.append(f"{pubext}@{version}: {license_str}")
         elif rc == EXIT_VULN_DENY:
-            result = "VULN_DENY"
+            result = "漏洞風險過高"
             vuln_issues.append(f"{pubext}@{version}: {high} 個漏洞 >= CVSS {max_cvss}")
         else:
-            result = "ERROR"
+            result = "處理錯誤"
 
         write_summary_row(summary_md, pubext, version, license_str, result, None if high == "-" else int(high), sha)
 
@@ -182,7 +182,15 @@ def main():
     if error_issues:
         log(f"發現 {len(error_issues)} 個處理錯誤")
     
-    log(f"整體結果代碼: {overall_rc}")
+    # 翻譯結果代碼為中文說明
+    result_messages = {
+        0: "✅ 稽核完成 - 所有擴充功能都通過檢查",
+        42: "❌ 稽核失敗 - 發現授權條款不符的擴充功能",
+        43: "❌ 稽核失敗 - 發現高風險漏洞的擴充功能"
+    }
+    
+    result_message = result_messages.get(overall_rc, f"⚠️  稽核完成但發生未知錯誤 (代碼: {overall_rc})")
+    log(f"整體結果: {result_message}")
     log(f"報告生成於: {REPORT_DIR}")
     sys.exit(overall_rc)
 

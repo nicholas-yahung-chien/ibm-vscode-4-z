@@ -22,8 +22,8 @@ def write_summary_header(summary_md: str, max_cvss: float):
     """寫入摘要報告的標題。"""
     with open(summary_md, "w", encoding="utf-8") as f:
         f.write("# VS Code 擴充功能安全稽核報告\n\n")
-        f.write(f"| 擴充功能 | 授權條款 | 結果 | 高嚴重性(CVSS>={max_cvss}) | SHA256 |\n")
-        f.write("|---|---|---:|---:|---|\n")
+        f.write(f"| 擴充功能 | 授權條款 | 稽核結果 | 高風險漏洞數量 (CVSS≥{max_cvss}) | SHA256 雜湊值 |\n")
+        f.write("|---|---|---|---|---|\n")
 
 
 def write_summary_footer(summary_md: str, license_issues: list, vuln_issues: list, error_issues: list):
@@ -33,29 +33,33 @@ def write_summary_footer(summary_md: str, license_issues: list, vuln_issues: lis
         
         if license_issues:
             f.write("### 授權條款問題\n\n")
-            f.write("以下擴充功能有授權條款問題：\n\n")
+            f.write("以下擴充功能的授權條款不符合政策要求：\n\n")
             for issue in license_issues:
                 f.write(f"- {issue}\n")
             f.write("\n")
         
         if vuln_issues:
             f.write("### 漏洞問題\n\n")
-            f.write("以下擴充功能有漏洞問題：\n\n")
+            f.write("以下擴充功能存在高風險漏洞 (CVSS 分數超過允許閾值)：\n\n")
             for issue in vuln_issues:
                 f.write(f"- {issue}\n")
             f.write("\n")
         
         if error_issues:
             f.write("### 處理錯誤\n\n")
-            f.write("以下擴充功能遇到處理錯誤：\n\n")
+            f.write("以下擴充功能在處理過程中發生錯誤：\n\n")
             for issue in error_issues:
                 f.write(f"- {issue}\n")
             f.write("\n")
         
         if not license_issues and not vuln_issues and not error_issues:
-            f.write("✅ 未發現問題。所有擴充功能都通過了稽核。\n\n")
+            f.write("✅ **稽核成功** - 所有擴充功能都通過了安全檢查，未發現任何問題。\n\n")
         else:
-            f.write(f"⚠️  總共發現問題：{len(license_issues)} 個授權條款問題，{len(vuln_issues)} 個漏洞問題，{len(error_issues)} 個處理錯誤\n\n")
+            total_issues = len(license_issues) + len(vuln_issues) + len(error_issues)
+            f.write(f"⚠️  **稽核結果摘要** - 總共發現 {total_issues} 個問題：\n")
+            f.write(f"- 授權條款問題：{len(license_issues)} 個\n")
+            f.write(f"- 漏洞問題：{len(vuln_issues)} 個\n")
+            f.write(f"- 處理錯誤：{len(error_issues)} 個\n\n")
 
 
 def write_extension_summary(ext_report_dir: str, name: str, license_str: str, sbom: str, grype: str, osv: str, sha: str, high: int, max_cvss: float):
