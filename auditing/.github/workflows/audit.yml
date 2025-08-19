@@ -27,7 +27,9 @@ jobs:
           python-version: "3.11"
 
       - name: Install Python deps
-        run: pip install pyyaml requests
+        run: |
+          pip install pyyaml requests
+          pip list | grep -E "(pyyaml|requests)"
 
       - name: Install Syft (Windows)
         shell: pwsh

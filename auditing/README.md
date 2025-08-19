@@ -10,10 +10,20 @@
 1. 安裝：
    - Node.js，並執行 `npm i -g ovsx`
    - Python 3
+   - Python 依賴模組：
+     ```bash
+     pip install pyyaml requests
+     ```
    - 下載並放入 PATH：
      - Syft（Windows）
      - Grype（Windows）
      - OSV-Scanner（Windows）
 2. 執行：
+   ```bash
+   python scripts/scan.py
+   ```
+   
+   或使用 PowerShell：
    ```powershell
-   pwsh -File scripts/scan.ps1
+   python scripts/scan.py
+   ```
