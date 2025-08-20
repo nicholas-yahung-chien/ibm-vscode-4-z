@@ -246,6 +246,7 @@ def main():
     replace_in_file(config_path, r"_PASSWORD_", f"{password}")
     
     replace_in_file(config_path, r"\"_ZOSMF_PORT_\"", f"{properties['zosmf']['port']}")
+    replace_in_file(config_path, r"_ZOSMF_ENCODING_", f"{properties['zosmf']['encoding']}")
     replace_in_file(config_path, r"_TSO_CODEPAGE_", f"{properties['tso']['codepage']}")
     replace_in_file(config_path, r"\"_SSH_PORT_\"", f"{properties['ssh']['port']}")
     replace_in_file(config_path, r"\"_FTP_PORT_\"", f"{properties['ftp']['port']}")
