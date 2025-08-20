@@ -162,5 +162,5 @@ debug:
 ---
 
 **IBM Taiwan Technology Expert Labs**
-**版本:** 2.7.0
+**版本:** 2.7.1
 **日期:** 2025/08/18
