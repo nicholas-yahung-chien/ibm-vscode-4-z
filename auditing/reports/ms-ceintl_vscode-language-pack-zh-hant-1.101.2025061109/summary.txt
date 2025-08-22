@@ -1,5 +1,5 @@
 extension: ms-ceintl.vscode-language-pack-zh-hant@1.101.2025061109
-license: SEE MIT LICENSE IN LICENSE.md
+license: Microsoft
 sbom: cyclonedx.json
 grype: grype.json
 osv: osv.json

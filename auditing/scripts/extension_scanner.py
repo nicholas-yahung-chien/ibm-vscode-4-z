@@ -108,17 +108,35 @@ def scan_one_extension(
     
     license_str = pkg_json.get("license") or "UNKNOWN"
     
-    # 處理 "SEE LICENSE IN" 格式
-    if isinstance(license_str, str) and license_str.startswith("SEE LICENSE IN "):
+    # 處理 "SEE * IN *" 格式
+    if isinstance(license_str, str) \
+        and license_str.upper().startswith("SEE") \
+        and " IN " in license_str:
         log(f"找到授權條款參考: {license_str}")
-        license_content = read_license_file(ext_dir, license_str)
-        if license_content:
-            detected_license = detect_license_from_content(license_content)
-            log(f"授權內容偵測到: {detected_license}")
-            license_str = detected_license
+        
+        # 解析格式：SEE [LICENSE or LICENSE_TYPE] IN [filename]
+        # 例如：SEE LICENSE IN LICENSE.md
+        parts = license_str.split(" IN ")
+        if len(parts) == 2:
+            # 提取授權類型（去掉開頭的 "SEE "）
+            license_type = parts[0][4:].strip()  # 移除 "SEE "
+            filename = parts[1].strip()
+            
+            log(f"解析授權類型: {license_type}, 檔案: {filename}")
+            
+            # 嘗試讀取授權檔案
+            license_content = read_license_file(ext_dir, f"SEE LICENSE IN {filename}")
+            if license_content:
+                detected_license = detect_license_from_content(license_content)
+                log(f"授權內容偵測到: {detected_license}")
+                license_str = detected_license
+            else:
+                # 如果無法讀取檔案，嘗試使用解析出的授權類型
+                log(f"使用解析出的授權類型: {license_type}")
+                license_str = license_type.upper()
         else:
-            log(f"警告: 無法讀取參考的授權檔案: {license_str}")
-            # 如果無法讀取檔案，保留原始參考
+            log(f"警告: 無法解析授權條款格式: {license_str}")
+            # 如果無法解析，保留原始參考
     
     # 如果授權條款是 UNKNOWN 或缺失，嘗試在同一目錄中尋找 LICENSE 檔案
     if license_str == "UNKNOWN":

@@ -27,6 +27,8 @@ from pathlib import Path
 from utils import log, ensure_dirs, require_bin
 from config import read_policy, read_extensions_config
 from extension_scanner import scan_one_extension
+from pypi_scanner import scan_pypi_directory, write_pypi_summary
+from tools_scanner import scan_tools_with_cpe, write_tools_summary, load_tools_config
 from report_generator import (
     write_summary_header,
     write_summary_row,
@@ -39,7 +41,9 @@ WORK_DIR = os.path.join(ROOT_DIR, "work")
 DIST_DIR = os.path.join(ROOT_DIR, "dist")
 REPORT_DIR = os.path.join(ROOT_DIR, "reports")
 EXTENSIONS_DIR = os.path.join(ROOT_DIR.parent, "extensions")
+PYWHLS_DIR = os.path.join(ROOT_DIR.parent, "pywhls")
 EXTENSIONS_CONFIG = os.path.join(ROOT_DIR.parent, "scripts", "configs", "extensions.yml")
+TOOLS_CONFIG = os.path.join(ROOT_DIR.parent, "scripts", "configs", "tools.yml")
 POLICY = os.path.join(ROOT_DIR, "policy.yml")
 
 # 預設 OpenVSX 註冊表；可透過命令列參數覆寫
@@ -94,10 +98,23 @@ def main():
     summary_md = os.path.join(REPORT_DIR, "summary.md")
     write_summary_header(summary_md, max_cvss)
     
+    # 在摘要報告中加入工具掃描的說明
+    with open(summary_md, "a", encoding="utf-8") as f:
+        f.write("\n## 掃描範圍\n\n")
+        f.write("本稽核包含以下三個方面的安全檢查：\n\n")
+        f.write("1. **VS Code 擴充功能** - 檢查授權條款和漏洞\n")
+        f.write("2. **PyPI 套件** - 檢查 Python 套件的漏洞\n")
+        f.write("3. **工具軟體** - 檢查 tools.yml 中有 CPE 設定的工具漏洞\n\n")
+        f.write("---\n\n")
+    
     # 追蹤問題以進行摘要
     license_issues = []
     vuln_issues = []
     error_issues = []
+    pypi_vuln_issues = []
+    pypi_error_issues = []
+    tools_vuln_issues = []
+    tools_error_issues = []
 
     overall_rc = 0
 
@@ -171,8 +188,57 @@ def main():
         if rc != 0 and overall_rc == 0:
             overall_rc = rc
 
+    # 掃描 PyPI 套件
+    log("=== 開始掃描 PyPI 套件 ===")
+    try:
+        pypi_results = scan_pypi_directory(PYWHLS_DIR, max_cvss)
+        
+        # 生成 PyPI 摘要報告
+        pypi_summary_file = write_pypi_summary(pypi_results, REPORT_DIR)
+        log(f"PyPI 摘要報告已生成: {pypi_summary_file}")
+        
+        # 統計 PyPI 問題
+        for result in pypi_results:
+            if result["high_vulnerabilities"] > 0:
+                pypi_vuln_issues.append(f"{result['package_name']}@{result['version']}: {result['high_vulnerabilities']} 個漏洞 >= CVSS {max_cvss}")
+            elif result["status"].startswith("掃描錯誤"):
+                pypi_error_issues.append(f"{result['package_name']}@{result['version']}: {result['status']}")
+        
+        # 更新整體結果代碼
+        if pypi_vuln_issues and overall_rc == 0:
+            overall_rc = EXIT_VULN_DENY
+            
+    except Exception as e:
+        log(f"PyPI 套件掃描時發生錯誤: {e}")
+        pypi_error_issues.append(f"整體掃描錯誤: {e}")
+
+    # 掃描工具
+    log("=== 開始掃描工具 ===")
+    try:
+        tools_config = load_tools_config(TOOLS_CONFIG)
+        tools_results = scan_tools_with_cpe(tools_config, max_cvss)
+        
+        # 生成工具摘要報告
+        tools_summary_file = write_tools_summary(tools_results, REPORT_DIR)
+        log(f"工具摘要報告已生成: {tools_summary_file}")
+        
+        # 統計工具問題
+        for result in tools_results:
+            if result["high_vulnerabilities"] > 0:
+                tools_vuln_issues.append(f"{result['tool_name']}@{result['version']}: {result['high_vulnerabilities']} 個漏洞 >= CVSS {max_cvss}")
+            elif result["status"].startswith("掃描錯誤"):
+                tools_error_issues.append(f"{result['tool_name']}@{result['version']}: {result['status']}")
+        
+        # 更新整體結果代碼
+        if tools_vuln_issues and overall_rc == 0:
+            overall_rc = EXIT_VULN_DENY
+            
+    except Exception as e:
+        log(f"工具掃描時發生錯誤: {e}")
+        tools_error_issues.append(f"整體掃描錯誤: {e}")
+
     # 在報告中加入問題摘要
-    write_summary_footer(summary_md, license_issues, vuln_issues, error_issues)
+    write_summary_footer(summary_md, license_issues, vuln_issues, error_issues, pypi_vuln_issues, pypi_error_issues, tools_vuln_issues, tools_error_issues)
 
     # 記錄摘要
     if license_issues:
@@ -181,12 +247,20 @@ def main():
         log(f"發現 {len(vuln_issues)} 個漏洞問題")
     if error_issues:
         log(f"發現 {len(error_issues)} 個處理錯誤")
+    if pypi_vuln_issues:
+        log(f"發現 {len(pypi_vuln_issues)} 個 PyPI 套件漏洞問題")
+    if pypi_error_issues:
+        log(f"發現 {len(pypi_error_issues)} 個 PyPI 套件處理錯誤")
+    if tools_vuln_issues:
+        log(f"發現 {len(tools_vuln_issues)} 個工具漏洞問題")
+    if tools_error_issues:
+        log(f"發現 {len(tools_error_issues)} 個工具處理錯誤")
     
     # 翻譯結果代碼為中文說明
     result_messages = {
-        0: "✅ 稽核完成 - 所有擴充功能都通過檢查",
+        0: "✅ 稽核完成 - 所有擴充功能、PyPI 套件和工具都通過檢查",
         42: "❌ 稽核失敗 - 發現授權條款不符的擴充功能",
-        43: "❌ 稽核失敗 - 發現高風險漏洞的擴充功能"
+        43: "❌ 稽核失敗 - 發現高風險漏洞的擴充功能、PyPI 套件或工具"
     }
     
     result_message = result_messages.get(overall_rc, f"⚠️  稽核完成但發生未知錯誤 (代碼: {overall_rc})")

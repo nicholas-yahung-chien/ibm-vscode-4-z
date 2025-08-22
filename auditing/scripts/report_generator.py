@@ -26,8 +26,17 @@ def write_summary_header(summary_md: str, max_cvss: float):
         f.write("|---|---|---|---|---|\n")
 
 
-def write_summary_footer(summary_md: str, license_issues: list, vuln_issues: list, error_issues: list):
+def write_summary_footer(summary_md: str, license_issues: list, vuln_issues: list, error_issues: list, pypi_vuln_issues: list = None, pypi_error_issues: list = None, tools_vuln_issues: list = None, tools_error_issues: list = None):
     """寫入摘要報告的頁尾。"""
+    if pypi_vuln_issues is None:
+        pypi_vuln_issues = []
+    if pypi_error_issues is None:
+        pypi_error_issues = []
+    if tools_vuln_issues is None:
+        tools_vuln_issues = []
+    if tools_error_issues is None:
+        tools_error_issues = []
+        
     with open(summary_md, "a", encoding="utf-8") as f:
         f.write("\n## 問題摘要\n\n")
         
@@ -45,6 +54,20 @@ def write_summary_footer(summary_md: str, license_issues: list, vuln_issues: lis
                 f.write(f"- {issue}\n")
             f.write("\n")
         
+        if pypi_vuln_issues:
+            f.write("### PyPI 套件漏洞問題\n\n")
+            f.write("以下 PyPI 套件存在高風險漏洞 (CVSS 分數超過允許閾值)：\n\n")
+            for issue in pypi_vuln_issues:
+                f.write(f"- {issue}\n")
+            f.write("\n")
+        
+        if tools_vuln_issues:
+            f.write("### 工具漏洞問題\n\n")
+            f.write("以下工具存在高風險漏洞 (CVSS 分數超過允許閾值)：\n\n")
+            for issue in tools_vuln_issues:
+                f.write(f"- {issue}\n")
+            f.write("\n")
+        
         if error_issues:
             f.write("### 處理錯誤\n\n")
             f.write("以下擴充功能在處理過程中發生錯誤：\n\n")
@@ -52,14 +75,32 @@ def write_summary_footer(summary_md: str, license_issues: list, vuln_issues: lis
                 f.write(f"- {issue}\n")
             f.write("\n")
         
-        if not license_issues and not vuln_issues and not error_issues:
-            f.write("✅ **稽核成功** - 所有擴充功能都通過了安全檢查，未發現任何問題。\n\n")
+        if pypi_error_issues:
+            f.write("### PyPI 套件處理錯誤\n\n")
+            f.write("以下 PyPI 套件在處理過程中發生錯誤：\n\n")
+            for issue in pypi_error_issues:
+                f.write(f"- {issue}\n")
+            f.write("\n")
+        
+        if tools_error_issues:
+            f.write("### 工具處理錯誤\n\n")
+            f.write("以下工具在處理過程中發生錯誤：\n\n")
+            for issue in tools_error_issues:
+                f.write(f"- {issue}\n")
+            f.write("\n")
+        
+        if not license_issues and not vuln_issues and not error_issues and not pypi_vuln_issues and not pypi_error_issues and not tools_vuln_issues and not tools_error_issues:
+            f.write("✅ **稽核成功** - 所有擴充功能、PyPI 套件和工具都通過了安全檢查，未發現任何問題。\n\n")
         else:
-            total_issues = len(license_issues) + len(vuln_issues) + len(error_issues)
+            total_issues = len(license_issues) + len(vuln_issues) + len(error_issues) + len(pypi_vuln_issues) + len(pypi_error_issues) + len(tools_vuln_issues) + len(tools_error_issues)
             f.write(f"⚠️  **稽核結果摘要** - 總共發現 {total_issues} 個問題：\n")
             f.write(f"- 授權條款問題：{len(license_issues)} 個\n")
             f.write(f"- 漏洞問題：{len(vuln_issues)} 個\n")
-            f.write(f"- 處理錯誤：{len(error_issues)} 個\n\n")
+            f.write(f"- PyPI 套件漏洞問題：{len(pypi_vuln_issues)} 個\n")
+            f.write(f"- 工具漏洞問題：{len(tools_vuln_issues)} 個\n")
+            f.write(f"- 處理錯誤：{len(error_issues)} 個\n")
+            f.write(f"- PyPI 套件處理錯誤：{len(pypi_error_issues)} 個\n")
+            f.write(f"- 工具處理錯誤：{len(tools_error_issues)} 個\n\n")
 
 
 def write_extension_summary(ext_report_dir: str, name: str, license_str: str, sbom: str, grype: str, osv: str, sha: str, high: int, max_cvss: float):

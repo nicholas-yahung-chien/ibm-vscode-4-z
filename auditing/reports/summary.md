@@ -2,6 +2,17 @@
 
 | 擴充功能 | 授權條款 | 稽核結果 | 高風險漏洞數量 (CVSS≥8.0) | SHA256 雜湊值 |
 |---|---|---|---|---|
+
+## 掃描範圍
+
+本稽核包含以下三個方面的安全檢查：
+
+1. **VS Code 擴充功能** - 檢查授權條款和漏洞
+2. **PyPI 套件** - 檢查 Python 套件的漏洞
+3. **工具軟體** - 檢查 tools.yml 中有 CPE 設定的工具漏洞
+
+---
+
 | `ibm.zopendebug@5.4.0` | `IBM` | **通過** | 0 | `9ce86963df2fc03f9c5556a8157d9c17c078db6de931978846c8f429bae4316a` |
 | `ibm.zopeneditor@5.6.0` | `IBM` | **漏洞風險過高** | 1 | `4718a82c8b66ae531d48d7d1baf42be7d6f3865bd01094d394a90df66762a1e8` |
 | `ibm.zcommoncomponent@16.1.25061109` | `IBM` | **通過** | 0 | `4b9b9c193b2cf566cdbfd4bec89eade9d92140b07eaac22f7da88b2547f4b224` |
@@ -31,7 +42,7 @@
 | `ms-vscode-remote.remote-ssh@0.120.0` | `Microsoft` | **通過** | 0 | `0fd6262ca183b486f6c067cb3516dccea2f87f32c049b642ff9eb77b0cea195d` |
 | `ms-vscode-remote.remote-containers@0.422.0` | `Microsoft` | **通過** | 0 | `50c5c265ef27bf038092b1f134aabe2fe01832832fab6a230e7e4dacc75338d9` |
 | `ms-vscode.remote-server@1.5.2` | `Microsoft` | **通過** | 0 | `1aa6f7fdf4904b7ad885ea054bc92ca2275a66b3a57717983e81529734a09952` |
-| `ms-ceintl.vscode-language-pack-zh-hant@1.101.2025061109` | `SEE MIT LICENSE IN LICENSE.md` | **通過** | 0 | `e005e98897c57783e9311f3d2105939f3794fa7dd13b098cd70688fa1d2876ba` |
+| `ms-ceintl.vscode-language-pack-zh-hant@1.101.2025061109` | `Microsoft` | **通過** | 0 | `e005e98897c57783e9311f3d2105939f3794fa7dd13b098cd70688fa1d2876ba` |
 
 ## 問題摘要
 
@@ -42,8 +53,18 @@
 - ibm.zopeneditor@5.6.0: 1 個漏洞 >= CVSS 8.0
 - galasa.galasa-plugin@0.13.0: 4 個漏洞 >= CVSS 8.0
 
-⚠️  **稽核結果摘要** - 總共發現 2 個問題：
+### 工具漏洞問題
+
+以下工具存在高風險漏洞 (CVSS 分數超過允許閾值)：
+
+- python@3.13.3: 1 個漏洞 >= CVSS 8.0
+
+⚠️  **稽核結果摘要** - 總共發現 3 個問題：
 - 授權條款問題：0 個
 - 漏洞問題：2 個
+- PyPI 套件漏洞問題：0 個
+- 工具漏洞問題：1 個
 - 處理錯誤：0 個
+- PyPI 套件處理錯誤：0 個
+- 工具處理錯誤：0 個
 
