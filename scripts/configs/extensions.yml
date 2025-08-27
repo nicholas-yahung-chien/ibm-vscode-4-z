@@ -1,6 +1,6 @@
 ibm:
   - zopendebug: 5.4.0
-  - zopeneditor: 5.6.0
+  - zopeneditor: 5.7.0
   - zcommoncomponent: 16.1.25061109
   - zfilemanager: 16.1.25061109
   - zfaultanalyzer: 16.1.25061109

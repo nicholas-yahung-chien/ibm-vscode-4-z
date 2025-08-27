@@ -1,7 +1,0 @@
-extension: ibm.zopeneditor@5.6.0
-license: IBM
-sbom: cyclonedx.json
-grype: grype.json
-osv: osv.json
-sha256: 4718a82c8b66ae531d48d7d1baf42be7d6f3865bd01094d394a90df66762a1e8
-high_or_equal_cvss_8_0: 1

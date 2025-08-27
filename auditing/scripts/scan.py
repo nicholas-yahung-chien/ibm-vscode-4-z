@@ -96,8 +96,7 @@ def main():
     log(f"允許的最大 CVSS: {max_cvss}")
 
     summary_md = os.path.join(REPORT_DIR, "summary.md")
-    write_summary_header(summary_md, max_cvss)
-    
+
     # 在摘要報告中加入工具掃描的說明
     with open(summary_md, "a", encoding="utf-8") as f:
         f.write("\n## 掃描範圍\n\n")
@@ -106,6 +105,8 @@ def main():
         f.write("2. **PyPI 套件** - 檢查 Python 套件的漏洞\n")
         f.write("3. **工具軟體** - 檢查 tools.yml 中有 CPE 設定的工具漏洞\n\n")
         f.write("---\n\n")
+
+    write_summary_header(summary_md, max_cvss)
     
     # 追蹤問題以進行摘要
     license_issues = []
