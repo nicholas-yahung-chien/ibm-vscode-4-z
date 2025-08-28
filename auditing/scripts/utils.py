@@ -63,3 +63,16 @@ def ensure_dirs(*dirs):
     """確保必要目錄存在。"""
     for dir_path in dirs:
         os.makedirs(dir_path, exist_ok=True)
+
+
+def clean_dirs(*dirs):
+    """清理目錄：刪除現有目錄並重新建立。"""
+    for dir_path in dirs:
+        if os.path.exists(dir_path):
+            try:
+                shutil.rmtree(dir_path)
+                log(f"已刪除目錄: {dir_path}")
+            except Exception as e:
+                log(f"刪除目錄 {dir_path} 時發生錯誤: {e}")
+        # 重新建立目錄
+        os.makedirs(dir_path, exist_ok=True)

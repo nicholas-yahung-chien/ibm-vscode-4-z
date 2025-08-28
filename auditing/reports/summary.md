@@ -1,4 +1,3 @@
-# VS Code 擴充功能安全稽核報告
 
 ## 掃描範圍
 
@@ -10,6 +9,8 @@
 
 ---
 
+# VS Code 擴充功能安全稽核報告
+
 | 擴充功能 | 授權條款 | 稽核結果 | 高風險漏洞數量 (CVSS≥8.0) | SHA256 雜湊值 |
 |---|---|---|---|---|
 | `ibm.zopendebug@5.4.0` | `IBM` | **通過** | 0 | `9ce86963df2fc03f9c5556a8157d9c17c078db6de931978846c8f429bae4316a` |
@@ -20,7 +21,6 @@
 | `ibm.db2forzosdeveloperextension@2.2.2` | `IBM` | **通過** | 0 | `3ac24e8a6b1ef7f7cfe5f7f0cd3c53012e361326dfc3e358c693192896b0f746` |
 | `ibm.ibm-developer@1.0.1` | `Apache 2.0 (see LICENSE.txt)` | **通過** | 0 | `ddd7093ba265eec5c739dc95069121b6644a68e3d04957d18a198aacca3a8e06` |
 | `ibm.wca-core@1.6.2` | `IBM` | **通過** | 0 | `df4ffbe81160330c91be98b3ed140f5d26f87e6c956f4cfc1c0778cc95e7f554` |
-| `galasa.galasa-plugin@0.13.0` | `EPL-2.0` | **漏洞風險過高** | 4 | `c4b6771653d4670c082cb21f78f854971da2af47446f03c028a26021e5055de3` |
 | `vscjava.vscode-maven@0.44.2024072906` | `MIT` | **通過** | 0 | `f52f19cde7e0f62de76623d902d5b9693d3b769667855d30f433f9bdd9c4b457` |
 | `broadcommfd.explorer-for-endevor@1.11.1` | `Broadcom` | **通過** | 0 | `843313b3f3d4ca53c3566bd463259a1f777a2dff344ece8a1948910dd704312e` |
 | `broadcommfd.abend-analyzer@1.3.0` | `Broadcom` | **通過** | 0 | `fb49b98a3d87684332f193df40230d2ff07d742c4cde225e62dc646ca8211953` |
@@ -45,24 +45,17 @@
 
 ## 問題摘要
 
-### 漏洞問題
-
-以下擴充功能存在高風險漏洞 (CVSS 分數超過允許閾值)：
-
-- galasa.galasa-plugin@0.13.0: 4 個漏洞 >= CVSS 8.0
-
 ### 工具漏洞問題
 
 以下工具存在高風險漏洞 (CVSS 分數超過允許閾值)：
 
-- python@3.13.3: 1 個漏洞 >= CVSS 8.0
-- git@2.50.0: 1 個漏洞 >= CVSS 8.0
+- python@3.13.5: 1 個漏洞 >= CVSS 8.0
 
-⚠️  **稽核結果摘要** - 總共發現 3 個問題：
+⚠️  **稽核結果摘要** - 總共發現 1 個問題：
 - 授權條款問題：0 個
-- 漏洞問題：1 個
+- 漏洞問題：0 個
 - PyPI 套件漏洞問題：0 個
-- 工具漏洞問題：2 個
+- 工具漏洞問題：1 個
 - 處理錯誤：0 個
 - PyPI 套件處理錯誤：0 個
 - 工具處理錯誤：0 個

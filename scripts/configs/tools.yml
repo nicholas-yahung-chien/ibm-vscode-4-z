@@ -7,11 +7,11 @@ vscode:
   cpe_name: "cpe:2.3:a:microsoft:visual_studio_code:-:*:*:*:*:*:*:*"
   add_home_path_to_env: false
 python:
-  version: "3.13.3"
+  version: "3.13.5"
   dir: python
   type: "zip"
   pattern: "*python*"
-  source: https://github.com/winpython/winpython/releases/download/15.3.20250425final/Winpython64-3.13.3.0dot.zip
+  source: https://github.com/winpython/winpython/releases/download/16.6.20250620final/Winpython64-3.13.5.0dot.zip
   cpe_name: "cpe:2.3:a:python:python:-:*:*:*:*:*:*:*"
   add_home_path_to_env: true
   home_path_of:
@@ -37,11 +37,11 @@ groovy:
   home_path_of:
     - "groovy.bat"
 git:
-  version: "2.50.0"
+  version: "2.51.0"
   dir: git
   type: "7z.exe"
   pattern: "PortableGit*"
-  source: https://github.com/git-for-windows/git/releases/download/v2.50.0.windows.1/PortableGit-2.50.0-64-bit.7z.exe
+  source: https://github.com/git-for-windows/git/releases/download/v2.51.0.windows.1/PortableGit-2.51.0-64-bit.7z.exe
   cpe_name: "cpe:2.3:a:git-scm:git:-:*:*:*:*:*:*:*"
   add_home_path_to_env: true
   home_path_of:
@@ -71,6 +71,16 @@ zowe-plugin:
   pattern: "zowe*plugins*"
   source: https://zowe.jfrog.io/zowe/list/libs-release-local/org/zowe/3.2.0/zowe-cli-plugins-3.2.0.zip
   add_home_path_to_env: false
+galasa:
+  version: "0.43.0"
+  dir: galasa
+  type: "exe"
+  pattern: "galasactl*"
+  source: https://github.com/galasa-dev/galasa/releases/download/v0.43.0/galasactl-windows-x86_64.exe
+  cpe_name: "cpe:2.3:a:galasa-dev:galasa:-:*:*:*:*:*:*:*"
+  add_home_path_to_env: true
+  home_path_of: 
+    - "galasactl.exe"
 java21:
   version: "21.0.7"
   dir: java/21

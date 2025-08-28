@@ -21,10 +21,11 @@ python scan.py [--root <專案根目錄>] [--ovsx-registry <OpenVSX 註冊表 UR
 import argparse
 import os
 import sys
+import shutil
 from pathlib import Path
 
 # 導入模組化功能
-from utils import log, ensure_dirs, require_bin
+from utils import log, ensure_dirs, require_bin, clean_dirs
 from config import read_policy, read_extensions_config
 from extension_scanner import scan_one_extension
 from pypi_scanner import scan_pypi_directory, write_pypi_summary
@@ -80,7 +81,9 @@ def main():
     global ENV_OVSX_REGISTRY
     ENV_OVSX_REGISTRY = args.ovsx_registry.rstrip("/") or DEFAULT_OVSX_REGISTRY
 
-    ensure_dirs(WORK_DIR, DIST_DIR, REPORT_DIR)
+    # 清理相關目錄以確保乾淨的執行環境
+    log("清理工作目錄...")
+    clean_dirs(WORK_DIR, DIST_DIR, REPORT_DIR)
 
     # 必要工具
     require_bin("python")  # 此直譯器

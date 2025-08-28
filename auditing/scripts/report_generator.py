@@ -20,7 +20,7 @@ def write_summary_row(summary_md: str, pubext: str, version: str, license_str: s
 
 def write_summary_header(summary_md: str, max_cvss: float):
     """寫入摘要報告的標題。"""
-    with open(summary_md, "w", encoding="utf-8") as f:
+    with open(summary_md, "a", encoding="utf-8") as f:
         f.write("# VS Code 擴充功能安全稽核報告\n\n")
         f.write(f"| 擴充功能 | 授權條款 | 稽核結果 | 高風險漏洞數量 (CVSS≥{max_cvss}) | SHA256 雜湊值 |\n")
         f.write("|---|---|---|---|---|\n")
@@ -114,7 +114,7 @@ def write_extension_summary(ext_report_dir: str, name: str, license_str: str, sb
     sha256: {sha}
     high_or_equal_cvss_{str(max_cvss).replace('.', '_')}: {high}
     """)
-    with open(os.path.join(ext_report_dir, "summary.txt"), "w", encoding="utf-8") as f:
+    with open(os.path.join(ext_report_dir, "summary.txt"), "a", encoding="utf-8") as f:
         f.write(summary_txt)
 
 
@@ -123,17 +123,17 @@ def write_result_file(ext_report_dir: str, result: str, details: str = ""):
     content = f"{result}\n"
     if details:
         content += f"{details}\n"
-    with open(os.path.join(ext_report_dir, "result.txt"), "w", encoding="utf-8") as f:
+    with open(os.path.join(ext_report_dir, "result.txt"), "a", encoding="utf-8") as f:
         f.write(content)
 
 
 def write_license_file(ext_report_dir: str, license_str: str):
     """寫入授權條款檔案。"""
-    with open(os.path.join(ext_report_dir, "license.txt"), "w", encoding="utf-8") as f:
+    with open(os.path.join(ext_report_dir, "license.txt"), "a", encoding="utf-8") as f:
         f.write(str(license_str) + "\n")
 
 
 def write_sha256_file(ext_report_dir: str, sha: str):
     """寫入 SHA256 檔案。"""
-    with open(os.path.join(ext_report_dir, "sha256.txt"), "w", encoding="utf-8") as f:
+    with open(os.path.join(ext_report_dir, "sha256.txt"), "a", encoding="utf-8") as f:
         f.write(sha + "\n")

@@ -8,9 +8,6 @@ ibm:
   - ibm-developer: 1.0.1
   - wca-core: 1.6.2
 
-galasa:
-  - galasa-plugin: 0.13.0
-
 vscjava:
   - vscode-maven: 0.44.2024072906
 
