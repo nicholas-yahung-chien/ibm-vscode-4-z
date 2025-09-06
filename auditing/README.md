@@ -102,6 +102,7 @@ python scripts/scan.py
 
 - **CPE 版本替換**：自動將 CPE 名稱中的版本 placeholder (`-`) 替換為實際版本號
 - **NVD API 查詢**：使用 NIST National Vulnerability Database API 查詢 CVE 漏洞
+- **精確漏洞過濾**：解析 NVD 回傳的 `configurations` 資料，只計算真正影響目標軟體的漏洞
 - **CVSS 分數分析**：分析漏洞的 CVSS 分數，找出最高分數和超過閾值的漏洞
 - **政策比較**：與 `policy.yml` 中設定的最大 CVSS 容許度進行比較
 
@@ -109,6 +110,28 @@ python scripts/scan.py
 ```
 輸入: cpe:2.3:a:microsoft:visual_studio_code:-:*:*:*:*:*:*:* 和版本 "1.101.0"
 輸出: cpe:2.3:a:microsoft:visual_studio_code:1.101.0:*:*:*:*:*:*:*
+```
+
+#### 精確漏洞過濾機制
+
+工具掃描器使用先進的漏洞過濾機制，確保只報告真正影響目標軟體的漏洞：
+
+**問題背景**：
+- NVD API 可能回傳與目標軟體相關但非直接影響的漏洞
+- 例如：Odoo 軟體在 Python 環境中的漏洞，不應被視為 Python 本身的漏洞
+
+**解決方案**：
+- 解析 NVD 回傳的 `configurations` 資料結構
+- 檢查每個 CVE 的 `cpeMatch` 項目
+- 只有當 CPE 名稱匹配目標軟體且 `vulnerable: true` 時，才計算該漏洞
+
+**範例**：
+```
+CVE-2020-29396 (CVSS: 8.8) - Odoo 相關漏洞
+├── cpe:2.3:a:odoo:odoo:11.0-13.0 (vulnerable: true)  ← 主要漏洞
+└── cpe:2.3:a:python:python:* (vulnerable: false)     ← Python 不受影響
+
+結果：此漏洞不會被計入 Python 的風險評估
 ```
 
 ## 輸出報告
@@ -231,6 +254,9 @@ python scripts/scan.py
 - **v1.0.0**：初始版本，支援基本的擴充功能掃描
 - **v1.1.0**：新增 PyPI 套件掃描功能
 - **v1.2.0**：新增工具軟體掃描功能
-- 整合 NVD API 查詢
-- 支援 CPE 版本替換
-- 生成詳細的 Markdown 報告
+- **v1.2.1**：改進工具掃描的漏洞過濾邏輯
+  - 整合 NVD API 查詢
+  - 支援 CPE 版本替換
+  - 精確解析 NVD configurations 資料
+  - 過濾不相關的漏洞（如第三方軟體在目標環境中的漏洞）
+  - 生成詳細的 Markdown 報告

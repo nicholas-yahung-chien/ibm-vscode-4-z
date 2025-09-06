@@ -63,9 +63,14 @@ def query_nvd_api(cpe_name: str) -> Dict:
         return {"vulnerabilities": []}
 
 
-def analyze_cve_vulnerabilities(vulns_data: Dict, max_cvss: float) -> Tuple[List[str], float, int]:
+def analyze_cve_vulnerabilities(vulns_data: Dict, max_cvss: float, target_cpe_prefix: str = None) -> Tuple[List[str], float, int]:
     """
     分析 CVE 漏洞資料，找出最高 CVSS 分數和超過閾值的漏洞數量
+    
+    參數:
+    - vulns_data: NVD API 回傳的漏洞資料
+    - max_cvss: CVSS 閾值
+    - target_cpe_prefix: 目標 CPE 前綴 (例如: "cpe:2.3:a:python:python")
     
     回傳: (高風險漏洞列表, 最高 CVSS 分數, 高風險漏洞數量)
     """
@@ -79,6 +84,10 @@ def analyze_cve_vulnerabilities(vulns_data: Dict, max_cvss: float) -> Tuple[List
     for vuln in vulns_data["vulnerabilities"]:
         cve = vuln.get("cve", {})
         cve_id = cve.get("id", "UNKNOWN")
+        
+        # 檢查此漏洞是否真的影響目標軟體
+        if not is_vulnerability_affects_target(cve, target_cpe_prefix):
+            continue
         
         # 取得 CVSS 分數
         cvss_score = 0.0
@@ -103,6 +112,39 @@ def analyze_cve_vulnerabilities(vulns_data: Dict, max_cvss: float) -> Tuple[List
             high_vulns.append(f"{cve_id} (CVSS: {cvss_score:.1f}) - {description}")
     
     return high_vulns, max_cvss_score, high_count
+
+
+def is_vulnerability_affects_target(cve: Dict, target_cpe_prefix: str) -> bool:
+    """
+    檢查 CVE 是否真的影響目標軟體
+    
+    參數:
+    - cve: CVE 資料
+    - target_cpe_prefix: 目標 CPE 前綴 (例如: "cpe:2.3:a:python:python")
+    
+    回傳: True 如果漏洞影響目標軟體，False 否則
+    """
+    if not target_cpe_prefix:
+        # 如果沒有指定目標 CPE 前綴，則接受所有漏洞
+        return True
+    
+    configurations = cve.get("configurations", [])
+    
+    for config in configurations:
+        nodes = config.get("nodes", [])
+        
+        for node in nodes:
+            cpe_matches = node.get("cpeMatch", [])
+            
+            for cpe_match in cpe_matches:
+                criteria = cpe_match.get("criteria", "")
+                vulnerable = cpe_match.get("vulnerable", False)
+                
+                # 檢查是否為目標軟體且標記為易受攻擊
+                if criteria.startswith(target_cpe_prefix) and vulnerable:
+                    return True
+    
+    return False
 
 
 def scan_tools_with_cpe(tools_config: Dict, max_cvss: float) -> List[Dict]:
@@ -132,8 +174,16 @@ def scan_tools_with_cpe(tools_config: Dict, max_cvss: float) -> List[Dict]:
             # 查詢 NVD API
             vulns_data = query_nvd_api(full_cpe)
             
+            # 提取 CPE 前綴用於過濾
+            # 例如: cpe:2.3:a:python:python:3.13.3:*:*:*:*:*:*:* -> cpe:2.3:a:python:python
+            cpe_parts = cpe_name.split(":")
+            if len(cpe_parts) >= 5:
+                target_cpe_prefix = ":".join(cpe_parts[:5])  # cpe:2.3:a:vendor:product
+            else:
+                target_cpe_prefix = cpe_name
+            
             # 分析漏洞
-            high_vulns, max_cvss_score, high_count = analyze_cve_vulnerabilities(vulns_data, max_cvss)
+            high_vulns, max_cvss_score, high_count = analyze_cve_vulnerabilities(vulns_data, max_cvss, target_cpe_prefix)
             
             # 判斷狀態
             if high_count > 0:
