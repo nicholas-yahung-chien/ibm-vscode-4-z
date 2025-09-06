@@ -32,6 +32,9 @@ from pathlib import Path
 from utils.file_utils import cleanup_directory_match
 from utils.path_utils import compose_folder_path, get_script_dir
 import subprocess
+import sys
+import time
+import threading
 
 # 導入我們的設定檔工具模組
 from configs import (
@@ -41,6 +44,58 @@ from configs import (
 )
 
 DEFAULT_OVSX_REGISTRY = "https://open-vsx.org"
+
+# -------------------------------
+#  進度顯示類別
+# -------------------------------
+class Spinner:
+    """簡單的 spinner 動畫類別"""
+    def __init__(self, message="下載中"):
+        self.message = message
+        self.spinner_chars = "|/-\\"
+        self.running = False
+        self.thread = None
+        
+    def start(self):
+        """開始顯示 spinner"""
+        self.running = True
+        self.thread = threading.Thread(target=self._spin)
+        self.thread.daemon = True
+        self.thread.start()
+        
+    def stop(self):
+        """停止顯示 spinner"""
+        self.running = False
+        if self.thread:
+            self.thread.join()
+        # 清除 spinner 行
+        sys.stdout.write('\r' + ' ' * (len(self.message) + 10) + '\r')
+        sys.stdout.flush()
+        
+    def _spin(self):
+        """spinner 動畫循環"""
+        i = 0
+        while self.running:
+            sys.stdout.write(f'\r{self.message} {self.spinner_chars[i % len(self.spinner_chars)]}')
+            sys.stdout.flush()
+            time.sleep(0.1)
+            i += 1
+
+def format_size(size_bytes):
+    """格式化檔案大小顯示"""
+    if size_bytes == 0:
+        return "0 B"
+    size_names = ["B", "KB", "MB", "GB", "TB"]
+    i = 0
+    while size_bytes >= 1024 and i < len(size_names) - 1:
+        size_bytes /= 1024.0
+        i += 1
+    return f"{size_bytes:.1f} {size_names[i]}"
+
+def clear_progress_line():
+    """清空當前行並回到行首"""
+    sys.stdout.write('\r' + ' ' * 100 + '\r')
+    sys.stdout.flush()
 
 # -------------------------------
 #  功能函式
@@ -77,12 +132,24 @@ def download_file(url, dest_directory, filename_pattern, default_filename=""):
     根據 URL 下載檔案，並根據 response header 中的 Content-Disposition 設定檔案名稱，
     若找不到檔名則使用 URL 的最後一段作為檔案名稱。在儲存前若檔案已存在，則先刪除。
     """
+    spinner = None
     try:
-        response = requests.get(url, timeout=60)
+        # 使用更詳細的 timeout 設定：(連接超時, 讀取超時)
+        # 連接超時：30秒，讀取超時：60秒（1分鐘）
+        print(f"開始下載：{url}")
+        spinner = Spinner("連接中")
+        spinner.start()
+        
+        response = requests.get(url, timeout=(30, 60), stream=True)
+        spinner.stop()
+        
         if response.status_code == 200:
             # 檢查下載內容是否為 HTML 網頁而非實際檔案
             content_type = response.headers.get('Content-Type', '').lower()
-            content_start = response.content[:1000].decode('utf-8', errors='ignore').lower()
+            
+            # 先讀取一小部分內容來檢查是否為 HTML
+            first_chunk = next(response.iter_content(chunk_size=1000), b'')
+            content_start = first_chunk.decode('utf-8', errors='ignore').lower()
             
             # 如果內容類型是 HTML 或內容包含 HTML 標籤，則認為是網頁而非檔案
             if ('text/html' in content_type or 
@@ -101,18 +168,68 @@ def download_file(url, dest_directory, filename_pattern, default_filename=""):
             if os.path.exists(os.path.join(dest_directory, filename)):
                 os.remove(os.path.join(dest_directory, filename))
             
-            # 寫入檔案
+            # 獲取檔案總大小（如果可用）
+            total_size = response.headers.get('content-length')
+            if total_size:
+                total_size = int(total_size)
+            else:
+                total_size = None
+            
+            # 使用流式下載，避免大文件一次性載入記憶體
+            downloaded_size = 0
             with open(dest_path, "wb") as f:
-                f.write(response.content)
+                # 先寫入已讀取的第一個 chunk
+                f.write(first_chunk)
+                downloaded_size += len(first_chunk)
+                
+                # 顯示初始進度
+                clear_progress_line()
+                if total_size:
+                    progress = (downloaded_size / total_size) * 100
+                    sys.stdout.write(f"下載進度: {progress:.1f}% ({format_size(downloaded_size)}/{format_size(total_size)})")
+                else:
+                    sys.stdout.write(f"已下載: {format_size(downloaded_size)}")
+                sys.stdout.flush()
+                
+                # 繼續下載剩餘內容
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:  # 過濾掉 keep-alive 的空 chunk
+                        f.write(chunk)
+                        downloaded_size += len(chunk)
+                        
+                        # 更新進度顯示
+                        clear_progress_line()
+                        if total_size:
+                            progress = (downloaded_size / total_size) * 100
+                            sys.stdout.write(f"下載進度: {progress:.1f}% ({format_size(downloaded_size)}/{format_size(total_size)})")
+                        else:
+                            sys.stdout.write(f"已下載: {format_size(downloaded_size)}")
+                        sys.stdout.flush()
+            
+            print()  # 換行
             print(f"下載成功，檔案已儲存為: {dest_path}")
             return True
         else:
             print(f"下載失敗：{url} (HTTP 狀態：{response.status_code})")
             return False
     except requests.exceptions.Timeout:
+        if spinner:
+            spinner.stop()
         print(f"下載逾時：{url}")
         return False
+    except requests.exceptions.ConnectionError:
+        if spinner:
+            spinner.stop()
+        print(f"連接錯誤：{url}")
+        return False
+    except KeyboardInterrupt:
+        if spinner:
+            spinner.stop()
+        print(f"下載被用戶中斷：{url}")
+        return False
     except Exception as e:
+        if spinner:
+            spinner.stop()
         print(f"下載過程中發生錯誤：{e}")
         return False
 
