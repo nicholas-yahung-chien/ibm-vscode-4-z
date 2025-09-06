@@ -102,11 +102,11 @@ def main():
     
     # 設定連線參數變數（初始值為預設值，後續根據選單或設定檔案更新）
     properties = {
-        "zosmf": {"port": 443, "encoding": "IBM-937"},
+        "zosmf": {"port": 443, "encoding": "EBCDIC"},
         "tso": {"codepage": 1047},
         "ssh": {"port": 22},
         "ftp": {"port": 21},
-        "rse": {"port": 6800, "encoding": "IBM-937"},
+        "rse": {"port": 6800, "encoding": "EBCDIC"},
         "debug": {"port": 8143}
     }
     
