@@ -1,10 +1,10 @@
 ibm:
-  - zopendebug: 5.4.0
-  - zopeneditor: 5.7.0
-  - zcommoncomponent: 16.1.25061109
-  - zfilemanager: 16.1.25061109
-  - zfaultanalyzer: 16.1.25061109
-  - db2forzosdeveloperextension: 2.2.2
+  - zopendebug: 5.5.2
+  - zopeneditor: 5.7.1
+  - zcommoncomponent: 16.1.125082220
+  - zfilemanager: 16.1.125082220
+  - zfaultanalyzer: 16.1.125082220
+  - db2forzosdeveloperextension: 2.2.3
   - ibm-developer: 1.0.1
   - wca-core: 1.6.2
 
@@ -23,12 +23,12 @@ broadcommfd:
   - lsp-for-rexx: 0.0.22
 
 zowe:
-  - cics-extension-for-zowe: 3.8.0
-  - zowe-explorer-ftp-extension: 3.2.1
-  - vscode-extension-for-zowe: 3.2.1
+  - cics-extension-for-zowe: 3.11.0
+  - zowe-explorer-ftp-extension: 3.2.2
+  - vscode-extension-for-zowe: 3.2.2
 
 continue:
-  - continue: 1.1.71
+  - continue: 1.2.2
 
 redhat:
   - vscode-yaml: 1.18.0

@@ -69,9 +69,7 @@
             "properties": {
                 "dpsPort": "_DEBUG_PORT_",
                 "dpsContextRoot": "api/v1",
-                "dpsSecured": true,
-                "authenticationType": "token",
-                "uuid": "a142a31e-3269-4695-af55-16c69bbb6943"
+                "dpsSecured": true
             },
             "secure": []
         },
