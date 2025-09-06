@@ -4,6 +4,7 @@ vscode:
   type: "zip"
   pattern: "VSCode*"
   source: https://code.visualstudio.com/sha/download?version=1.101.0&os=win32-x64-archive
+  zip_type: "zip"
   cpe_name: "cpe:2.3:a:microsoft:visual_studio_code:-:*:*:*:*:*:*:*"
   add_home_path_to_env: false
 python:
@@ -12,6 +13,7 @@ python:
   type: "zip"
   pattern: "*python*"
   source: https://github.com/winpython/winpython/releases/download/16.6.20250620final/Winpython64-3.13.5.0dot.zip
+  zip_type: "zip"
   cpe_name: "cpe:2.3:a:python:python:-:*:*:*:*:*:*:*"
   add_home_path_to_env: true
   home_path_of:
@@ -22,6 +24,7 @@ nodejs:
   type: "zip"
   pattern: "*node*"
   source: https://nodejs.org/dist/v22.16.0/node-v22.16.0-win-x64.zip
+  zip_type: "zip"
   cpe_name: "cpe:2.3:a:nodejs:node.js:-:*:*:*:*:*:*:*"
   add_home_path_to_env: true
   home_path_of:
@@ -32,6 +35,7 @@ groovy:
   type: "zip"
   pattern: "*groovy*"
   source: https://groovy.jfrog.io/artifactory/dist-release-local/groovy-zips/apache-groovy-sdk-4.0.27.zip
+  zip_type: "zip"
   cpe_name: "cpe:2.3:a:apache:groovy:-:*:*:*:*:*:*:*"
   add_home_path_to_env: true
   home_path_of:
@@ -42,6 +46,7 @@ git:
   type: "7z.exe"
   pattern: "PortableGit*"
   source: https://github.com/git-for-windows/git/releases/download/v2.51.0.windows.1/PortableGit-2.51.0-64-bit.7z.exe
+  zip_type: "exe"
   cpe_name: "cpe:2.3:a:git-scm:git:-:*:*:*:*:*:*:*"
   add_home_path_to_env: true
   home_path_of:
@@ -52,6 +57,7 @@ maven:
   type: "zip"
   pattern: "*maven*"
   source: https://dlcdn.apache.org/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.zip
+  zip_type: "zip"
   cpe_name: "cpe:2.3:a:apache:maven:-:*:*:*:*:*:*:*"
   add_home_path_to_env: true
   home_path_of:
@@ -62,6 +68,7 @@ zowe-core:
   type: "zip"
   pattern: "zowe*package*"
   source: https://zowe.jfrog.io/zowe/list/libs-release-local/org/zowe/3.2.0/zowe-cli-package-3.2.0.zip
+  zip_type: "zip"
   cpe_name: "cpe:2.3:a:zowe:zowe_cli:-:*:*:*:*:*:*:*"
   add_home_path_to_env: false
 zowe-plugin:
@@ -70,6 +77,7 @@ zowe-plugin:
   type: "zip"
   pattern: "zowe*plugins*"
   source: https://zowe.jfrog.io/zowe/list/libs-release-local/org/zowe/3.2.0/zowe-cli-plugins-3.2.0.zip
+  zip_type: "zip"
   add_home_path_to_env: false
 galasa:
   version: "0.43.0"
@@ -77,6 +85,7 @@ galasa:
   type: "exe"
   pattern: "galasactl*"
   source: https://github.com/galasa-dev/galasa/releases/download/v0.43.0/galasactl-windows-x86_64.exe
+  zip_type: "nonzip"
   cpe_name: "cpe:2.3:a:galasa-dev:galasa:-:*:*:*:*:*:*:*"
   add_home_path_to_env: true
   home_path_of: 
@@ -87,6 +96,7 @@ java21:
   type: "zip"
   pattern: "*jdk*21*"
   source: https://github.com/ibmruntimes/semeru21-binaries/releases/download/jdk-21.0.7%2B6_openj9-0.51.0/ibm-semeru-open-jdk_x64_windows_21.0.7_6_openj9-0.51.0.zip
+  zip_type: "zip"
   cpe_name: "cpe:2.3:a:ibm:semeru_runtime:-:*:*:*:*:*:*:*"
   add_home_path_to_env: true
   home_path_of: 

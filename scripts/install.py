@@ -127,7 +127,7 @@ def phase1_check_tools(workspace, auto_continue=False):
 def phase2_extract_packages(tools, tool_files, workspace, auto_continue=False):
     # 解壓縮 zip 類型工具包
     for tool, info in tools.items():
-        if info["type"] == "zip":
+        if info["zip_type"] == "zip":
             dest_dir = compose_folder_path(workspace, info["dir"])
             zip_path = os.path.join(dest_dir, tool_files[tool])
             extract_zip_with_spinner(zip_path, dest_dir)
@@ -135,7 +135,7 @@ def phase2_extract_packages(tools, tool_files, workspace, auto_continue=False):
     
     # 解壓縮 exe 類型自解工具包
     for tool, info in tools.items():
-        if info["type"] == "exe":
+        if info["zip_type"] == "exe":
             dest_dir = compose_folder_path(workspace, info["dir"])
             exe_path = os.path.join(dest_dir, tool_files[tool])
             try:
@@ -148,6 +148,33 @@ def phase2_extract_packages(tools, tool_files, workspace, auto_continue=False):
                 print(f"解壓縮 {tool} 失敗，錯誤代碼：{e.returncode}")
                 if e.stderr:
                     print(f"錯誤訊息：{e.stderr}")
+    
+    # 處理 nonzip 類型工具包（僅重命名檔案）
+    for tool, info in tools.items():
+        if info["zip_type"] == "nonzip":
+            dest_dir = compose_folder_path(workspace, info["dir"])
+            source_file = os.path.join(dest_dir, tool_files[tool])
+            
+            # 檢查來源檔案是否存在
+            if not os.path.exists(source_file):
+                print(f"警告：{tool} 的來源檔案 {source_file} 不存在，跳過重命名。")
+                continue
+            
+            # 根據 home_path_of 進行檔案重命名
+            if "home_path_of" in info and info["home_path_of"]:
+                for target_name in info["home_path_of"]:
+                    target_path = os.path.join(dest_dir, target_name)
+                    try:
+                        if os.path.exists(target_path):
+                            os.remove(target_path)
+                            print(f"已刪除既有的 {target_name}")
+                        
+                        os.rename(source_file, target_path)
+                        print(f"已將 {os.path.basename(source_file)} 重命名為 {target_name}")
+                    except OSError as e:
+                        print(f"重命名 {tool} 檔案失敗：{e}")
+            else:
+                print(f"警告：{tool} 未設定 home_path_of，跳過重命名。")
     
     # 取得 JAVA_HOME 相關路徑（取倒序排序第一個項目）
     java_versions = sorted([key for key in tools if key.startswith("java")], reverse=True)
