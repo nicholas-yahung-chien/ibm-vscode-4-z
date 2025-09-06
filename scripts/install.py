@@ -353,7 +353,7 @@ def phase5_path_migration(tools, java_home_path, workspace, auto_continue=False)
     
     # 設定系統編碼
     print("設定系統編碼...")
-    default_encoding = "IBM-937"
+    default_encoding = "CP950"
     if auto_continue:
         system_encoding = default_encoding
         print(f"使用預設編碼：{system_encoding}")
