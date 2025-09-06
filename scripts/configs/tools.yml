@@ -46,7 +46,7 @@ git:
   type: "7z.exe"
   pattern: "PortableGit*"
   source: https://github.com/git-for-windows/git/releases/download/v2.51.0.windows.1/PortableGit-2.51.0-64-bit.7z.exe
-  zip_type: "exe"
+  zip_type: "7z"
   cpe_name: "cpe:2.3:a:git-scm:git:-:*:*:*:*:*:*:*"
   add_home_path_to_env: true
   home_path_of:

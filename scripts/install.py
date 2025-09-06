@@ -125,16 +125,30 @@ def phase1_check_tools(workspace, auto_continue=False):
 
 @confirm_step("【步驟 2】解壓工具包：請確認解壓前準備")
 def phase2_extract_packages(tools, tool_files, workspace, auto_continue=False):
-    # 解壓縮 zip 類型工具包
     for tool, info in tools.items():
+        # 解壓縮 zip 類型工具包
         if info["zip_type"] == "zip":
             dest_dir = compose_folder_path(workspace, info["dir"])
             zip_path = os.path.join(dest_dir, tool_files[tool])
             extract_zip_with_spinner(zip_path, dest_dir)
             move_contents_up(dest_dir, find_real_directory(dest_dir, f".{info['type']}"))
-    
-    # 解壓縮 exe 類型自解工具包
-    for tool, info in tools.items():
+
+        # 解壓縮 7z 類型自解工具包
+        if info["zip_type"] == "7z":
+            dest_dir = compose_folder_path(workspace, info["dir"])
+            exe_path = os.path.join(dest_dir, tool_files[tool])
+            try:
+                run_with_spinner(
+                    [exe_path, "-y", f"-o{dest_dir}"],
+                    f"解壓縮 {tool}",
+                    cwd=dest_dir
+                )
+            except subprocess.CalledProcessError as e:
+                print(f"解壓縮 {tool} 失敗，錯誤代碼：{e.returncode}")
+                if e.stderr:
+                    print(f"錯誤訊息：{e.stderr}")
+
+        # 解壓縮 exe 類型自解工具包
         if info["zip_type"] == "exe":
             dest_dir = compose_folder_path(workspace, info["dir"])
             exe_path = os.path.join(dest_dir, tool_files[tool])
@@ -149,8 +163,7 @@ def phase2_extract_packages(tools, tool_files, workspace, auto_continue=False):
                 if e.stderr:
                     print(f"錯誤訊息：{e.stderr}")
     
-    # 處理 nonzip 類型工具包（僅重命名檔案）
-    for tool, info in tools.items():
+        # 處理 nonzip 類型工具包（僅重命名檔案）
         if info["zip_type"] == "nonzip":
             dest_dir = compose_folder_path(workspace, info["dir"])
             source_file = os.path.join(dest_dir, tool_files[tool])
