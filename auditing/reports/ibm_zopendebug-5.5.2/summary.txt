@@ -1,0 +1,7 @@
+extension: ibm.zopendebug@5.5.2
+license: IBM
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: b7e2b3ff8a0c5adaf6546418e62465cc253372790a71ba5d46e0bf5765364b39
+high_or_equal_cvss_8_0: 0

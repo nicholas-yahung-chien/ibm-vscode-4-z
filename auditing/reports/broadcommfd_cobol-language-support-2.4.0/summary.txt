@@ -3,5 +3,5 @@ license: EPL-2.0
 sbom: cyclonedx.json
 grype: grype.json
 osv: osv.json
-sha256: 09892c9db94e3948219e487c52a47c9cbb87709ee84b38e09c72b77623c467ab
+sha256: 05af9e5aab193cf710b78c8f8c3ed62f8f2158a81209c9b63574fd17a0aaecc4
 high_or_equal_cvss_8_0: 0

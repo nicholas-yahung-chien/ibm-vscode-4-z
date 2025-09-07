@@ -1,0 +1,7 @@
+extension: ibm.zcommoncomponent@16.1.125082220
+license: IBM
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: 1b036d0820bcb66991423737e2a25bc258051fd0cdaab8701896a12feec7816b
+high_or_equal_cvss_8_0: 0

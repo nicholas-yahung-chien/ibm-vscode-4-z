@@ -1,0 +1,7 @@
+extension: ibm.zfilemanager@16.1.125082220
+license: IBM
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: 69f60f4fc9692d948764e699d3536952a7b53986464743e7abd6acf78a081a3e
+high_or_equal_cvss_8_0: 0

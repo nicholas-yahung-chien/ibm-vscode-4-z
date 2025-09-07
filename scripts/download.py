@@ -2,7 +2,7 @@
 """
 IBM VSCode for Z Development Environment Setup Script
 開發單位: IBM Taiwan Technology Expert Labs
-版本: 2.7.0
+版本: 2.8.1
 日期: 2025/01/13
 
 說明:
@@ -14,6 +14,8 @@ IBM VSCode for Z Development Environment Setup Script
 使用前請確認 Python 執行環境中有必要的模組。
 
 更新記錄:
+- v2.8.1: 完善平台特定下載支援，為 OpenVSX 和 VS Code Marketplace 都添加 win32-x64 平台優先下載邏輯，使用安全的 URL 構建方式
+- v2.8.0: 新增平台特定下載支援，確保 VS Code Marketplace 下載時指定 win32-x64 平台版本
 - v2.7.0: 改善 OpenVSX 下載邏輯，檢測 HTML 網頁回應並自動切換至 VS Code Marketplace
 - v2.6.0: 優化下載流程，改善配置載入和檔案管理
 - v2.5.0: 優化檔案下載邏輯，改善檔案名稱決定機制
@@ -25,7 +27,7 @@ IBM VSCode for Z Development Environment Setup Script
 import os
 import argparse
 import fnmatch
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlencode
 import re
 import requests
 from pathlib import Path
@@ -234,39 +236,63 @@ def download_file(url, dest_directory, filename_pattern, default_filename=""):
         return False
 
 
-def vsix_url_openvsx(base, publisher, ext_name, version):
+def vsix_url_openvsx(base, publisher, ext_name, version, platform=None):
+    """構建 OpenVSX 的 VSIX 下載 URL，支援平台特定版本"""
     base = base.rstrip('/')
-    return f"{base}/api/{publisher}/{ext_name}/{version}/file/{publisher}.{ext_name}-{version}.vsix"
+    if platform:
+        # 嘗試平台特定的檔案名稱
+        return f"{base}/api/{publisher}/{ext_name}/{version}/file/{publisher}.{ext_name}-{version}-{platform}.vsix"
+    else:
+        # 預設的通用版本
+        return f"{base}/api/{publisher}/{ext_name}/{version}/file/{publisher}.{ext_name}-{version}.vsix"
 
 
 def download_vsix_with_sources(publisher, ext_name, version, dest_directory, registry_base):
-    """依序嘗試：本地 OpenVSX -> 遠端 OpenVSX -> VS Code Marketplace。"""
+    """依序嘗試：本地 OpenVSX (平台特定) -> 本地 OpenVSX (通用) -> 遠端 OpenVSX (平台特定) -> 遠端 OpenVSX (通用) -> VS Code Marketplace (平台特定) -> VS Code Marketplace (通用)。"""
     desired_filename = f"{publisher}.{ext_name}-{version}.vsix"
     pattern = "*.vsix"
+    target_platform = "win32-x64"
 
-    # 1) 若使用者指定了自訂 registry，先嘗試該 registry
+    # 1) 若使用者指定了自訂 registry，先嘗試該 registry 的平台特定版本
     used_local = registry_base and registry_base.rstrip('/') != DEFAULT_OVSX_REGISTRY
     if used_local:
+        # 嘗試平台特定版本
+        url_local_platform = vsix_url_openvsx(registry_base, publisher, ext_name, version, target_platform)
+        print(f"嘗試從本地 OpenVSX 下載（{target_platform} 平台）：{url_local_platform}")
+        if download_file(url_local_platform, dest_directory, pattern, desired_filename):
+            return True
+        
+        # 嘗試通用版本
         url_local = vsix_url_openvsx(registry_base, publisher, ext_name, version)
-        print(f"嘗試從本地 OpenVSX 下載：{url_local}")
+        print(f"嘗試從本地 OpenVSX 下載（通用版本）：{url_local}")
         if download_file(url_local, dest_directory, pattern, desired_filename):
             return True
         print("本地 OpenVSX 下載失敗（逾時或返回網頁），改用遠端 OpenVSX。")
 
-    # 2) 遠端 OpenVSX
+    # 2) 遠端 OpenVSX - 先嘗試平台特定版本
+    url_remote_platform = vsix_url_openvsx(DEFAULT_OVSX_REGISTRY, publisher, ext_name, version, target_platform)
+    print(f"嘗試從遠端 OpenVSX 下載（{target_platform} 平台）：{url_remote_platform}")
+    if download_file(url_remote_platform, dest_directory, pattern, desired_filename):
+        return True
+    
+    # 嘗試通用版本
     url_remote = vsix_url_openvsx(DEFAULT_OVSX_REGISTRY, publisher, ext_name, version)
-    print(f"嘗試從遠端 OpenVSX 下載：{url_remote}")
+    print(f"嘗試從遠端 OpenVSX 下載（通用版本）：{url_remote}")
     if download_file(url_remote, dest_directory, pattern, desired_filename):
         return True
     print("遠端 OpenVSX 下載失敗（逾時或返回網頁），改用 VS Code Marketplace。")
 
-    # 3) VS Code Marketplace（最後嘗試）
-    url_marketplace = (
-        f"https://marketplace.visualstudio.com/_apis/public/gallery/publishers/"
-        f"{publisher}/vsextensions/{ext_name}/{version}/vspackage"
-    )
-    print(f"嘗試從 VS Code Marketplace 下載：{url_marketplace}")
-    return download_file(url_marketplace, dest_directory, pattern, desired_filename)
+    # 3) VS Code Marketplace - 先嘗試平台特定版本
+    marketplace_base = f"https://marketplace.visualstudio.com/_apis/public/gallery/publishers/{publisher}/vsextensions/{ext_name}/{version}/vspackage"
+    marketplace_params = {"targetPlatform": target_platform}
+    url_marketplace_platform = f"{marketplace_base}?{urlencode(marketplace_params)}"
+    print(f"嘗試從 VS Code Marketplace 下載（{target_platform} 平台）：{url_marketplace_platform}")
+    if download_file(url_marketplace_platform, dest_directory, pattern, desired_filename):
+        return True
+    
+    # 最後嘗試通用版本
+    print(f"嘗試從 VS Code Marketplace 下載（通用版本）：{marketplace_base}")
+    return download_file(marketplace_base, dest_directory, pattern, desired_filename)
 
 # -------------------------------
 # 主流程

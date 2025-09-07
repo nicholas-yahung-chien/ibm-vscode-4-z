@@ -397,6 +397,48 @@ def phase6_install_extensions(tools, workspace, auto_continue=False):
     print("擴充功能包安裝完成。\n")
     return
 
+@confirm_step("【步驟 6】移動 VSCode 擴充功能包：請確認移動擴充功能包目錄")
+def phase6_install_extensions_by_move(tools, workspace, auto_continue=False):
+    """
+    通過將 extensions 目錄移動到 VSCode 的 bootstrap 子目錄中來實現自動安裝擴充功能包。
+    這種方法讓 VSCode 在第一次啟動時自動安裝所有擴充功能包。
+    """
+    extensions_source = os.path.join(workspace, "extensions")
+    extensions_dest = os.path.join(compose_folder_path(workspace, tools["vscode"]["dir"]), "bootstrap", "extensions")
+    
+    # 檢查來源目錄是否存在
+    if not os.path.exists(extensions_source):
+        print(f"警告：擴充功能包目錄 {extensions_source} 不存在，跳過移動操作。")
+        return
+    
+    # 檢查目標目錄是否已存在
+    if os.path.exists(extensions_dest):
+        print(f"目標目錄 {extensions_dest} 已存在，先刪除既有目錄...")
+        try:
+            safe_rmtree(extensions_dest)
+            print("已刪除既有的擴充功能包目錄。")
+        except Exception as e:
+            print(f"刪除既有目錄失敗：{e}")
+            return
+    
+    # 移動擴充功能包目錄
+    try:
+        print(f"正在移動擴充功能包目錄...")
+        print(f"來源：{extensions_source}")
+        print(f"目標：{extensions_dest}")
+        
+        # 確保目標目錄的父目錄存在
+        os.makedirs(os.path.dirname(extensions_dest), exist_ok=True)
+        
+        # 移動目錄
+        os.rename(extensions_source, extensions_dest)
+        print("擴充功能包目錄移動完成。")
+        print("VSCode 將在第一次啟動時自動安裝所有擴充功能包。\n")
+        
+    except Exception as e:
+        print(f"移動擴充功能包目錄失敗：{e}")
+        return
+
 @confirm_step("【步驟 7】建立 VSCode 快捷方式：請確認建立捷徑")
 def phase7_create_shortcut(tools, java_home_path, workspace, auto_continue=False):
     shortcut_path = os.path.join(workspace, "VSCode.lnk")
@@ -467,7 +509,13 @@ def main():
     phase3_install_zowe(tools, workspace, auto_continue=args.yes)
     phase4_install_python_modules(tools, workspace, auto_continue=args.yes)
     phase5_path_migration(tools, java_home_path, workspace, auto_continue=args.yes)
+    
+    # 擴充功能包安裝方法選擇：
+    # 方法1：使用 code.cmd 命令逐一安裝（原始方法）
     phase6_install_extensions(tools, workspace, auto_continue=args.yes)
+    # 方法2：移動 extensions 目錄到 VSCode data 子目錄（新方法，VSCode 啟動時自動安裝）
+    # phase6_install_extensions_by_move(tools, workspace, auto_continue=args.yes)
+    
     phase7_create_shortcut(tools, java_home_path, workspace, auto_continue=args.yes)
     
     print("腳本執行結束。")

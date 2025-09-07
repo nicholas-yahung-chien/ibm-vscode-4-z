@@ -1,0 +1,7 @@
+extension: ibm.db2forzosdeveloperextension@2.2.3
+license: IBM
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: cc9af0189c959a8a3205d680994a7fe7aa13c22af31d6bbb60148afc30c23c78
+high_or_equal_cvss_8_0: 0

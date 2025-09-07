@@ -13,12 +13,12 @@
 
 | 擴充功能 | 授權條款 | 稽核結果 | 高風險漏洞數量 (CVSS≥8.0) | SHA256 雜湊值 |
 |---|---|---|---|---|
-| `ibm.zopendebug@5.4.0` | `IBM` | **通過** | 0 | `9ce86963df2fc03f9c5556a8157d9c17c078db6de931978846c8f429bae4316a` |
-| `ibm.zopeneditor@5.7.0` | `IBM` | **通過** | 0 | `38ded7e3ca69a8d9dcf43bb5fc0bbdc1aed85059ed36e70abb3751ea89d9fc01` |
-| `ibm.zcommoncomponent@16.1.25061109` | `IBM` | **通過** | 0 | `4b9b9c193b2cf566cdbfd4bec89eade9d92140b07eaac22f7da88b2547f4b224` |
-| `ibm.zfilemanager@16.1.25061109` | `IBM` | **通過** | 0 | `1b1f8772753da1d4bc8723d47477c137b53267e0fb21c048e447e5d39b298eea` |
-| `ibm.zfaultanalyzer@16.1.25061109` | `IBM` | **通過** | 0 | `cb30829b122b9187a969e241e035cfa5226b0a98fb66a76f44ea3344e0869017` |
-| `ibm.db2forzosdeveloperextension@2.2.2` | `IBM` | **通過** | 0 | `3ac24e8a6b1ef7f7cfe5f7f0cd3c53012e361326dfc3e358c693192896b0f746` |
+| `ibm.zopendebug@5.5.2` | `IBM` | **通過** | 0 | `b7e2b3ff8a0c5adaf6546418e62465cc253372790a71ba5d46e0bf5765364b39` |
+| `ibm.zopeneditor@5.7.1` | `IBM` | **通過** | 0 | `9675aefc5d6007321fde2af340f8abffd3b436ee99237ba3f2e3f04c1f13bf57` |
+| `ibm.zcommoncomponent@16.1.125082220` | `IBM` | **通過** | 0 | `1b036d0820bcb66991423737e2a25bc258051fd0cdaab8701896a12feec7816b` |
+| `ibm.zfilemanager@16.1.125082220` | `IBM` | **通過** | 0 | `69f60f4fc9692d948764e699d3536952a7b53986464743e7abd6acf78a081a3e` |
+| `ibm.zfaultanalyzer@16.1.125082220` | `IBM` | **通過** | 0 | `7d5abf50b3473be13b55a8dfc12296f8673375eeef420261a3b5faa194d41244` |
+| `ibm.db2forzosdeveloperextension@2.2.3` | `IBM` | **通過** | 0 | `cc9af0189c959a8a3205d680994a7fe7aa13c22af31d6bbb60148afc30c23c78` |
 | `ibm.ibm-developer@1.0.1` | `Apache 2.0 (see LICENSE.txt)` | **通過** | 0 | `ddd7093ba265eec5c739dc95069121b6644a68e3d04957d18a198aacca3a8e06` |
 | `ibm.wca-core@1.6.2` | `IBM` | **通過** | 0 | `df4ffbe81160330c91be98b3ed140f5d26f87e6c956f4cfc1c0778cc95e7f554` |
 | `vscjava.vscode-maven@0.44.2024072906` | `MIT` | **通過** | 0 | `f52f19cde7e0f62de76623d902d5b9693d3b769667855d30f433f9bdd9c4b457` |
@@ -28,13 +28,13 @@
 | `broadcommfd.data-editor-for-mainframe@1.0.0` | `Broadcom` | **通過** | 0 | `1b57bf384fd42a3d77b490e7b5c3cd5057a01645a826fda9efdfef0e3d01c949` |
 | `broadcommfd.debugger-for-mainframe@1.13.0` | `Broadcom` | **通過** | 0 | `67414c183c747797e4eea77ec33e99165cb042b9d10e7aa741d69595af78bf9d` |
 | `broadcommfd.hlasm-language-support@1.17.0` | `EPL-2.0` | **通過** | 0 | `54deddb05c2af4e5f5bc0456ced18c9aef846f5466eb3e6192cf818003fe8006` |
-| `broadcommfd.cobol-language-support@2.4.0` | `EPL-2.0` | **通過** | 0 | `09892c9db94e3948219e487c52a47c9cbb87709ee84b38e09c72b77623c467ab` |
+| `broadcommfd.cobol-language-support@2.4.0` | `EPL-2.0` | **通過** | 0 | `05af9e5aab193cf710b78c8f8c3ed62f8f2158a81209c9b63574fd17a0aaecc4` |
 | `broadcommfd.jcl-language-support@3.0.0` | `Broadcom` | **通過** | 0 | `f2ae4f1a1a73edc6158f72ff963e06b6b74d6930e16725aaedda76a056acdb4a` |
 | `broadcommfd.lsp-for-rexx@0.0.22` | `Broadcom` | **通過** | 0 | `10fb65628b5ff801351b7c527c02b807a2c1a76f5d27a4160bdd56dabce3e87e` |
-| `zowe.cics-extension-for-zowe@3.8.0` | `EPL-2.0` | **通過** | 0 | `dc22b2dccc854370ec873239e814b32be80f9b7bc859e4d56ff63b8c566f7687` |
-| `zowe.zowe-explorer-ftp-extension@3.2.1` | `EPL-2.0` | **通過** | 0 | `20945906da3c5a92cf00f07d4beb6ed6d39f6c3fffd96ac1dd36e97856c411a1` |
-| `zowe.vscode-extension-for-zowe@3.2.1` | `EPL-2.0` | **通過** | 0 | `3329ad679f2429ed159e81a60a484555afdbe33407f3afdad672f7faba8baaa4` |
-| `continue.continue@1.1.71` | `Apache-2.0` | **通過** | 0 | `dffe14f14bdcccec8ca79aa02a65d398112861b8d1834daef931e19c6aa1854f` |
+| `zowe.cics-extension-for-zowe@3.11.0` | `EPL-2.0` | **通過** | 0 | `c6b434ae624867b5995cd425086824a9ae550b5140bc01c3c8990e00a9714677` |
+| `zowe.zowe-explorer-ftp-extension@3.2.2` | `EPL-2.0` | **通過** | 0 | `e460967e6c4efff075074623f8ffebd27bb6e81248872d0e8536b36476ab49a7` |
+| `zowe.vscode-extension-for-zowe@3.2.2` | `EPL-2.0` | **通過** | 0 | `9af31efb26e3e87cc6fb7ba0ab97d1ee3142286fd5ecbb40db1610b3aeec9f5e` |
+| `continue.continue@1.2.2` | `Apache-2.0` | **通過** | 0 | `25cb62141901d8fb2034afba3bd398f1f47b15518b5f23db78429a9714b3ebda` |
 | `redhat.vscode-yaml@1.18.0` | `MIT` | **通過** | 0 | `52dc43a65391516aa6896e88f27e1984aec70107520c6e1dc3b33f71b8e49996` |
 | `redhat.ansible@25.4.0` | `MIT` | **通過** | 0 | `13f06880db5ac78764bfa86561c6918a74f1af88e757257d85509d90892e97db` |
 | `ms-vscode-remote.remote-wsl@0.99.0` | `Microsoft` | **通過** | 0 | `cf0338823d75b0cd341e368e505119efb566d3b8820f0c0f984aa227dee45cbf` |
