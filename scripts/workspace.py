@@ -102,11 +102,11 @@ def main():
     
     # 設定連線參數變數（初始值為預設值，後續根據選單或設定檔案更新）
     properties = {
-        "zosmf": {"port": 443, "encoding": "EBCDIC"},
+        "zosmf": {"port": 443},
         "tso": {"codepage": 1047},
         "ssh": {"port": 22},
         "ftp": {"port": 21},
-        "rse": {"port": 6800, "encoding": "EBCDIC"},
+        "rse": {"port": 6800, "encoding": "IBM-937"},
         "debug": {"port": 8143}
     }
     
@@ -122,7 +122,6 @@ def main():
         # 載入連線參數
         if 'zosmf' in config_data:
             properties['zosmf']['port'] = config_data['zosmf'].get('port', properties['zosmf']['port'])
-            properties['zosmf']['encoding'] = config_data['zosmf'].get('encoding', properties['zosmf']['encoding'])
         
         if 'tso' in config_data:
             properties['tso']['codepage'] = config_data['tso'].get('codepage', properties['tso']['codepage'])
@@ -186,9 +185,6 @@ def main():
                 properties["zosmf"]["port"] = prompt_with_default(
                     f"請輸入 zosmf 連線 port (預設 {properties['zosmf']['port']}): ",
                     properties["zosmf"]["port"])
-                properties["zosmf"]["encoding"] = prompt_with_default(
-                    f"請輸入 zosmf 連線 encoding (預設 {properties['zosmf']['encoding']}): ",
-                    properties["zosmf"]["encoding"])
             elif choice == "2":
                 # 設定 tso
                 properties["tso"]["codepage"] = prompt_with_default(
@@ -246,7 +242,6 @@ def main():
     replace_in_file(config_path, r"_PASSWORD_", f"{password}")
     
     replace_in_file(config_path, r"\"_ZOSMF_PORT_\"", f"{properties['zosmf']['port']}")
-    replace_in_file(config_path, r"_ZOSMF_ENCODING_", f"{properties['zosmf']['encoding']}")
     replace_in_file(config_path, r"_TSO_CODEPAGE_", f"{properties['tso']['codepage']}")
     replace_in_file(config_path, r"\"_SSH_PORT_\"", f"{properties['ssh']['port']}")
     replace_in_file(config_path, r"\"_FTP_PORT_\"", f"{properties['ftp']['port']}")

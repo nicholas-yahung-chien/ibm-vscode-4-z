@@ -369,7 +369,7 @@ def phase5_path_migration(tools, java_home_path, workspace, auto_continue=False)
     print("路徑設定遷移完成。\n")
     return
 
-@confirm_step("【步驟 6】安裝 VSCode 擴充功能包：請確認安裝擴充功能包")
+@confirm_step("【步驟 6-1】安裝下載的擴充功能包：請確認安裝從 OpenVSX 或 VSCode Marketplace 下載的擴充功能包")
 def phase6_install_extensions(tools, workspace, auto_continue=False):
     # 載入 extensions.yml 設定檔
     extensions = load_extensions_config()
@@ -394,49 +394,50 @@ def phase6_install_extensions(tools, workspace, auto_continue=False):
                 print(f"安裝 {os.path.basename(extension)} 失敗，錯誤代碼：{e.returncode}")
                 if e.stderr:
                     print(f"錯誤訊息：{e.stderr}")
-    print("擴充功能包安裝完成。\n")
+    print("下載的擴充功能包安裝完成。\n")
     return
 
-@confirm_step("【步驟 6】移動 VSCode 擴充功能包：請確認移動擴充功能包目錄")
+@confirm_step("【步驟 6-2】安裝預設擴充功能包：請確認移動 Bootstrap 目錄以安裝預先包裹的擴充功能包")
 def phase6_install_extensions_by_move(tools, workspace, auto_continue=False):
     """
-    通過將 extensions 目錄移動到 VSCode 的 bootstrap 子目錄中來實現自動安裝擴充功能包。
-    這種方法讓 VSCode 在第一次啟動時自動安裝所有擴充功能包。
+    通過將整個 bootstrap 目錄移動到 VSCode 目錄中來實現自動安裝預先包裹的擴充功能包。
+    這些擴充功能包是預先包裹在安裝包中、無法透過 OpenVSX 或 VSCode Marketplace 下載得到的預設擴充功能包。
+    這種方法讓 VSCode 在第一次啟動時自動安裝所有預設擴充功能包。
     """
-    extensions_source = os.path.join(workspace, "extensions")
-    extensions_dest = os.path.join(compose_folder_path(workspace, tools["vscode"]["dir"]), "bootstrap", "extensions")
+    bootstrap_source = os.path.join(workspace, "bootstrap")
+    bootstrap_dest = os.path.join(compose_folder_path(workspace, tools["vscode"]["dir"]), "bootstrap")
     
     # 檢查來源目錄是否存在
-    if not os.path.exists(extensions_source):
-        print(f"警告：擴充功能包目錄 {extensions_source} 不存在，跳過移動操作。")
+    if not os.path.exists(bootstrap_source):
+        print(f"警告：Bootstrap 目錄 {bootstrap_source} 不存在，跳過移動操作。")
         return
     
     # 檢查目標目錄是否已存在
-    if os.path.exists(extensions_dest):
-        print(f"目標目錄 {extensions_dest} 已存在，先刪除既有目錄...")
+    if os.path.exists(bootstrap_dest):
+        print(f"目標目錄 {bootstrap_dest} 已存在，先刪除既有目錄...")
         try:
-            safe_rmtree(extensions_dest)
-            print("已刪除既有的擴充功能包目錄。")
+            safe_rmtree(bootstrap_dest)
+            print("已刪除既有的 Bootstrap 目錄。")
         except Exception as e:
             print(f"刪除既有目錄失敗：{e}")
             return
     
-    # 移動擴充功能包目錄
+    # 移動 Bootstrap 目錄
     try:
-        print(f"正在移動擴充功能包目錄...")
-        print(f"來源：{extensions_source}")
-        print(f"目標：{extensions_dest}")
+        print(f"正在移動 Bootstrap 目錄...")
+        print(f"來源：{bootstrap_source}")
+        print(f"目標：{bootstrap_dest}")
         
         # 確保目標目錄的父目錄存在
-        os.makedirs(os.path.dirname(extensions_dest), exist_ok=True)
+        os.makedirs(os.path.dirname(bootstrap_dest), exist_ok=True)
         
         # 移動目錄
-        os.rename(extensions_source, extensions_dest)
-        print("擴充功能包目錄移動完成。")
-        print("VSCode 將在第一次啟動時自動安裝所有擴充功能包。\n")
+        os.rename(bootstrap_source, bootstrap_dest)
+        print("Bootstrap 目錄移動完成。")
+        print("VSCode 將在第一次啟動時自動安裝所有預設擴充功能包。\n")
         
     except Exception as e:
-        print(f"移動擴充功能包目錄失敗：{e}")
+        print(f"移動 Bootstrap 目錄失敗：{e}")
         return
 
 @confirm_step("【步驟 7】建立 VSCode 快捷方式：請確認建立捷徑")
@@ -510,11 +511,11 @@ def main():
     phase4_install_python_modules(tools, workspace, auto_continue=args.yes)
     phase5_path_migration(tools, java_home_path, workspace, auto_continue=args.yes)
     
-    # 擴充功能包安裝方法選擇：
-    # 方法1：使用 code.cmd 命令逐一安裝（原始方法）
+    # 擴充功能包安裝：執行兩種安裝方式
+    # 方法1：使用 code.cmd 命令逐一安裝從 OpenVSX 或 VSCode Marketplace 下載的擴充功能包
     phase6_install_extensions(tools, workspace, auto_continue=args.yes)
-    # 方法2：移動 extensions 目錄到 VSCode data 子目錄（新方法，VSCode 啟動時自動安裝）
-    # phase6_install_extensions_by_move(tools, workspace, auto_continue=args.yes)
+    # 方法2：移動 bootstrap 目錄到 VSCode 目錄（安裝預先包裹在安裝包中的預設擴充功能包）
+    phase6_install_extensions_by_move(tools, workspace, auto_continue=args.yes)
     
     phase7_create_shortcut(tools, java_home_path, workspace, auto_continue=args.yes)
     

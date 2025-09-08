@@ -6,6 +6,7 @@ VSCode4z 是一個專為 IBM Z 開發環境設計的整合式工具包，提供�
 
 * **一鍵安裝**：自動下載並配置所有必要的開發工具
 * **IBM Z 整合**：內建 Zowe CLI、Z Open Editor 等 IBM Z 開發工具
+* **AI 程式碼助手**：整合 Watsonx Code Assistant for Z，提供智慧程式碼建議
 * **多語言支援**：支援 COBOL、PL/I、Assembler、REXX 等 IBM Z 程式語言
 
 ## 前置準備
@@ -27,6 +28,7 @@ VSCode4z 是一個專為 IBM Z 開發環境設計的整合式工具包，提供�
   * **Node.js** 環境解壓並設定
   * **Zowe-CLI** 核心工具及插件安裝
   * **VSCode 擴充功能** 自動安裝（包含檔案鎖定處理機制）
+  * **Watsonx Code Assistant for Z** AI 程式碼助手擴充功能安裝
   * 開發環境啟動期間的環境路徑及設定檔調整（包含 `PATH` 與 `JAVA_HOME` 等）
   * 建立 VSCode 的啟動捷徑（請務必透過此捷徑啟動）
   * 系統編碼設定：安裝過程將提示輸入系統編碼（預設 `IBM-937`），可依需求調整
@@ -88,13 +90,24 @@ debug:
 
 * 完成選單設定後，系統將更新並保存參數到 `workspace/zowe.config.json`。
 
-### 步驟 3：使用 VSCode 環境
+### 步驟 3：設定 Watsonx Assistant（選擇性）
+
+* 若需要使用 AI 程式碼助手功能，可執行 `assistant.exe` 進行 Watsonx Assistant 設定。
+* 設定過程將引導您：
+  * 選擇 AI 模型（支援 IBM Granite 3.0 系列模型）
+  * 輸入 API Key Token
+  * 輸入 API Base URL
+  * 輸入 Project ID
+* 完成設定後，將自動更新 `workspace/.continue/assistants/config.yaml` 檔案。
+
+### 步驟 4：使用 VSCode 環境
 
 * 執行完 `install.exe` 後，系統將在資料夾中生成一個 `VSCode.lnk` 捷徑檔。
 * 雙擊該捷徑檔即可開啟已設定完成的 VSCode 環境。
 * 在 VSCode 中，可透過開啟資料夾功能查看預設提供的 `workspace` 目錄，進行範例專案的檢視並與遠端 IBM Z 主機連線。
 * 在 VSCode 中，可啟動終端機功能，切換到 `workspace` 目錄下，以 `zowe` 指令與遠端主機連線。
 * 輸入 `zowe --help` 以查看 zowe-cli 指令的操作方式。
+* 若已設定 Watsonx Assistant，可在 VSCode 中使用 AI 程式碼助手功能，獲得智慧程式碼建議和協助。
 * 初次啟動 VSCode 會維持英文使用者介面，只要關閉後再次啟動，之後就都會是中文語系介面。
 
 ## 卸載步驟
@@ -106,6 +119,13 @@ debug:
 * 若有備份的設定檔案，將自動回復至最後備份狀態。
 
 ## 版本更新記錄
+
+### v2.7.5 (2025/01/18)
+* 新增 **Watsonx Code Assistant for Z** 整合：內建 AI 程式碼助手，支援 IBM Z 開發
+* 新增 **Watsonx Assistant 設定工具**：提供 `assistant.exe` 用於配置 AI 模型參數
+* 新增 **Lite 版本打包功能**：提供體積最小化的精簡版壓縮檔
+* 改善 **OpenVSX 下載邏輯**：檢測 HTML 網頁回應並自動切換至 VS Code Marketplace
+* 優化擴充功能下載流程，提升安裝穩定性
 
 ### v2.7.0 (2025/08/18)
 * 新增系統編碼設定：安裝過程可輸入編碼，預設 `IBM-937`
@@ -162,5 +182,5 @@ debug:
 ---
 
 **IBM Taiwan Technology Expert Labs**
-**版本:** 2.7.1
-**日期:** 2025/08/18
+**版本:** 2.7.5
+**日期:** 2025/01/18

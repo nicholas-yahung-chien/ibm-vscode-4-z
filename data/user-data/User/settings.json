@@ -77,7 +77,7 @@
             "zcodeformat.yaml"
         ],
         "_CONTINUE_CONFIG_SCHEMA_URI_": [
-            ".continue/**/config.yaml"
+            ".continue/**/*.yaml"
         ],
     },
     "json.schemas": [

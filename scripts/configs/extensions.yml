@@ -6,7 +6,7 @@ ibm:
   - zfaultanalyzer: 16.1.125082220
   - db2forzosdeveloperextension: 2.2.3
   - ibm-developer: 1.0.1
-  - wca-core: 1.6.2
+  - wca-core: 1.9.0
 
 vscjava:
   - vscode-maven: 0.44.2024072906
@@ -33,6 +33,7 @@ continue:
 redhat:
   - vscode-yaml: 1.18.0
   - ansible: 25.4.0
+  - java: 1.45.0
 
 ms-vscode-remote:
   - remote-wsl: 0.99.0
