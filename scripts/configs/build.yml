@@ -1,6 +1,6 @@
 release:
   name: "VSCode4z"
-  version: "2.7.5"
+  version: "2.8.0"
   description: "VSCode4z is a comprehensive development environment for IBM Z, providing Visual Studio Code with IBM Z extensions, Zowe CLI tools, and Python/Java development environments"
   author: "IBM Taiwan Technology Expert Labs"
   license: "MIT"
@@ -23,7 +23,7 @@ release:
     "ibm",
     "enterprise"
   ]
-  exclude_dirs: [".git", "__pycache__", "node_modules", ".vscode", "reports"]
+  exclude_dirs: [".git", "__pycache__", "node_modules", "reports"]
   exclude_files: ["*.tmp", "*.log", "*.bak", "*.swp", "Thumbs.db", ".gitignore", ".gitattributes", ".gitmodules"]
   exclude_dirs_lite: []
   exclude_files_lite: ["*.vsix", "*.whl", "*.zip", "*.7z.exe"]

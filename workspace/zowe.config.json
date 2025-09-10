@@ -58,7 +58,7 @@
                 "system": "",
                 "subsystem": "",
                 "type": "",
-                "stageNumber": "",
+                "stageNumber": "1",
                 "maxrc": 8
             },
             "secure": []
@@ -66,11 +66,16 @@
         "zOpenDebug": {
             "type": "zOpenDebug",
             "properties": {
-                "dpsPort": "_DEBUG_PORT_",
+                "dpsPort": "_DPS_PORT_",
                 "dpsContextRoot": "api/v1",
-                "dpsSecured": true
+                "dpsSecured": false,
+                "rdsPort": "_RDS_PORT_",
+                "rdsSecured": false,
+                "authenticationType": "token"
             },
-            "secure": []
+            "secure": [
+                "tokenValue"
+            ]
         },
         "cics": {
             "type": "cics",

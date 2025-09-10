@@ -101,3 +101,14 @@ java21:
   add_home_path_to_env: true
   home_path_of: 
     - "java.exe"
+java11:
+  version: "11.0.28"
+  dir: java/11
+  type: "zip"
+  pattern: "*jdk*11*"
+  source: https://github.com/ibmruntimes/semeru11-binaries/releases/download/jdk-11.0.28%2B6_openj9-0.53.0/ibm-semeru-open-jdk_x64_windows_11.0.28_6_openj9-0.53.0.zip
+  zip_type: "zip"
+  cpe_name: "cpe:2.3:a:ibm:semeru_runtime:-:*:*:*:*:*:*:*"
+  add_home_path_to_env: true
+  home_path_of: 
+    - "java.exe"

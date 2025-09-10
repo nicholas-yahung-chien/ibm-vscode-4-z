@@ -107,7 +107,7 @@ def main():
         "ssh": {"port": 22},
         "ftp": {"port": 21},
         "rse": {"port": 6800, "encoding": "IBM-937"},
-        "debug": {"port": 8143}
+        "debug": {"dpsPort": 8143, "rdsPort": 8002}
     }
     
     # 如果找到設定檔案，則載入參數並跳過選單
@@ -137,7 +137,8 @@ def main():
             properties['rse']['encoding'] = config_data['rse'].get('encoding', properties['rse']['encoding'])
         
         if 'debug' in config_data:
-            properties['debug']['port'] = config_data['debug'].get('port', properties['debug']['port'])
+            properties['debug']['dpsPort'] = config_data['debug'].get('dpsPort', properties['debug']['dpsPort'])
+            properties['debug']['rdsPort'] = config_data['debug'].get('rdsPort', properties['debug']['rdsPort'])
         
         # 檢查必要參數是否完整
         if not host or not user or not password:
@@ -210,9 +211,12 @@ def main():
                     properties["rse"]["encoding"])
             elif choice == "6":
                 # 設定 debug
-                properties["debug"]["port"] = prompt_with_default(
-                    f"請輸入 zOpenDebug 連線 port (預設 {properties['debug']['port']}): ",
-                    properties["debug"]["port"])
+                properties["debug"]["dpsPort"] = prompt_with_default(
+                    f"請輸入 zOpenDebug DPS 連線 port (預設 {properties['debug']['dpsPort']}): ",
+                    properties["debug"]["dpsPort"])
+                properties["debug"]["rdsPort"] = prompt_with_default(
+                    f"請輸入 zOpenDebug RDS 連線 port (預設 {properties['debug']['rdsPort']}): ",
+                    properties["debug"]["rdsPort"])
             elif choice == "7":
                 # 離開選單，開始進行 zowe.config.json 檔案內容的修改
                 break
@@ -247,7 +251,8 @@ def main():
     replace_in_file(config_path, r"\"_FTP_PORT_\"", f"{properties['ftp']['port']}")
     replace_in_file(config_path, r"\"_RSE_PORT_\"", f"{properties['rse']['port']}")
     replace_in_file(config_path, r"_RSE_ENCODING_", f"{properties['rse']['encoding']}")
-    replace_in_file(config_path, r"\"_DEBUG_PORT_\"", f"{properties['debug']['port']}")
+    replace_in_file(config_path, r"\"_DPS_PORT_\"", f"{properties['debug']['dpsPort']}")
+    replace_in_file(config_path, r"\"_RDS_PORT_\"", f"{properties['debug']['rdsPort']}")
     
     print("\nzowe.config.json 已成功更新！")
 
