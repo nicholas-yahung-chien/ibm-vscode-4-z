@@ -1,0 +1,7 @@
+extension: ms-vscode.hexeditor@1.11.1
+license: MIT
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: 8315290fb532d65ed179ae9c418e76b8dc26682114df7fae94e3783165b31f13
+high_or_equal_cvss_8_0: 0

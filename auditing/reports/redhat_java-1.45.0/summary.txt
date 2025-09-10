@@ -1,0 +1,7 @@
+extension: redhat.java@1.45.0
+license: EPL-2.0
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: 68bc8053927eeb90b0dd4b187b2f58dbf6d2316162cf74cd3b0041be37aff1d6
+high_or_equal_cvss_8_0: 0

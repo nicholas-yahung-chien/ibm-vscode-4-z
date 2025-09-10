@@ -1,0 +1,7 @@
+extension: ibm.wca-core@1.9.0
+license: IBM
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: 06793cd8703d9902ac55e76dc036c5fd2bf09d493af3f71632dfec3716c51aae
+high_or_equal_cvss_8_0: 0

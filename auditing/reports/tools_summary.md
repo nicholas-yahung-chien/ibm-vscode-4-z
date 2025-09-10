@@ -11,6 +11,7 @@
 | zowe-core | 3.2.0 | `cpe:2.3:a:zowe:zowe_cli:-:*:*:*:*:*:*:*` | 5.9 | 0 | ✅ 通過檢查 (最高 CVSS: 5.9) |
 | galasa | 0.43.0 | `cpe:2.3:a:galasa-dev:galasa:-:*:*:*:*:*:*:*` | 0.0 | 0 | ✅ 通過檢查 (最高 CVSS: 0.0) |
 | java21 | 21.0.7 | `cpe:2.3:a:ibm:semeru_runtime:-:*:*:*:*:*:*:*` | 0.0 | 0 | ✅ 通過檢查 (最高 CVSS: 0.0) |
+| java11 | 11.0.28 | `cpe:2.3:a:ibm:semeru_runtime:-:*:*:*:*:*:*:*` | 7.5 | 0 | ✅ 通過檢查 (最高 CVSS: 7.5) |
 
 ## 詳細漏洞資訊
 

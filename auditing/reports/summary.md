@@ -20,7 +20,7 @@
 | `ibm.zfaultanalyzer@16.1.125082220` | `IBM` | **通過** | 0 | `7d5abf50b3473be13b55a8dfc12296f8673375eeef420261a3b5faa194d41244` |
 | `ibm.db2forzosdeveloperextension@2.2.3` | `IBM` | **通過** | 0 | `cc9af0189c959a8a3205d680994a7fe7aa13c22af31d6bbb60148afc30c23c78` |
 | `ibm.ibm-developer@1.0.1` | `Apache 2.0 (see LICENSE.txt)` | **通過** | 0 | `ddd7093ba265eec5c739dc95069121b6644a68e3d04957d18a198aacca3a8e06` |
-| `ibm.wca-core@1.6.2` | `IBM` | **通過** | 0 | `df4ffbe81160330c91be98b3ed140f5d26f87e6c956f4cfc1c0778cc95e7f554` |
+| `ibm.wca-core@1.9.0` | `IBM` | **通過** | 0 | `06793cd8703d9902ac55e76dc036c5fd2bf09d493af3f71632dfec3716c51aae` |
 | `vscjava.vscode-maven@0.44.2024072906` | `MIT` | **通過** | 0 | `f52f19cde7e0f62de76623d902d5b9693d3b769667855d30f433f9bdd9c4b457` |
 | `broadcommfd.explorer-for-endevor@1.11.1` | `Broadcom` | **通過** | 0 | `843313b3f3d4ca53c3566bd463259a1f777a2dff344ece8a1948910dd704312e` |
 | `broadcommfd.abend-analyzer@1.3.0` | `Broadcom` | **通過** | 0 | `fb49b98a3d87684332f193df40230d2ff07d742c4cde225e62dc646ca8211953` |
@@ -37,10 +37,12 @@
 | `continue.continue@1.2.2` | `Apache-2.0` | **通過** | 0 | `25cb62141901d8fb2034afba3bd398f1f47b15518b5f23db78429a9714b3ebda` |
 | `redhat.vscode-yaml@1.18.0` | `MIT` | **通過** | 0 | `52dc43a65391516aa6896e88f27e1984aec70107520c6e1dc3b33f71b8e49996` |
 | `redhat.ansible@25.4.0` | `MIT` | **通過** | 0 | `13f06880db5ac78764bfa86561c6918a74f1af88e757257d85509d90892e97db` |
+| `redhat.java@1.45.0` | `EPL-2.0` | **通過** | 0 | `68bc8053927eeb90b0dd4b187b2f58dbf6d2316162cf74cd3b0041be37aff1d6` |
 | `ms-vscode-remote.remote-wsl@0.99.0` | `Microsoft` | **通過** | 0 | `cf0338823d75b0cd341e368e505119efb566d3b8820f0c0f984aa227dee45cbf` |
 | `ms-vscode-remote.remote-ssh@0.120.0` | `Microsoft` | **通過** | 0 | `0fd6262ca183b486f6c067cb3516dccea2f87f32c049b642ff9eb77b0cea195d` |
 | `ms-vscode-remote.remote-containers@0.422.0` | `Microsoft` | **通過** | 0 | `50c5c265ef27bf038092b1f134aabe2fe01832832fab6a230e7e4dacc75338d9` |
 | `ms-vscode.remote-server@1.5.2` | `Microsoft` | **通過** | 0 | `1aa6f7fdf4904b7ad885ea054bc92ca2275a66b3a57717983e81529734a09952` |
+| `ms-vscode.hexeditor@1.11.1` | `MIT` | **通過** | 0 | `8315290fb532d65ed179ae9c418e76b8dc26682114df7fae94e3783165b31f13` |
 | `ms-ceintl.vscode-language-pack-zh-hant@1.101.2025061109` | `Microsoft` | **通過** | 0 | `e005e98897c57783e9311f3d2105939f3794fa7dd13b098cd70688fa1d2876ba` |
 
 ## 問題摘要

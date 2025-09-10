@@ -42,6 +42,7 @@ ms-vscode-remote:
 
 ms-vscode:
   - remote-server: 1.5.2
+  - hexeditor: 1.11.1
 
 ms-ceintl:
   - vscode-language-pack-zh-hant: 1.101.2025061109
