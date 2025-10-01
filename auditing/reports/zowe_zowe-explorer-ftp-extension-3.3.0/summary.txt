@@ -1,0 +1,7 @@
+extension: zowe.zowe-explorer-ftp-extension@3.3.0
+license: EPL-2.0
+sbom: cyclonedx.json
+grype: grype.json
+osv: osv.json
+sha256: 451914d405425fca2d3b7276e22a7c671246746e9bcaab2b43cdbefbfc260fb7
+high_or_equal_cvss_8_0: 0

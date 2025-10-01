@@ -1,7 +1,0 @@
-extension: zowe.cics-extension-for-zowe@3.11.0
-license: EPL-2.0
-sbom: cyclonedx.json
-grype: grype.json
-osv: osv.json
-sha256: c6b434ae624867b5995cd425086824a9ae550b5140bc01c3c8990e00a9714677
-high_or_equal_cvss_8_0: 0

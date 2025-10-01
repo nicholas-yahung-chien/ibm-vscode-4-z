@@ -13,14 +13,14 @@
 
 | 擴充功能 | 授權條款 | 稽核結果 | 高風險漏洞數量 (CVSS≥8.0) | SHA256 雜湊值 |
 |---|---|---|---|---|
-| `ibm.zopendebug@5.5.2` | `IBM` | **通過** | 0 | `b7e2b3ff8a0c5adaf6546418e62465cc253372790a71ba5d46e0bf5765364b39` |
-| `ibm.zopeneditor@5.7.1` | `IBM` | **通過** | 0 | `9675aefc5d6007321fde2af340f8abffd3b436ee99237ba3f2e3f04c1f13bf57` |
+| `ibm.zopendebug@5.5.3` | `IBM` | **通過** | 0 | `c4a9c8d7d71afd6dea0dd90d191952fcf755e9d0027d8e3c3401eb9cfa32de49` |
+| `ibm.zopeneditor@6.0.0` | `IBM` | **通過** | 0 | `2695bfff71e61ba0deff0affc22b3e54dc659db767c0eb58cf53e4fe70facadc` |
 | `ibm.zcommoncomponent@16.1.125082220` | `IBM` | **通過** | 0 | `1b036d0820bcb66991423737e2a25bc258051fd0cdaab8701896a12feec7816b` |
 | `ibm.zfilemanager@16.1.125082220` | `IBM` | **通過** | 0 | `69f60f4fc9692d948764e699d3536952a7b53986464743e7abd6acf78a081a3e` |
 | `ibm.zfaultanalyzer@16.1.125082220` | `IBM` | **通過** | 0 | `7d5abf50b3473be13b55a8dfc12296f8673375eeef420261a3b5faa194d41244` |
 | `ibm.db2forzosdeveloperextension@2.2.3` | `IBM` | **通過** | 0 | `cc9af0189c959a8a3205d680994a7fe7aa13c22af31d6bbb60148afc30c23c78` |
 | `ibm.ibm-developer@1.0.1` | `Apache 2.0 (see LICENSE.txt)` | **通過** | 0 | `ddd7093ba265eec5c739dc95069121b6644a68e3d04957d18a198aacca3a8e06` |
-| `ibm.wca-core@1.9.0` | `IBM` | **通過** | 0 | `06793cd8703d9902ac55e76dc036c5fd2bf09d493af3f71632dfec3716c51aae` |
+| `ibm.wca-core@1.9.1` | `IBM` | **通過** | 0 | `c509125f827a18fc3989f16733acd29b6109ec8c457404cd9d722fd5dc069e9f` |
 | `vscjava.vscode-maven@0.44.2024072906` | `MIT` | **通過** | 0 | `f52f19cde7e0f62de76623d902d5b9693d3b769667855d30f433f9bdd9c4b457` |
 | `broadcommfd.explorer-for-endevor@1.11.1` | `Broadcom` | **通過** | 0 | `843313b3f3d4ca53c3566bd463259a1f777a2dff344ece8a1948910dd704312e` |
 | `broadcommfd.abend-analyzer@1.3.0` | `Broadcom` | **通過** | 0 | `fb49b98a3d87684332f193df40230d2ff07d742c4cde225e62dc646ca8211953` |
@@ -31,9 +31,9 @@
 | `broadcommfd.cobol-language-support@2.4.0` | `EPL-2.0` | **通過** | 0 | `05af9e5aab193cf710b78c8f8c3ed62f8f2158a81209c9b63574fd17a0aaecc4` |
 | `broadcommfd.jcl-language-support@3.0.0` | `Broadcom` | **通過** | 0 | `f2ae4f1a1a73edc6158f72ff963e06b6b74d6930e16725aaedda76a056acdb4a` |
 | `broadcommfd.lsp-for-rexx@0.0.22` | `Broadcom` | **通過** | 0 | `10fb65628b5ff801351b7c527c02b807a2c1a76f5d27a4160bdd56dabce3e87e` |
-| `zowe.cics-extension-for-zowe@3.11.0` | `EPL-2.0` | **通過** | 0 | `c6b434ae624867b5995cd425086824a9ae550b5140bc01c3c8990e00a9714677` |
-| `zowe.zowe-explorer-ftp-extension@3.2.2` | `EPL-2.0` | **通過** | 0 | `e460967e6c4efff075074623f8ffebd27bb6e81248872d0e8536b36476ab49a7` |
-| `zowe.vscode-extension-for-zowe@3.2.2` | `EPL-2.0` | **通過** | 0 | `9af31efb26e3e87cc6fb7ba0ab97d1ee3142286fd5ecbb40db1610b3aeec9f5e` |
+| `zowe.cics-extension-for-zowe@3.13.0` | `EPL-2.0` | **通過** | 0 | `50bf2540e0ad49944a43160ef58c12126047638b3800f4322d1a6448b05eea07` |
+| `zowe.zowe-explorer-ftp-extension@3.3.0` | `EPL-2.0` | **通過** | 0 | `451914d405425fca2d3b7276e22a7c671246746e9bcaab2b43cdbefbfc260fb7` |
+| `zowe.vscode-extension-for-zowe@3.3.0` | `EPL-2.0` | **通過** | 0 | `2ce216e58d81a4023930e05d7cad0d66132917c20324a5f6882547fb047bca27` |
 | `continue.continue@1.2.2` | `Apache-2.0` | **通過** | 0 | `25cb62141901d8fb2034afba3bd398f1f47b15518b5f23db78429a9714b3ebda` |
 | `redhat.vscode-yaml@1.18.0` | `MIT` | **通過** | 0 | `52dc43a65391516aa6896e88f27e1984aec70107520c6e1dc3b33f71b8e49996` |
 | `redhat.ansible@25.4.0` | `MIT` | **通過** | 0 | `13f06880db5ac78764bfa86561c6918a74f1af88e757257d85509d90892e97db` |
