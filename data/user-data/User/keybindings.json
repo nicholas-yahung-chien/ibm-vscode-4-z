@@ -1,0 +1,11 @@
+// 將按鍵繫結關係放在此檔案中以覆寫預設
+[
+    {
+        "key": "shift+alt+j",
+        "command": "zowe.ds.submitMember"
+    },
+    {
+        "key": "shift+j",
+        "command": "zowe.ds.submitJcl"
+    }
+]

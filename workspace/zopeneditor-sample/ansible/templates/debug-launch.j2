@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "zOpenDebug",
+            "request": "attach",
+            "name": "List parked IBM Z Open Debug sessions",
+            "connection": {
+                "type": "zowe", "name": "{{ ansible_host }}.zOpenDebug"
+            }
+        },
+        {
+            "type": "zOpenDebug",
+            "request": "launch",
+            "name": "Launch and debug a z/OS application",
+            "connection": {
+                "type": "zowe", "name": "{{ ansible_host }}.zOpenDebug"
+            },
+            "applicationLaunch": {
+                "commandLine": "zowe jobs submit data-set \"IBMUSER.SAMPLE.JCL(DEBUG)\""
+            },
+            "terminateAndAbend": true,
+            "trace": true
+        }
+    ]
+}

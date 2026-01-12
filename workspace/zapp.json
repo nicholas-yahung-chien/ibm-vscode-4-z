@@ -1,0 +1,193 @@
+{
+  "name": "vscode4z",
+  "description": "For IBM Z Open Editor 5.5.0 or newer. Wazi's code samples in COBOL, PL/I, HLASM, REXX, JCL.",
+  "version": "5.5.0",
+  "author": {
+    "name": "IBM CORPORATION"
+  },
+  "propertyGroups": [
+    {
+      "name": "jcl-includes",
+      "language": "jcl",
+      "libraries": [
+        {
+          "name": "syslib",
+          "type": "local",
+          "locations": ["**/*"]
+        },
+        {
+          "name": "jcllib",
+          "type": "local",
+          "locations": ["**/*"]
+        },
+        {
+          "name": "proclib",
+          "type": "local",
+          "locations": ["**/*"]
+        },
+        {
+          "name": "syslib",
+          "type": "mvs",
+          "locations": [
+            "SYS1.PROCLIB",
+            "PROCLIB",
+            "PROC.LIB",
+            "PROC"
+          ]
+        },
+        {
+          "name": "jcllib",
+          "type": "mvs",
+          "locations": [
+            "JCLLIB",
+            "JCL.LIB",
+            "JCL"
+          ]
+        },
+        {
+          "name": "proclib",
+          "type": "mvs",
+          "locations": [
+            "JCLPROC",
+            "JCL.PROC",
+            "JCL"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "cobol-includes",
+      "language": "cobol",
+      "libraries": [
+        {
+          "name": "syslib",
+          "type": "local",
+          "locations": ["**/*"]
+        },
+        {
+          "name": "MYFILE",
+          "type": "local",
+          "locations": ["**/*"]
+        },
+        {
+          "name": "MYLIB",
+          "type": "local",
+          "locations": ["**/*"]
+        },
+        {
+          "name": "syslib",
+          "type": "mvs",
+          "locations": [
+            "COBCOPY",
+            "COB.COPY",
+            "COPY",
+            "COPYBOOK",
+            "CBL.COPY",
+            "CBL.CPY",
+            "CPY",
+            "COPYLIB"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "pl1-includes",
+      "language": "pl1",
+      "compilerOptions": "not(!)",
+      "libraries": [
+        {
+          "name": "syslib",
+          "type": "local",
+          "locations": ["**/*"]
+        },
+        {
+          "name": "plilib",
+          "type": "local",
+          "locations": ["**/*"]
+        },
+        {
+          "name": "MYFILE",
+          "type": "local",
+          "locations": ["**/*"]
+        },
+        {
+          "name": "MYLIB",
+          "type": "local",
+          "locations": ["**/*"]
+        },
+        {
+          "name": "syslib",
+          "type": "mvs",
+          "locations": [
+            "PLINC",
+            "PLI.INC",
+            "PLI.INCLUDE",
+            "INC",
+            "INCLUDE",
+            "INCLUDELIB"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "hlasm-includes",
+      "language": "hlasm",
+      "libraries": [
+        {
+          "name": "syslib",
+          "type": "local",
+          "locations": ["**/*"]
+        },
+        {
+          "name": "maclib",
+          "type": "local",
+          "locations": ["**/*"]
+        },
+        {
+          "name": "syslib",
+          "type": "mvs",
+          "locations": [
+            "ASMCOPY",
+            "ASM.COPY"
+          ]
+        },
+        {
+          "name": "maclib",
+          "type": "mvs",
+          "locations": [
+            "ASMMAC",
+            "ASM.MAC",
+            "MACLIB",
+            "MAC.LIB"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rexx-includes",
+      "language": "rexx",
+      "libraries": [
+        {
+          "name": "syslib",
+          "type": "local",
+          "locations": ["**/*"]
+        },
+        {
+          "name": "rexxlib",
+          "type": "local",
+          "locations": ["**/*"]
+        },
+        {
+          "name": "syslib",
+          "type": "mvs",
+          "locations": [
+            "REXXINC",
+            "REXX.INC",
+            "REXXLIB",
+            "REXX.LIB"
+          ]
+        }
+      ]
+    }
+  ]
+}

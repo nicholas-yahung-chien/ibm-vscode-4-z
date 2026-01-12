@@ -1,0 +1,98 @@
+0 verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+1 info using npm@10.9.2
+2 info using node@v22.16.0
+3 silly config load:file:C:\Program Files\nodejs\node_modules\npm\npmrc
+4 silly config load:file:C:\Users\NicholasChien\Documents\VSCode4z-InstantPack-work\npm-cache\npm-tmp\.npmrc
+5 silly config load:file:C:\Users\NicholasChien\.npmrc
+6 silly config load:file:C:\Users\NicholasChien\AppData\Roaming\npm\etc\npmrc
+7 verbose title npm install @zowe/mq-for-zowe-cli@4.0.0
+8 verbose argv "install" "--no-fund" "--no-audit" "--no-save" "--no-package-lock" "--prefer-online" "--cache" "C:\\Users\\NicholasChien\\Documents\\VSCode4z-InstantPack-work\\npm-cache" "@zowe/mq-for-zowe-cli@4.0.0"
+9 verbose logfile logs-max:10 dir:C:\Users\NicholasChien\Documents\VSCode4z-InstantPack-work\npm-cache\_logs\2025-11-27T06_45_23_319Z-
+10 verbose logfile C:\Users\NicholasChien\Documents\VSCode4z-InstantPack-work\npm-cache\_logs\2025-11-27T06_45_23_319Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:4345298944 maxSize:1086324736 maxEntrySize:543162368
+13 silly idealTree buildDeps
+14 silly fetch manifest @zowe/mq-for-zowe-cli@4.0.0
+15 silly packumentCache full:https://registry.npmjs.org/@zowe%2fmq-for-zowe-cli cache-miss
+16 http fetch GET 200 https://registry.npmjs.org/@zowe%2fmq-for-zowe-cli 1837ms (cache revalidated)
+17 silly packumentCache full:https://registry.npmjs.org/@zowe%2fmq-for-zowe-cli set size:108221 disposed:false
+18 silly fetch manifest @zowe/imperative@^8.0.0
+19 silly packumentCache full:https://registry.npmjs.org/@zowe%2fimperative cache-miss
+20 http fetch GET 200 https://registry.npmjs.org/@zowe%2fimperative 1902ms (cache revalidated)
+21 silly packumentCache full:https://registry.npmjs.org/@zowe%2fimperative set size:2315670 disposed:false
+22 silly placeDep ROOT @zowe/mq-for-zowe-cli@4.0.0 OK for:  want: 4.0.0
+23 silly reify mark retired [
+23 silly reify   'C:\\Users\\NicholasChien\\Documents\\VSCode4z-InstantPack-work\\npm-cache\\npm-tmp\\node_modules\\@zowe\\db2-for-zowe-cli'
+23 silly reify ]
+24 silly reify moves {
+24 silly reify   'C:\\Users\\NicholasChien\\Documents\\VSCode4z-InstantPack-work\\npm-cache\\npm-tmp\\node_modules\\@zowe\\db2-for-zowe-cli': 'C:\\Users\\NicholasChien\\Documents\\VSCode4z-InstantPack-work\\npm-cache\\npm-tmp\\node_modules\\@zowe\\.db2-for-zowe-cli-n3ue8LES'
+24 silly reify }
+25 http fetch GET 200 https://registry.npmjs.org/@zowe/mq-for-zowe-cli/-/mq-for-zowe-cli-4.0.0.tgz 1301ms (cache revalidated)
+26 silly ADD node_modules/@zowe/mq-for-zowe-cli
+27 silly REMOVE node_modules/@zowe/db2-for-zowe-cli
+28 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/xtend
+29 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/wrappy
+30 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/util-deprecate
+31 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/universalify
+32 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/to-buffer
+33 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/targz
+34 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/tar-stream
+35 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/tar-stream/node_modules/string_decoder
+36 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/tar-stream/node_modules/safe-buffer
+37 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/tar-stream/node_modules/readable-stream
+38 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/tar-stream/node_modules/bl
+39 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/tar-fs
+40 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/tar-fs/node_modules/mkdirp
+41 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/tar-fs/node_modules/chownr
+42 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/q
+43 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/pump
+44 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/proxy-from-env
+45 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/process-nextick-args
+46 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/once
+47 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/nan
+48 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/minimist
+49 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/mime-types
+50 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/mime-db
+51 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/math-intrinsics
+52 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/lodash
+53 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/jsonfile
+54 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/isarray
+55 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/inherits
+56 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/ibm_db
+57 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/hasown
+58 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/has-tostringtag
+59 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/has-symbols
+60 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/graceful-fs
+61 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/gopd
+62 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/get-proto
+63 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/get-intrinsic
+64 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/function-bind
+65 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/fs-extra
+66 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/fs-constants
+67 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/form-data
+68 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/follow-redirects
+69 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/file-uri-to-path
+70 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/es-set-tostringtag
+71 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/es-object-atoms
+72 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/es-errors
+73 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/es-define-property
+74 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/end-of-stream
+75 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/dunder-proto
+76 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/delayed-stream
+77 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/core-util-is
+78 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/combined-stream
+79 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/call-bind-apply-helpers
+80 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/buffer-fill
+81 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/buffer-alloc-unsafe
+82 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/buffer-alloc
+83 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/bindings
+84 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/big-integer
+85 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/axios
+86 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/asynckit
+87 silly REMOVE node_modules/@zowe/db2-for-zowe-cli/node_modules/adm-zip
+88 verbose cwd C:\Users\NicholasChien\Documents\VSCode4z-InstantPack-work\npm-cache\npm-tmp
+89 verbose os Windows_NT 10.0.26100
+90 verbose node v22.16.0
+91 verbose npm  v10.9.2
+92 verbose exit 0
+93 info ok

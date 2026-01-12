@@ -1,0 +1,49 @@
+################################################################
+# LICENSED MATERIALS - PROPERTY OF IBM
+# "RESTRICTED MATERIALS OF IBM"
+# (C) COPYRIGHT IBM CORPORATION 2020, 2024. ALL RIGHTS RESERVED
+# US GOVERNMENT USERS RESTRICTED RIGHTS - USE, DUPLICATION,
+# OR DISCLOSURE RESTRICTED BY GSA ADP SCHEDULE
+# CONTRACT WITH IBM CORPORATION
+################################################################
+
+name: sam-application
+description: Wazi's multi-root workspace code sample for COBOL
+version: 5.0.0
+author:
+  name: IBM CORPORATION
+
+profiles:
+  # User build profile example, requires IBM Dependency-Based Build v3.x
+  - name: zBuilder-userbuild
+    type: dbb
+    settings:
+      command: "$DBB_HOME/bin/dbb build"
+      lifecycle: user
+      lifecycleArgs:
+        - "--hlq ${zopeneditor.userbuild.userSettings.dbbHlq}"
+      additionalDependencies:
+        - "dbb-app.yaml"
+      logFilePatterns:
+        - "${buildFile.basename}-*.cbl.log"
+        - "BuildReport.*"
+
+  # User build profile example, requires IBM Dependency-Based Build v2.x
+  - name: groovyz-userbuild
+    type: dbb
+    settings:
+      application: SAM
+      command: "unset JAVA_OPTS; $DBB_HOME/bin/groovyz"
+      buildScriptPath: "${zopeneditor.userbuild.userSettings.dbbWorkspace}/dbb-zappbuild/build.groovy"
+      buildScriptArgs:
+        - "--userBuild"
+        - "--workspace ${zopeneditor.userbuild.userSettings.dbbWorkspace}"
+        - "--application ${application}"
+        - "--hlq ${zopeneditor.userbuild.userSettings.dbbHlq}"
+        - "--outDir ${zopeneditor.userbuild.userSettings.dbbLogDir}"
+        - "--dependencyFile ${dependencyFile}"
+      additionalDependencies:
+        - application-conf
+      logFilePatterns:
+        - "${buildFile.basename}.log"
+        - "BuildReport.*"

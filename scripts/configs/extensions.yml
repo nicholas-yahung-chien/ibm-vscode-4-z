@@ -1,0 +1,28 @@
+ibm:
+  - zopendebug: 5.6.0
+  - zopeneditor: 6.1.1
+  - zcommoncomponent: 16.1.225110416
+  - zfilemanager: 16.1.225110416
+  - zfaultanalyzer: 16.1.225110416
+  - db2forzosdeveloperextension: 2.2.4
+  - ibm-developer: 1.0.1
+  - wca-core: 1.9.3
+
+zowe:
+  - cics-extension-for-zowe: 3.15.0
+  - zowe-explorer-ftp-extension: 3.3.1
+  - vscode-extension-for-zowe: 3.3.1
+
+redhat:
+  - vscode-yaml: 1.19.1
+  - java: 1.50.0
+
+ms-vscode:
+  - remote-server: 1.5.2
+  - hexeditor: 1.11.1
+
+debugpig:
+  - highlight: 0.1.0
+
+ms-ceintl:
+  - vscode-language-pack-zh-hant: 1.104.2025091009

@@ -1,0 +1,211 @@
+{
+    // 初次啟動時預設不顯示側邊欄
+    "workbench.secondarySideBar.defaultVisibility": "hidden",
+
+    // 更新與擴充功能設定 (Updates & Extensions)
+    "extensions.autoCheckUpdates": false,
+    "extensions.autoUpdate": false,
+    "update.enableWindowsBackgroundUpdates": false,
+    "update.mode": "none",
+
+    // 採用支援繁體中文的等寬字型，以便在ZOpenEditor中正確顯示排版長度
+    "editor.fontFamily": "'Maple Mono CN', 'Maple Mono', Consolas, 'Courier New', monospace",
+
+    // Zowe 與 ZOpenEditor 功能設定 (Zowe & ZOpenEditor Features)
+    "zowe.cics.persistent": {
+        "persistence": true,
+        "programSearchHistory": [],
+        "transactionSearchHistory": [],
+        "localFileSearchHistory": [],
+        "loadedCICSProfile": [],
+        "librarySearchHistory": [],
+        "datasetSearchHistory": [],
+        "regionSearchHistory": [],
+        "tcpipsSearchHistory": [],
+        "urimapsSearchHistory": [],
+        "pipelineSearchHistory": [],
+        "webserviceSearchHistory": []
+    },
+
+    // 停用Zowe分頁顯示
+    "zowe.ds.paginate.dataSetsPerPage": 0,
+    "zowe.jobs.paginate.enabled": false,
+
+    // 啟用程式碼摺疊與系統程序連結
+    "zopeneditor.jcl.enableCodeFolding": true,
+    "zopeneditor.jcl.enableResolvingProcs": true,
+    "zopeneditor.cobol.enableCodeFolding": true,
+
+    // 指定ZOpenEditor預設用於呼叫Zowe-Cli的profile
+    "zopeneditor.zowe": {
+        "defaultCliProfile": "zosmf",
+    },
+
+    // 在切換程式碼視窗時自動重新執行預處理器
+    "zopeneditor.autoPreprocessor": "focus",
+
+    // 停用Redhat遠端遙測
+    "redhat.telemetry.enabled": false,
+
+    // WCA4Z 智慧助手 雲端API設定
+    "wca.apiUrl": "https://api.dataplatform.cloud.ibm.com",
+
+    // Java 環境設定 (Java Environment)
+    "java.configuration.runtimes": [
+        "_JAVA_RUNTIMES_"
+    ],
+    "java.home": "_JAVAHOME_",
+    "java.jdt.ls.java.home": "_JAVAHOME_",
+    "zopeneditor.JAVA_HOME": "_JAVAHOME_",
+
+    // ZAPP 與 ZCodeFormat 設定檔 Schema 校驗
+    "yaml.schemas": {
+        "_ZAPP_SCHEMA_URI_": [
+            "zapp.yaml"
+        ],
+        "_ZCODE_FORMAT_SCHEMA_URI_": [
+            "zcodeformat.yaml"
+        ],
+        "_CONTINUE_CONFIG_SCHEMA_URI_": [
+            ".continue/**/*.yaml"
+        ],
+    },
+    "json.schemas": [
+        {
+            "fileMatch": [
+                "/zapp.json"
+            ],
+            "url": "_ZAPP_SCHEMA_URI_"
+        },
+        {
+            "fileMatch": [
+                "/zcodeformat.json"
+            ],
+            "url": "_ZCODE_FORMAT_SCHEMA_URI_"
+        }
+    ],
+
+    // 檔案關聯設定 (File Associations)
+    "files.associations": {
+        "**/*.COBOL*{,/*}": "cobol",
+        "**/*.COB*{,/*}": "cobol",
+        "**/*.COBCOPY*{,/*}": "cobol",
+        "**/*.COPYBOOK*{,/*}": "cobol",
+        "**/*.COPY*{,/*}": "cobol",
+        "**/*.PL1*{,/*}": "pl1",
+        "**/*.PLI*{,/*}": "pl1",
+        "**/*.INC*{,/*}": "pl1",
+        "**/*.INCLUDE*{,/*}": "pl1",
+        "**/*.JCL*{,/*}": "jcl",
+        "**/*.CNTL*{,/*}": "jcl",
+        "**/*.PROC*{,/*}": "jcl",
+        "**/*.ASM*{,/*}": "hlasm",
+        "**/*.ASSEMBLE*{,/*}": "hlasm",
+        "**/*.HLASM*{,/*}": "hlasm",
+        "**/*.HLA*{,/*}": "hlasm",
+        "**/*.MACLIB*{,/*}": "hlasm",
+        "**/*.DBD*{,/*}": "hlasm",
+        "**/*.MFS*{,/*}": "hlasm",
+        "**/*.PCB*{,/*}": "hlasm",
+        "**/*.EXEC*{,/*}": "rexx",
+        "**/*.REXX*{,/*}": "rexx",
+        "**/*.REXXINC*{,/*}": "rexx",
+        "**/.hlasmplugin/proc_grps.json": "jsonc",
+        "**/.hlasmplugin/pgm_conf.json": "jsonc",
+        "*.": "plaintext",
+        "*.sqlj": "java"
+    },
+    
+    // ZOpenEditor 檔案副檔名識別 (ZOpenEditor File Extension Definitions)
+    "zopeneditor.jcl.includeFileExtensions": [
+        ".jcl",
+        ".cntl",
+        ".proc"
+    ],
+    "zopeneditor.cobol.includeFileExtensions": [
+        ".cpy",
+        ".copybook",
+        ".copy",
+        ".cobcopy"
+    ],
+    "zopeneditor.pl1.includeFileExtensions": [
+        ".inc",
+        ".include",
+        ".plinc",
+        ".pcx",
+        ".pci"
+    ],
+    "zopeneditor.hlasm.includeFileExtensions": [
+        ".s",
+        ".assemble",
+        ".asm",
+        ".hlasm",
+        ".hla",
+        ".copyasm",
+        ".macasm",
+        ".bms",
+        ".mac",
+        ".dbd",
+        ".mfs",
+        ".pcb"
+    ],
+    "zopeneditor.rexx.includeFileExtensions": [
+        ".rex",
+        ".rexx"
+    ],
+
+    // 檔案編碼設定 (File Encodings)
+    "files.autoGuessEncoding": false,
+    "zopeneditor.encodings.filePatterns": {
+        "**/*.COBOL*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.COB*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.COBCOPY*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.COPYBOOK*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.COPY*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.PL1*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.PLI*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.INC*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.INCLUDE*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.JCL*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.CNTL*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.PROC*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.ASM*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.ASSEMBLE*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.HLASM*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.HLA*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.MACLIB*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.DBD*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.MFS*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.PCB*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.EXEC*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.REXX*{,/*}": "_DEFAULT_ENCODING_",
+        "**/*.REXXINC*{,/*}": "_DEFAULT_ENCODING_",
+        "**/.hlasmplugin/proc_grps.json": "_DEFAULT_ENCODING_",
+        "**/.hlasmplugin/pgm_conf.json": "_DEFAULT_ENCODING_"
+    },
+
+    // 特定語言覆寫設定 (Language Specific Overrides)
+    "[jcl]": {
+    },
+    "[cobol]": {
+    },
+    "[pl1]": {
+    },
+    "[hlasm]": {
+    },
+    "[rexx]": {
+    },
+    "[jsonc]": {
+    }
+
+    // 編輯器外觀與語法高亮 (Editor Appearance & Token Colors)
+    /*
+    "editor.tokenColorCustomizations": {
+        "textMateRules": [
+            { "scope": "source.pl1", "settings": { "foreground": "#00FF40"} },
+            { "scope": "string.quoted.single.pl1", "settings": { "foreground": "#EEEEEE"} },
+            { "scope": "comment.block.pl1", "settings": { "foreground": "#00AA00", "fontStyle": "italic"} }
+        ]
+    }
+    */
+}

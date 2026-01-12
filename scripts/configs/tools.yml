@@ -1,0 +1,42 @@
+vscode:
+  version: "1.101.0"
+  dir: vscode
+  type: "zip"
+  pattern: "VSCode*"
+  source: https://code.visualstudio.com/sha/download?version=1.101.0&os=win32-x64-archive
+  zip_type: "zip"
+  cpe_name: "cpe:2.3:a:microsoft:visual_studio_code:-:*:*:*:*:*:*:*"
+  add_home_path_to_env: false
+nodejs:
+  version: "22.16.0"
+  dir: node
+  type: "zip"
+  pattern: "*node*"
+  source: https://nodejs.org/dist/v22.16.0/node-v22.16.0-win-x64.zip
+  zip_type: "zip"
+  cpe_name: "cpe:2.3:a:nodejs:node.js:-:*:*:*:*:*:*:*"
+  add_home_path_to_env: true
+  home_path_of:
+    - "node.exe"
+git:
+  version: "2.51.0"
+  dir: git
+  type: "7z.exe"
+  pattern: "PortableGit*"
+  source: https://github.com/git-for-windows/git/releases/download/v2.51.0.windows.1/PortableGit-2.51.0-64-bit.7z.exe
+  zip_type: "7z"
+  cpe_name: "cpe:2.3:a:git-scm:git:-:*:*:*:*:*:*:*"
+  add_home_path_to_env: true
+  home_path_of:
+    - "git.exe"
+java21:
+  version: "21.0.7"
+  dir: java/21
+  type: "zip"
+  pattern: "*jdk*21*"
+  source: https://github.com/ibmruntimes/semeru21-binaries/releases/download/jdk-21.0.7%2B6_openj9-0.51.0/ibm-semeru-open-jdk_x64_windows_21.0.7_6_openj9-0.51.0.zip
+  zip_type: "zip"
+  cpe_name: "cpe:2.3:a:ibm:semeru_runtime:-:*:*:*:*:*:*:*"
+  add_home_path_to_env: true
+  home_path_of: 
+    - "java.exe"

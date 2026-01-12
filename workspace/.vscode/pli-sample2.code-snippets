@@ -1,0 +1,7 @@
+{
+    "hello2": {
+        "scope": "pl1",
+        "prefix": "hello2",
+        "body": "$BLOCK_COMMENT_START Hello My World $BLOCK_COMMENT_END"
+    }
+}

@@ -1,0 +1,218 @@
+################################################################
+# LICENSED MATERIALS - PROPERTY OF IBM
+# "RESTRICTED MATERIALS OF IBM"
+# (C) COPYRIGHT IBM CORPORATION 2020, 2025. ALL RIGHTS RESERVED
+# US GOVERNMENT USERS RESTRICTED RIGHTS - USE, DUPLICATION,
+# OR DISCLOSURE RESTRICTED BY GSA ADP SCHEDULE
+# CONTRACT WITH IBM CORPORATION
+################################################################
+
+name: sam
+description: For IBM Z Open Editor 5.5.0 or newer. Wazi's code samples in COBOL, PL/I, HLASM, REXX, JCL.
+version: 5.5.0
+author:
+  name: IBM CORPORATION
+
+propertyGroups:
+  - name: cobol-copybooks
+    language: cobol
+    libraries:
+      - name: syslib
+        type: local
+        locations:
+          - "**/COPYBOOK"
+      - name: syslib
+        type: mvs
+        locations:
+          - "${HLQ}.SAMPLE.COBCOPY"
+      - name: MYLIB
+        type: mvs
+        locations:
+          - ${HLQ}.SAMPLE.COPYLIB
+      - name: MYLIB
+        type: local
+        locations:
+          - "**/COPYLIB-MVS"
+      - name: MYFILE
+        type: local
+        locations:
+          - "**/COPYLIB"
+
+  - name: pl1-includes
+    language: pl1
+    compilerOptions: not(!)
+    libraries:
+      - name: syslib
+        type: local
+        locations:
+          - "**/INCLUDES"
+      - name: syslib
+        type: mvs
+        locations:
+          - ${HLQ}.SAMPLE.PLINC
+      - name: MYLIB
+        type: mvs
+        locations:
+          - "${HLQ}.SAMPLE.PLI.INCLLIB"
+      - name: MYLIB
+        type: local
+        locations:
+          - "**/INCLUDELIB-MVS"
+      - name: MYFILE
+        type: local
+        locations:
+          - "**/INCLUDELIB"
+
+  - name: hlasm-local
+    language: hlasm
+    libraries:
+      - name: syslib
+        type: local
+        locations:
+          - "**/ASMCOPY"
+      - name: maclib
+        type: local
+        locations:
+          - "**/ASMMAC"
+      - name: maclib
+        type: mvs
+        locations:
+          - "${HLQ}.SAMPLE.MACLIB"
+
+  - name: rexx-local
+    language: rexx
+    libraries:
+      - name: syslib
+        type: local
+        locations:
+          - "**/REXXINC"
+      - name: REXXLIB
+        type: local
+        locations:
+          - "**/REXXLIB"
+
+  - name: jcl-includes
+    language: jcl
+    libraries:
+      - name: jcllib
+        type: local
+        locations:
+          - "JCLLIB"
+      - name: jcllib
+        type: mvs
+      - name: proclib
+        type: local
+        locations:
+          - "JCLPROC"
+      - name: syslib
+        type: mvs
+        locations:
+          - "SYS1.PROCLIB"
+
+# User build profile example, requires IBM Dependency-Based Build v3.x
+profiles:
+  - name: zBuilder-userbuild
+    type: dbb
+    settings:
+      command: "$DBB_HOME/bin/dbb build"
+      lifecycle: user
+      lifecycleArgs:
+        - "--hlq ${dbbHlq}"
+      additionalDependencies:
+        - "dbb-app.yaml"
+      logFilePatterns:
+        - "${buildFile.basename}-*.log"
+        - "BuildReport.*"
+
+  # User build profile example, requires IBM Dependency-Based Build v2.x
+  - name: groovyz-userbuild
+    type: dbb
+    settings:
+      application: SAM
+      command: "unset JAVA_OPTS; $DBB_HOME/bin/groovyz"
+      buildScriptPath: "${dbbWorkspace}/dbb-zappbuild/build.groovy"
+      buildScriptArgs:
+        - "--userBuild"
+        - "--workspace ${dbbWorkspace}"
+        - "--application ${application}"
+        - "--hlq ${dbbHlq}"
+        - "--outDir ${dbbLogDir}"
+        - "--dependencyFile ${dependencyFile}"
+      additionalDependencies:
+        - application-conf
+      logFilePatterns:
+        - "${buildFile.basename}.log"
+        - "BuildReport.*"
+
+  # RSE API mappings profile example using US defaults. Adjust to your code pages.
+  - name: RSE-Mappings
+    type: rseapi
+    settings:
+      mappings:
+        - resource: "**.SAMPLE.COB**"
+          extension: cbl
+          transfer: text
+          encoding: IBM-037
+          memberMappings:
+            - extension: dat
+              transfer: binary
+              resource: "*DAT"
+        - resource: "**PLI*"
+          extension: pl1
+          transfer: text
+          encoding: IBM-037
+      default.encoding: IBM-037
+
+  # Preprocessor example. See file preprocessor/README.md and documentation.
+  - name: local-cobol
+    language: cobol
+    type: preprocessor
+    location: local
+    settings:
+      command: |
+        "${javaHome}/bin/java" -jar ${workspace}/preprocessor/COBOL/local-preprocessor/target/local-cobol-preprocessor-1.0-SNAPSHOT.jar ${input_file} ${output_file}
+      outputPath: ./preprocessor/output
+      fileExtension: cee
+      environmentVariables:
+        some: var
+  - name: remote-cobol
+    language: cobol
+    type: preprocessor
+    location: mvs
+    settings:
+      commandDataSet: ${HLQ}.SAMPLE.REXX(CBLPRPC)
+      tempDataHLQ: ${HLQ}
+      outputDataSet: ${HLQ}.SAMPLE.CBL2()
+      commandParameters: ""
+      # programDataSet: ${HLQ}.PREPROC.COBOL()
+  - name: local-pli
+    language: pl1
+    type: preprocessor
+    location: local
+    settings:
+      command: |
+        "${javaHome}/bin/java" -jar ${workspace}/preprocessor/PLI/local-preprocessor/target/local-pl1-preprocessor-1.0-SNAPSHOT.jar ${input_file} ${output_file}
+      outputPath: ./preprocessor/output
+      fileExtension: pci
+      environmentVariables:
+        some: var
+  - name: remote-pli
+    language: pl1
+    type: preprocessor
+    location: mvs
+    settings:
+      commandDataSet: ${HLQ}.SAMPLE.REXX(PLIPRPC)
+      tempDataHLQ: ${HLQ}
+      outputDataSet: ${HLQ}.SAMPLE.PLIO()
+      commandParameters: ""
+      # programDataSet: ${HLQ}.PREPROC.COBOL()
+
+  # - name: pli-expand-macros
+  #   language: pl1
+  #   type: preprocessor
+  #   location: mvs
+  #   settings:
+  #     commandDataSet: ${HLQ}.PREPROC(PLIPRPC)
+  #     tempDataHLQ: ${HLQ}
+  #     outputDataSet: ${HLQ}.PREPROC.OUTPUT()
+  #     commandParameters: <SYSPRINT>${HLQ}.LOG.OUTPUT()</SYSPRINT>

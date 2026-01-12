@@ -1,0 +1,6 @@
+zowe:
+  - cli: 8.27.1
+  # - cics-for-zowe-cli: 6.13.0
+  - zos-ftp-for-zowe-cli: 3.0.0
+  # - db2-for-zowe-cli: 6.1.7
+  # - mq-for-zowe-cli: 4.0.0

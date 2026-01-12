@@ -1,2 +1,217 @@
-# ibm-vscode-4-z
-VSCode tool pack for Z Modernization
+# VSCode4z 開發環境詳細安裝與操作指南
+
+VSCode4z 是一個專為 IBM Z 開發環境設計的整合式工具包，提供完整的 Visual Studio Code 開發環境，包含 IBM Z 相關擴充功能、Zowe CLI 工具鏈，以及 Python 和 Java 開發環境。
+
+## 專案特色
+
+* **一鍵部署**：自動檢查、解壓並配置所有必要的開發工具（以套件內檔案為主，支援離線安裝流程）
+* **IBM Z 整合**：內建 Zowe CLI、Z Open Editor 等 IBM Z 開發工具
+* **AI 程式碼助手**：整合 Watsonx Code Assistant for Z，提供智慧程式碼建議
+* **多語言支援**：支援 COBOL、PL/I、Assembler、REXX 等 IBM Z 程式語言
+
+## 前置準備
+
+* 作業系統：Windows x64
+* 已取得並解壓縮 `VSCode4z-x.y.z.zip` 壓縮檔
+* （選擇性）網路連線：若需自行執行下載流程（例如補齊 VSIX 或 npm-cache），才需要網路
+
+## 安裝步驟
+
+### 步驟 1：安裝環境工具
+
+* 在解壓縮後的資料夾內，執行 `install.exe`。
+* 安裝過程將自動完成以下事項：
+
+  * **Visual Studio Code** 工具解壓並設定
+  * **IBM Semeru Java OpenJDK 21** 工具解壓並設定
+  * **Python** 環境解壓並設定
+  * **Node.js** 環境解壓並設定
+  * **Node.js 套件** 安裝（使用 `npm-cache` 離線快取；需事先由下載流程填充快取）
+  * **VSCode (Portable) 設定檔** 佈署：將工作區 `data/` 複製到 `vscode/data/`，並套用路徑/URI/JavaHome 等變數替換
+  * **VSCode 啟動環境** 調整：在 `vscode/bin/code.cmd` 的 `setlocal` 後插入臨時 `PATH`、`JAVA_HOME`（並設定 CurrentUser ExecutionPolicy）
+  * **VSIX 擴充功能** 安裝（從 `extensions/*.vsix` 逐一安裝，並在每次安裝後清理 VSCode 相關進程避免檔案鎖定）
+  * **Bootstrap 擴充功能** 佈署：將 `bootstrap/` 移動至 `vscode/bootstrap/`，讓 VSCode 第一次啟動時自動安裝預包的擴充功能
+  * **Schema 路徑** 設定：自動尋找並寫入 Zapp / Zcodeformat / Continue config schema 的本機 `file://` URI
+  * **安裝資訊檔** 建立：輸出 `install_info.json`（供後續遷移腳本使用）
+  * **字型安裝**：安裝 `fonts/` 內字型至 Windows（優先系統層級；否則使用者層級）
+  * **清理暫存資料夾**：移除 `bootstrap/`、`data/`、`extensions/`、`npm-cache/`、`scripts/`
+
+在過程中，系統會多次提示按下 `Enter` 鍵以確認繼續，請依指示操作。
+
+**注意**：安裝過程中會自動處理檔案鎖定問題，確保所有工具和擴充功能都能正確安裝。
+
+#### install.yml（選擇性）
+
+`install.exe` 支援從 `scripts/configs/install.yml` 讀取部分參數以進行自動化（若檔案不存在則使用預設/命令列參數）。
+
+- **workspace**：指定工作區根目錄（等同 `--workspace`）
+- **auto_continue**：是否自動確認步驟（等同 `--yes`）
+- **system_encoding**：寫入設定檔的預設編碼值（預設 `CP937`）
+- **advanced.pause_at_end**：結束時是否暫停等待按 Enter（預設 `true`）
+
+### 步驟 2：設定工作區（workspace）參數
+
+* 完成安裝後，執行 `workspace.exe`。
+* 此工具會更新 `workspace/zowe.config.json`，並先建立備份檔：`workspace/zowe.config.backup_YYYYMMDD_HHMMSS.json`。
+
+#### 使用 YAML 設定檔自動載入（選擇性）
+
+* 若存在 `scripts/configs/workspace.yml`，執行 `workspace.exe` 時會自動載入參數，直接產生 `workspace/zowe.config.json` 並略過選單互動。
+* 範例內容（未提供者將使用預設值）：
+
+```yaml
+host: your.zos.host
+user: YOURUSER
+password: YOURPASS
+zosmf:
+  port: 1443
+  encoding: "937"
+tso:
+  codepage: 1047
+ssh:
+  port: 22
+ftp:
+  port: 21
+rse:
+  port: 6800
+  encoding: "937"
+debug:
+  dpsPort: 8143
+  rdsPort: 8002
+```
+
+#### 基本參數設定
+
+* 根據提示輸入以下基本必要資訊：
+
+  * **IBM Z 伺服器位置（host）**
+  * **帳號名稱（user）**
+  * **密碼（password）**
+
+#### 進階參數設定（選單操作）
+
+設定選單將提供以下可選項目，需輸入選項編號進行設定：
+
+| 選項編號 | 說明及預設值                               | 詳細輸入指引                 |
+| ---- | ------------------------------------ | ---------------------- |
+| 1    | 設定 zosmf 連線 port（預設 1443）            | 輸入 `1` 後再輸入指定 port 號   |
+| 2    | 設定 tso 連線編碼（預設 1047）                 | 輸入 `2` 後再輸入指定編碼值       |
+| 3    | 設定 ssh 連線 port（預設 22）                | 輸入 `3` 後再輸入指定 port 號   |
+| 4    | 設定 ftp 連線 port（預設 21）                | 輸入 `4` 後再輸入指定 port 號   |
+| 5    | 設定 rse 連線 port 與編碼（預設 6800, 937）    | 輸入 `5` 後依序輸入 port 及編碼值 |
+| 6    | 設定 zOpenDebug 連線 port（預設 DPS=8143, RDS=8002） | 輸入 `6` 後依序輸入 DPS/RDS port |
+| 7    | 結束設定，保存並套用參數                         | 輸入 `7` 結束設定程序          |
+
+* 完成選單設定後，系統將更新並保存參數到 `workspace/zowe.config.json`。
+
+### 步驟 3：設定 Watsonx Assistant（選擇性）
+
+* 若需要使用 AI 程式碼助手功能，可執行 `assistant.exe` 進行 Watsonx Assistant 設定。
+* 設定過程將引導您：
+  * 選擇 AI 模型（支援 IBM Granite 3.0 系列模型）
+  * 輸入 API Key Token
+  * 輸入 API Base URL
+  * 輸入 Project ID
+* 完成設定後，將自動更新 `workspace/.continue/assistants/config.yaml` 檔案。
+
+### （建議）搬移資料夾後的路徑遷移：migrate.exe
+
+若您已完成安裝、且後續將整個 VSCode4z 資料夾「搬移/改路徑」，建議執行 `migrate.exe` 修正 VSCode portable 資料中的舊路徑：
+
+- **輸入**：讀取工作區根目錄的 `install_info.json`（由 `install.exe` 建立）
+- **更新項目**：
+  - `vscode/data/user-data/...` 內的 `settings.json`、`languagepacks.json`、`storage.json`
+  - `vscode/data/user-data/User/workspaceStorage/*/workspace.json`
+  - `vscode/data/user-data/User/globalStorage/state.vscdb`（SQLite recentlyOpenedPathsList）
+  - `vscode/bin/code.cmd`
+  - 重新寫回 `install_info.json`（更新成新路徑資訊）
+
+### 步驟 4：使用 VSCode 環境
+
+* 若安裝包提供 `VSCode.lnk` 捷徑，請優先使用該捷徑啟動。
+* 若沒有捷徑，請直接執行 `vscode/bin/code.cmd` 啟動（`PATH` / `JAVA_HOME` 的臨時注入是在此檔案中完成）。
+* 在 VSCode 中，可透過開啟資料夾功能查看預設提供的 `workspace` 目錄，進行範例專案的檢視並與遠端 IBM Z 主機連線。
+* 在 VSCode 中，可啟動終端機功能，切換到 `workspace` 目錄下，以 `zowe` 指令與遠端主機連線。
+* 輸入 `zowe --help` 以查看 zowe-cli 指令的操作方式。
+* 若已設定 Watsonx Assistant，可在 VSCode 中使用 AI 程式碼助手功能，獲得智慧程式碼建議和協助。
+* 初次啟動 VSCode 會維持英文使用者介面，只要關閉後再次啟動，之後就都會是中文語系介面。
+
+## 卸載步驟
+
+若要卸載環境，請執行：
+
+* 執行 `uninstall.exe`。
+* 腳本將清除展開的工具環境檔案，僅保留原始的 `.zip` 壓縮檔案。
+* 若有備份的設定檔案，將自動回復至最後備份狀態。
+
+## 版本更新記錄
+
+### v2.7.6 (2026/01/12)
+* 更新文件內容使其與目前腳本行為一致（install/workspace/migrate）
+* 修正預設值與參數格式說明（例如 zosmf 預設 port、debug 參數結構）
+* 統一專案版本號與日期資訊（README 與 scripts 檔頭 metadata）
+
+### v2.7.5 (2025/01/18)
+* 新增 **Watsonx Code Assistant for Z** 整合：內建 AI 程式碼助手，支援 IBM Z 開發
+* 新增 **Watsonx Assistant 設定工具**：提供 `assistant.exe` 用於配置 AI 模型參數
+* 新增 **Lite 版本打包功能**：提供體積最小化的精簡版壓縮檔
+* 改善 **OpenVSX 下載邏輯**：檢測 HTML 網頁回應並自動切換至 VS Code Marketplace
+* 優化擴充功能下載流程，提升安裝穩定性
+
+### v2.7.0 (2025/01/13)
+* 新增系統編碼設定：安裝過程可輸入編碼，預設 `CP937`
+* 增強 VSIX 下載邏輯：支援自訂 OpenVSX registry，並依序嘗試「本地 → 遠端 OpenVSX → VS Code Marketplace」
+* 改善下載流程錯誤處理，提升穩定性
+* 移除過時擴充功能，精簡套件清單
+* `workspace.exe` 支援從 `scripts/configs/workspace.yml` 自動載入參數，免選單操作
+
+### v2.6.0 (2025/01/13)
+* 優化檔案鎖定檢測和進程終止功能，改善安裝和卸載流程
+* 優化建置流程，改善配置載入和檔案管理
+* 優化下載流程，改善配置載入和檔案管理
+* 優化設定檔載入邏輯，改善配置管理
+* 優化檔案操作流程，改善檔案鎖定處理
+* 優化路徑處理邏輯，改善目錄結構處理
+* 優化使用者介面，改善進度顯示和錯誤處理
+
+### v2.5.0 (2025/01/15)
+* 新增 VSCode 擴充功能安裝後的進程清理機制，避免檔案被鎖定
+* 優化檔案鎖定檢測和進程終止功能，改善刪除流程
+* 加強使用者介面，改善進度顯示和錯誤處理
+* 優化檔案壓縮邏輯，改善檔案收集和排除模式處理
+
+### v2.4.11 (2025/01/15)
+* 優化 Zowe-Cli 安裝流程，改善 npm 命令執行
+* 重構壓縮功能，使用 pyminizip 提升效能
+* 重構下載流程，提升檔案管理效能
+* 優化檔案清理邏輯，提升刪除效能
+
+### v2.3.0 (2025/01/15)
+* 重構檔案處理邏輯，提升壓縮和檔案管理效能
+* 新增檔案排除功能，改善打包流程
+* 重構設定流程，提升使用者體驗
+* 新增備份功能，改善設定檔管理
+
+### v2.2.1 (2025/01/15)
+* 初始版本，提供完整的 VSCode4z 開發環境安裝功能
+* 提供基本的建置和打包功能
+* 提供基本的檔案下載功能
+* 提供基本的卸載功能
+
+## 注意事項
+
+* 若安裝遇到問題，請確認是否需要系統管理員權限。
+* 若需進行遠端主機連線，請先確認 VPN 連線、防火牆及網路環境是否開放所需的連線埠。
+* 安裝過程中如遇到檔案鎖定問題，系統會自動處理，無需手動干預。
+* 若遇問題，請聯絡開發負責人：[nicholas.yahung.chien@ibm.com](mailto:nicholas.yahung.chien@ibm.com)。
+
+## 技術支援
+
+* **GitHub Issues**：[https://github.com/nicholas-yahung-chien/ibm-vscode-4-z/issues](https://github.com/nicholas-yahung-chien/ibm-vscode-4-z/issues)
+* **文件**：[https://github.com/nicholas-yahung-chien/ibm-vscode-4-z](https://github.com/nicholas-yahung-chien/ibm-vscode-4-z)
+
+---
+
+**IBM Taiwan Technology Expert Labs**
+**版本:** 2.7.6
+**日期:** 2026/01/12

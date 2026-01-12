@@ -1,0 +1,20 @@
+name: IBM Watsonx Assistant
+version: 1.0.0
+schema: v1
+models:
+  - name: _MODEL_DISPLAY_NAME_
+    provider: watsonx
+    model: _MODEL_NAME_
+    apiKey: _API_KEY_TOKEN_
+    apiBase: _API_BASE_URL_
+    env:
+      projectId: _PROJECT_ID_
+      apiVersion: 2024-03-14
+context:
+  - provider: code
+  - provider: docs
+  - provider: diff
+  - provider: terminal
+  - provider: problems
+  - provider: folder
+  - provider: codebase
